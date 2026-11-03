@@ -117,3 +117,25 @@ Synthetic LLM-written submissions are fine for debugging the harness. They are c
 3. Generate simulated students and get the evaluation harness running.
 4. Build the adversarial and abnormal-input sets (E08, E16).
 5. Add the implementation-dependent metrics (E06, E07, E09) once routing and the agents exist.
+
+## Harness, MCP standard, and mock data (draft v0.1)
+
+Suggested-order steps 1 and 3 now have a first draft. See [`HARNESS_AND_MCP_STANDARD.md`](HARNESS_AND_MCP_STANDARD.md) for the contracts, run protocol, and metrics.
+
+| Path | Contents |
+| --- | --- |
+| `schemas/` | JSON Schemas for `validate_submission`, `route_next`, and the event log |
+| `rubrics/concept3_task_rubric.json` | Draft task-level rubric for Concept 3 (HS-PRO-RD-18); expected to be replaced by T&L |
+| `harness/` | Mock-data generator, reference grader, metrics, run script, draft MCP server |
+| `data/` | 20 synthetic students, 38 synthetic submissions (1-3 attempts each), 13 adversarial / abnormal cases |
+| `results/` | Event logs, summaries, and markdown reports from harness runs |
+
+```bash
+pip install -r evaluation/requirements.txt
+export AWS_DEFAULT_REGION=us-west-2           # plus AWS credentials
+python -m evaluation.harness.simulate --students 20
+python -m evaluation.harness.run_eval --repeat-n 8 --repeats 3
+python -m evaluation.harness.mcp_server       # MCP over stdio
+```
+
+Mock submissions are synthetic. Agreement with their target stages only shows that the harness works; it is not the E01 result.
