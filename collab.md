@@ -31,7 +31,7 @@ Every autonomous agent or developer **MUST read this file before writing code** 
 | Agent ID | Current Model | Status (`idle` / `working`) | Current Task / Focus Area | Started At (Timestamp) |
 |---|---|---|---|---|
 | `Agent-Bootstrap` | Gemini 3.8 Flash | `idle` | Integrated curriculum database references, added post-project AI reteach loop, created COURSE_FLOW_GRAPH.md, initialized git repository and committed all files | 2026-11-03 15:21 PST |
-| `Agent-2` | Unassigned | `idle` | None | - |
+| `Agent-2` | Claude Sonnet 5.5 | `idle` | Scaffolded `frontend/` (React 18 / TS / MUI 7) from Code.org adaptive patterns; on branch `frontend-scaffold`, pending review | 2026-11-03 15:47 PST |
 | `Agent-3` | Unassigned | `idle` | None | - |
 
 ---
@@ -40,17 +40,22 @@ Every autonomous agent or developer **MUST read this file before writing code** 
 
 > *Most recent on top. Maximum 10 items.*
 
-1. **[Task 008] Vision Document Ingestion & Intra-Lesson Adaptivity Invariant**
+1. **[Task 009] Front-End Scaffold Adapted from Code.org Adaptive Pathway UI**
+   - **Model:** Claude Sonnet 5.5
+   - **Agent:** `Agent-2`
+   - **Timestamp:** 2026-11-03 15:47 PST
+   - **Summary:** Added `frontend/` (Vite, React 18, TS, MUI 7, zod 4): typed API contract and mock backend, poly-hierarchy skill tree view, diagnostic player with AI follow-up probes, stance router, lesson view with batched telemetry. Layout and answer-flow logic adapted from `code-dot-org/code-dot-org` `apps/src/adaptive` (Apache-2.0, see `frontend/NOTICE-codeorg.md`; no Code.org assets used). 27 tests, typecheck and build pass. Only `GET /api/v1/student/skill_tree` is in the spec; other endpoints in `frontend/src/api/client.ts` are proposals for backend.
+2. **[Task 008] Vision Document Ingestion & Intra-Lesson Adaptivity Invariant**
    - **Model:** Gemini 3.8 Flash (Authoritative)
    - **Agent:** Lead-Antigravity
    - **Timestamp:** 2026-11-03 15:33 PST
    - **Summary:** Integrated the official CodeAI AWS Imagine Grant Vision Document into documentation/VISION.md, aligning the architecture with intra-lesson adaptivity, consistent objectives with variable depth, static fallbacks, and bidirectional content filtering.
-2. **[Task 007] Authoritative Lead Designation & Version Control Protocols**
+3. **[Task 007] Authoritative Lead Designation & Version Control Protocols**
    - **Model:** Gemini 3.8 Flash (Authoritative)
    - **Agent:** Lead-Antigravity
    - **Timestamp:** 2026-11-03 15:32 PST
    - **Summary:** Established authoritative implementation mandate directly to main with atomic, tested commits and branch-off protocols for high-risk modules.
-2. **[Task 006] CSTA Verification, Learning Trajectories Reference & Diff-Check Rule**
+4. **[Task 006] CSTA Verification, Learning Trajectories Reference & Diff-Check Rule**
    - **Model:** Gemini 3.8 Flash
    - **Agent:** Agent-Bootstrap
    - **Timestamp:** 2026-11-03 15:31 PST
