@@ -31,7 +31,7 @@ Every autonomous agent or developer **MUST read this file before writing code** 
 | Agent ID | Current Model | Status (`idle` / `working`) | Current Task / Focus Area | Started At (Timestamp) |
 |---|---|---|---|---|
 | `Agent-Bootstrap` | Gemini 3.8 Flash | `idle` | Integrated curriculum database references, added post-project AI reteach loop, created COURSE_FLOW_GRAPH.md, initialized git repository and committed all files | 2026-11-03 15:21 PST |
-| `Agent-2` | Unassigned | `idle` | None | - |
+| `Agent-2` | Claude Opus 5.5 (Kiro) | `idle` | Renamed "Stance Decider 2B" to "Strands Decider 2B" in documentation/ | 2026-11-03 15:30 PST |
 | `Agent-3` | Unassigned | `idle` | None | - |
 
 ---
@@ -40,7 +40,12 @@ Every autonomous agent or developer **MUST read this file before writing code** 
 
 > *Most recent on top. Maximum 10 items.*
 
-1. **[Task 008] Vision Document Ingestion & Intra-Lesson Adaptivity Invariant**
+1. **[Task 009] Rename Stance Decider 2B → Strands Decider 2B**
+   - **Model:** Claude Opus 5.5 (Kiro)
+   - **Agent:** `Agent-2`
+   - **Timestamp:** 2026-11-03 15:30 PST
+   - **Summary:** Renamed the routing SLM from "Stance Decider 2B" to "Strands Decider 2B" in `documentation/PROJECT_SPEC.md` and `documentation/COURSE_FLOW_GRAPH.md` (including the Mermaid node ID). Stance outputs (`STANCE_REINFORCE`, etc.) are unchanged. Older history entries below keep the original name.
+2. **[Task 008] Vision Document Ingestion & Intra-Lesson Adaptivity Invariant**
    - **Model:** Gemini 3.8 Flash (Authoritative)
    - **Agent:** Lead-Antigravity
    - **Timestamp:** 2026-11-03 15:33 PST
