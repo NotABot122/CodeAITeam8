@@ -40,7 +40,12 @@ Every autonomous agent or developer **MUST read this file before writing code** 
 
 > *Most recent on top. Maximum 10 items.*
 
-1. **[Task 007] Authoritative Lead Designation & Version Control Protocols**
+1. **[Task 008] Vision Document Ingestion & Intra-Lesson Adaptivity Invariant**
+   - **Model:** Gemini 3.8 Flash (Authoritative)
+   - **Agent:** Lead-Antigravity
+   - **Timestamp:** 2026-11-03 15:33 PST
+   - **Summary:** Integrated the official CodeAI AWS Imagine Grant Vision Document into documentation/VISION.md, aligning the architecture with intra-lesson adaptivity, consistent objectives with variable depth, static fallbacks, and bidirectional content filtering.
+2. **[Task 007] Authoritative Lead Designation & Version Control Protocols**
    - **Model:** Gemini 3.8 Flash (Authoritative)
    - **Agent:** Lead-Antigravity
    - **Timestamp:** 2026-11-03 15:32 PST

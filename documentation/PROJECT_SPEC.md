@@ -8,7 +8,14 @@
 ### 1.1 Goal
 Build an intelligent, personalized learning engine designed for K-12 students learning to code and build real-world software projects, regardless of starting skill level. The platform serves as a **primary classroom copilot for teachers** (tailored to AP Computer Science Principles and foundational computing), tracking mastery, personalizing lessons, and verifying growth.
 
-### 1.2 Core Pillars
+### 1.2 Alignment with Official CodeAI Vision & Tenets
+- **Primary MVP Target: Intra-Lesson Adaptivity**: Adapts dynamically to student performance *within a single lesson* (45 min duration), routing across $\ge 3$ tasks without teacher intervention.
+- **Consistent Objectives, Variable Depth**: All students share the same learning objectives; advanced students go deeper (e.g. Stage 2/3 rubrics) rather than racing ahead of classroom pacing.
+- **Formative, Continuous Assessment**: Background evidence capture rather than disruptive stopping assessments.
+- **Deterministic & Non-Adaptive Fallback**: Guaranteed fallback to a standard static path if AI routing or validation encounters latency/errors.
+- **Student Safety & Content Filtering**: Runtime bidirectional guardrails on student input and model output.
+
+### 1.3 Core Pillars
 1. **Holistic Diagnostic Profiling**: Evaluates prior knowledge, school grade, and cognitive coding readiness through dynamic multiple-choice, open-ended conceptual explanations, and automated follow-up questioning.
 2. **Gamified Skill-Tree Mastery & Poly-Hierarchy**: Represents curriculum progress as an interactive node graph (like an RPG skill tree). Skills can belong to multiple categories (e.g. `While Loops` belongs to both `Conditionals / Boolean Logic` and `Iteration / Loops`).
 3. **Deterministic & Stance Decider 2B Routing**: Combines strict prerequisite logic trees with a 2B SLM (Stance Decider 2B) and Amazon Bedrock to decide the optimal next learning step, project branch, or remediation path.
