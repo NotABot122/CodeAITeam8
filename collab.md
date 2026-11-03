@@ -25,7 +25,7 @@ Every autonomous agent or developer **MUST read this file before writing code** 
 
 | Agent ID | Current Model | Status (`idle` / `working`) | Current Task / Focus Area | Started At (Timestamp) |
 |---|---|---|---|---|
-| `Agent-Bootstrap` | Gemini 3.8 Flash | `idle` | Formalized backend-first skill tree, point-classification scoring, and Stance Decider 2B course flow diagram | 2026-11-03 15:11 PST |
+| `Agent-Bootstrap` | Gemini 3.8 Flash | `idle` | Integrated curriculum database references, added post-project AI reteach loop, created COURSE_FLOW_GRAPH.md, initialized git repository and committed all files | 2026-11-03 15:21 PST |
 | `Agent-2` | Unassigned | `idle` | None | - |
 | `Agent-3` | Unassigned | `idle` | None | - |
 
@@ -35,12 +35,17 @@ Every autonomous agent or developer **MUST read this file before writing code** 
 
 > *Most recent on top. Maximum 10 items.*
 
-1. **[Task 004] Backend-First Skill Tree & Point Classification + Stance Decider 2B Pipeline**
+1. **[Task 005] Course Flow Graph, Curriculum DB Integration & Post-Project Reteach Loop**
+   - **Model:** Gemini 3.8 Flash
+   - **Agent:** `Agent-Bootstrap`
+   - **Timestamp:** 2026-11-03 15:21 PST
+   - **Summary:** Added `documentation/COURSE_FLOW_GRAPH.md` showing end-to-end adaptive flow. Updated `documentation/PROJECT_SPEC.md` with the teammate's Curriculum Database in Aurora/SimpleDB, dual evaluation modalities (eval checks answers, lesson checks live telemetry feed), post-project AI reteach option, and committed all files to the local Git repository pointing to `https://github.com/NotABot122/CodeAITeam8`.
+2. **[Task 004] Backend-First Skill Tree & Point Classification + Stance Decider 2B Pipeline**
    - **Model:** Gemini 3.8 Flash
    - **Agent:** `Agent-Bootstrap`
    - **Timestamp:** 2026-11-03 15:11 PST
    - **Summary:** Updated `documentation/PROJECT_SPEC.md` to specify that the skill tree is strictly maintained on the backend (Ruby/Rails + Aurora/SimpleDB), defined the point-classification scoring model ($P_{\text{node}}$), and formalized the course flow with Stance Decider 2B determining next questions/skills.
-2. **[Task 003] Official CodeAI AWS Architecture & Tech Stack Alignment**
+3. **[Task 003] Official CodeAI AWS Architecture & Tech Stack Alignment**
    - **Model:** Gemini 3.8 Flash
    - **Agent:** `Agent-Bootstrap`
    - **Timestamp:** 2026-11-03 15:06 PST
