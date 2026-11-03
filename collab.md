@@ -7,6 +7,10 @@ Every autonomous agent or developer **MUST read this file before writing code** 
 
 ## ⚡ Agent Guidelines & Rules of Engagement
 
+> 👑 **Lead / Authoritative Agent Role (Antigravity):**
+> Antigravity acts as the authoritative lead agent for implementation directly on main with atomic, verified commits. When a feature is complex or carries architectural regression risk, Antigravity will branch off (e.g., eat/<feature-name>), verify end-to-end, and merge back to main.
+
+
 1. **Before Starting Any Task:**
    - Review the **Active Agent Status Table** below to ensure no collision on targeted modules/files.
    - Set your Agent status to `working` with your exact task objective and target model.
@@ -36,7 +40,12 @@ Every autonomous agent or developer **MUST read this file before writing code** 
 
 > *Most recent on top. Maximum 10 items.*
 
-1. **[Task 006] CSTA Verification, Learning Trajectories Reference & Diff-Check Rule**
+1. **[Task 007] Authoritative Lead Designation & Version Control Protocols**
+   - **Model:** Gemini 3.8 Flash (Authoritative)
+   - **Agent:** Lead-Antigravity
+   - **Timestamp:** 2026-11-03 15:32 PST
+   - **Summary:** Established authoritative implementation mandate directly to main with atomic, tested commits and branch-off protocols for high-risk modules.
+2. **[Task 006] CSTA Verification, Learning Trajectories Reference & Diff-Check Rule**
    - **Model:** Gemini 3.8 Flash
    - **Agent:** Agent-Bootstrap
    - **Timestamp:** 2026-11-03 15:31 PST
