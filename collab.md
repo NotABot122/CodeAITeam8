@@ -33,6 +33,7 @@ Every autonomous agent or developer **MUST read this file before writing code** 
 | `Agent-Bootstrap` | Gemini 3.8 Flash | `idle` | Integrated curriculum database references, added post-project AI reteach loop, created COURSE_FLOW_GRAPH.md, initialized git repository and committed all files | 2026-11-03 15:21 PST |
 | `Agent-2` | Unassigned | `idle` | None | - |
 | `Agent-3` | Unassigned | `idle` | None | - |
+| `zane-claude` | Claude Opus 5.5 (Kiro) | `idle` | Renamed "Stance Decider 2B" to "Strands Decider 2B" in documentation/ | 2026-11-03 15:30 PST |
 
 ---
 
