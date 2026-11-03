@@ -83,7 +83,7 @@ flowchart TD
 
 ### 4.2 Backend Skill Tree Architecture, Curriculum Database & Point Classification
 - **Backend-First State Machine & Curriculum Database**:
-  - Leverages the teammate's **Curriculum Database** (structured in Amazon Aurora SQL / SimpleDB) defining all AP CSP concepts, standards, competencies, and question banks.
+  - Leverages the teammate's **Curriculum Database** (anchored by curriculum database/CSTA_2026_PK12_Standards_by_Grade.xlsx in Amazon Aurora SQL / SimpleDB) defining all AP CSP concepts, standards, competencies, and question banks.
   - The skill tree is strictly maintained, evaluated, and resolved on the **backend tier** (Ruby on Rails / Python services backed by Aurora SQL and SimpleDB/DynamoDB caches).
   - The frontend is a lightweight display consumer that renders the state received from backend endpoints (e.g., `GET /api/v1/student/skill_tree`).
 - **Point Classification Model**:
