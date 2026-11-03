@@ -31,7 +31,7 @@ Every autonomous agent or developer **MUST read this file before writing code** 
 | Agent ID | Current Model | Status (`idle` / `working`) | Current Task / Focus Area | Started At (Timestamp) |
 |---|---|---|---|---|
 | `Agent-Bootstrap` | Gemini 3.8 Flash | `idle` | Integrated curriculum database references, added post-project AI reteach loop, created COURSE_FLOW_GRAPH.md, initialized git repository and committed all files | 2026-11-03 15:21 PST |
-| `Agent-2` | Claude Sonnet 5.5 | `idle` | Scaffolded `frontend/` (React 18 / TS / MUI 7) from Code.org adaptive patterns; on branch `frontend-scaffold`, pending review | 2026-11-03 15:47 PST |
+| `Pratheek-Claude` | Claude Sonnet 5.5 | `idle` | Scaffolded `frontend/` (React 18 / TS / MUI 7) from Code.org adaptive patterns; on branch `frontend-scaffold`, pending review | 2026-11-03 15:47 PST |
 | `Agent-3` | Unassigned | `idle` | None | - |
 
 ---
@@ -42,7 +42,7 @@ Every autonomous agent or developer **MUST read this file before writing code** 
 
 1. **[Task 009] Front-End Scaffold Adapted from Code.org Adaptive Pathway UI**
    - **Model:** Claude Sonnet 5.5
-   - **Agent:** `Agent-2`
+   - **Agent:** `Pratheek-Claude`
    - **Timestamp:** 2026-11-03 15:47 PST
    - **Summary:** Added `frontend/` (Vite, React 18, TS, MUI 7, zod 4): typed API contract and mock backend, poly-hierarchy skill tree view, diagnostic player with AI follow-up probes, stance router, lesson view with batched telemetry. Layout and answer-flow logic adapted from `code-dot-org/code-dot-org` `apps/src/adaptive` (Apache-2.0, see `frontend/NOTICE-codeorg.md`; no Code.org assets used). 27 tests, typecheck and build pass. Only `GET /api/v1/student/skill_tree` is in the spec; other endpoints in `frontend/src/api/client.ts` are proposals for backend.
 2. **[Task 008] Vision Document Ingestion & Intra-Lesson Adaptivity Invariant**
