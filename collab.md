@@ -11,6 +11,7 @@ Every autonomous agent or developer **MUST read this file before writing code** 
    - Review the **Active Agent Status Table** below to ensure no collision on targeted modules/files.
    - Set your Agent status to `working` with your exact task objective and target model.
    - Review recent entries in the **LRU Task History** to maintain continuity.
+   - **MANDATORY Documentation Diff-Check:** Periodically run a diff check on the documentation/ folder (e.g. git diff documentation/) to remain fully aware of evolving specifications, standards, and architecture changes made by teammate agents beyond this file.
 2. **While Working:**
    - Commit atomic, verifiable changes.
    - Do not overwrite active files assigned to other agents.
@@ -35,7 +36,12 @@ Every autonomous agent or developer **MUST read this file before writing code** 
 
 > *Most recent on top. Maximum 10 items.*
 
-1. **[Task 005] Course Flow Graph, Curriculum DB Integration & Post-Project Reteach Loop**
+1. **[Task 006] CSTA Verification, Learning Trajectories Reference & Diff-Check Rule**
+   - **Model:** Gemini 3.8 Flash
+   - **Agent:** Agent-Bootstrap
+   - **Timestamp:** 2026-11-03 15:31 PST
+   - **Summary:** Scraped and verified Google Doc reference into documentation/resources/concept_learning_trajectories_draft.md (Units 1-4, Stage 0-3 progressions), verified CSTA PK-12 standard mappings from csteachers.org, and added mandatory documentation diff-check requirement for collaborating agents.
+2. **[Task 005] Course Flow Graph, Curriculum DB Integration & Post-Project Reteach Loop**
    - **Model:** Gemini 3.8 Flash
    - **Agent:** `Agent-Bootstrap`
    - **Timestamp:** 2026-11-03 15:21 PST
