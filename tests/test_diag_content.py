@@ -113,9 +113,9 @@ class BrokenContent(TempDirCase):
 
     def test_sentence_too_long_for_the_grade_band(self):
         root = self.copy_project()
-        long = " ".join(["word"] * 30)
+        long = " ".join(["word"] * 40)
         edit_yaml(root / ITEMS / "loops.yaml", lambda d: d["items"][0].update(prompt=long))
-        self.assertRejected(root, "longer than 16 words")
+        self.assertRejected(root, "longer than 30 words")  # grades 9-12 limit
 
     def test_banned_word_in_student_text(self):
         root = self.copy_project()

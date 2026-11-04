@@ -4,8 +4,8 @@ Input (what students type):
   Flag names match evaluation/schemas/validate_submission.schema.json so the
   evaluation harness reads them unchanged: empty, too_short, gibberish,
   prompt_injection, inappropriate, personal_info.
-  Rules follow evaluation/harness/validator.py, tuned for grades 3-5:
-  a lower "too short" bar (kids write short answers) and a spelling-tolerant
+  Rules follow evaluation/harness/validator.py, tuned for short answers:
+  a lower "too short" bar (short answers are fine) and a spelling-tolerant
   gibberish check. The shared word lists come from engine.safety.
 
 Output (what the model wrote for students):
@@ -21,12 +21,13 @@ import re
 from dataclasses import dataclass
 from typing import List, Optional, Tuple
 
-from engine.safety import EMAIL, PHONE, screen_text
+from engine.safety import EMAIL, PHONE, looks_like_ai_paste, screen_text
 
 from .readability import readability_problems
 
 EMPTY, TOO_SHORT, GIBBERISH = "empty", "too_short", "gibberish"
 PROMPT_INJECTION, INAPPROPRIATE, PERSONAL_INFO = "prompt_injection", "inappropriate", "personal_info"
+SUSPECTED_AI_PASTE = "suspected_ai_paste"   # review only: the answer is still scored
 
 HARNESS_MIN_WORDS = 8            # the evaluation harness's bar (used only for parity checks)
 GIBBERISH_CLUSTER_FRACTION = 0.4
@@ -108,6 +109,8 @@ def prefilter(text: Optional[str], min_words: int = 3) -> Prefilter:
         category = screened.category
     elif any(word in low for word in _MILD_INSULTS):
         flags.append(INAPPROPRIATE)          # flagged, still scorable
+    if looks_like_ai_paste(stripped):
+        flags.append(SUSPECTED_AI_PASTE)     # flagged for the teacher, still scorable
     return Prefilter(tuple(flags), unscorable, category)
 
 

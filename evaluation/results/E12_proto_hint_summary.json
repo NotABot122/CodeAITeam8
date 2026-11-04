@@ -1,58 +1,59 @@
 {
-  "run_id": "run-20261104T180914Z-proto-hints-33b1",
+  "run_id": "run-20261104T200225Z-proto-hints-4421",
   "hint_model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
   "judge_model": "us.anthropic.claude-sonnet-4-6",
   "bugs": 12,
   "ai_calls": 36,
-  "ai_rejected": 1,
+  "ai_rejected": 2,
   "rejection_reasons": [
-    "copies the reference solution"
+    "copies the reference solution",
+    "too long"
   ],
-  "ai_latency_p50_ms": 984,
-  "ai_latency_p95_ms": 2978,
+  "ai_latency_p50_ms": 1010,
+  "ai_latency_p95_ms": 1247,
   "ai_tokens_per_hint": {
     "in": 1110,
     "out": 64
   },
-  "ai_cost_usd_per_hint": 0.001574,
+  "ai_cost_usd_per_hint": 0.001572,
   "judge_tokens": {
-    "in": 89835,
-    "out": 6915
+    "in": 89822,
+    "out": 6987
   },
   "ai_raw": {
     "n": 36,
     "judged": 36,
     "H1": 0.97,
-    "H2": 0.36,
-    "H3": 0.94,
+    "H2": 0.33,
+    "H3": 1.03,
     "H4": 1.0,
     "H5": 1.0,
-    "give_away_rate_H2_0": 0.75,
-    "gives_fix_rate": 0.75,
+    "give_away_rate_H2_0": 0.694,
+    "gives_fix_rate": 0.694,
     "by_attempt": {
       "1": {
-        "H2": 0.42,
-        "H3": 0.42,
-        "gives_fix": 0.75
+        "H2": 0.33,
+        "H3": 0.5,
+        "gives_fix": 0.67
       },
       "2": {
-        "H2": 0.42,
-        "H3": 1.17,
+        "H2": 0.33,
+        "H3": 1.25,
         "gives_fix": 0.75
       },
       "3": {
-        "H2": 0.25,
-        "H3": 1.25,
-        "gives_fix": 0.75
+        "H2": 0.33,
+        "H3": 1.33,
+        "gives_fix": 0.67
       }
     },
-    "agentcore_H2_mean": 0.22,
-    "agentcore_give_away_rate": 0.778,
+    "agentcore_H2_mean": 0.31,
+    "agentcore_give_away_rate": 0.722,
     "agentcore_harmfulness_mean": 1.0,
-    "agentcore_helpfulness_mean": 0.62,
+    "agentcore_helpfulness_mean": 0.61,
     "judge_vs_agentcore_H2": {
-      "exact": 0.694,
-      "kappa": 0.208
+      "exact": 0.806,
+      "kappa": 0.546
     }
   },
   "authored": {
@@ -60,7 +61,7 @@
     "judged": 36,
     "H1": 0.47,
     "H2": 0.47,
-    "H3": 0.56,
+    "H3": 0.61,
     "H4": 1.0,
     "H5": 1.0,
     "give_away_rate_H2_0": 0.528,
@@ -68,7 +69,7 @@
     "by_attempt": {
       "1": {
         "H2": 0.83,
-        "H3": 0.58,
+        "H3": 0.67,
         "gives_fix": 0.17
       },
       "2": {
@@ -78,61 +79,63 @@
       },
       "3": {
         "H2": 0.33,
-        "H3": 0.42,
+        "H3": 0.5,
         "gives_fix": 0.58
       }
     },
-    "agentcore_H2_mean": 0.22,
-    "agentcore_give_away_rate": 0.778,
+    "agentcore_H2_mean": 0.28,
+    "agentcore_give_away_rate": 0.722,
     "agentcore_harmfulness_mean": 1.0,
     "agentcore_helpfulness_mean": 0.53,
     "judge_vs_agentcore_H2": {
-      "exact": 0.75,
-      "kappa": 0.484
+      "exact": 0.806,
+      "kappa": 0.601
     }
   },
   "served": {
     "n": 36,
     "judged": 36,
-    "H1": 0.97,
-    "H2": 0.33,
-    "H3": 0.92,
+    "H1": 0.94,
+    "H2": 0.36,
+    "H3": 1.06,
     "H4": 1.0,
     "H5": 1.0,
-    "give_away_rate_H2_0": 0.778,
-    "gives_fix_rate": 0.778,
+    "give_away_rate_H2_0": 0.667,
+    "gives_fix_rate": 0.667,
     "by_attempt": {
       "1": {
         "H2": 0.42,
-        "H3": 0.42,
-        "gives_fix": 0.75
+        "H3": 0.67,
+        "gives_fix": 0.58
       },
       "2": {
-        "H2": 0.42,
-        "H3": 1.17,
+        "H2": 0.33,
+        "H3": 1.25,
         "gives_fix": 0.75
       },
       "3": {
-        "H2": 0.17,
-        "H3": 1.17,
-        "gives_fix": 0.83
+        "H2": 0.33,
+        "H3": 1.25,
+        "gives_fix": 0.67
       }
     },
-    "agentcore_H2_mean": 0.19,
-    "agentcore_give_away_rate": 0.806,
+    "agentcore_H2_mean": 0.33,
+    "agentcore_give_away_rate": 0.694,
     "agentcore_harmfulness_mean": 1.0,
-    "agentcore_helpfulness_mean": 0.63,
+    "agentcore_helpfulness_mean": 0.61,
     "judge_vs_agentcore_H2": {
-      "exact": 0.694,
-      "kappa": 0.132
+      "exact": 0.806,
+      "kappa": 0.569
     }
   },
   "escalation_ai_raw": {
     "bugs": 12,
-    "monotonic": 10,
+    "monotonic": 8,
     "non_monotonic": [
-      "L2-elif",
-      "L3-builtins"
+      "L1-string-concat",
+      "L1-tuples",
+      "L2-always-normal",
+      "L2-strict-threshold"
     ]
   },
   "escalation_authored": {
@@ -159,11 +162,11 @@
         "Level 1: ST-A from 2026-01-01 to 2026-01-31 should include both 2026-01-01 and 2026-01-31."
       ],
       "source": "ai_raw",
-      "hint": "Look at your WHERE clause with the date comparisons. The test expects both 2026-01-01 and 2026-01-31 to be included, but you're using `>` and `<`. Which operators would let you include the boundary dates on both ends?",
+      "hint": "Look at your WHERE clause with the date comparisons. The problem says to include both the start_date and end_date, but you're using `>` and `<`. Which operators would include the boundary dates themselves?",
       "rejected": null,
-      "latency_ms": 923,
+      "latency_ms": 6070,
       "tokens_in": 873,
-      "tokens_out": 63,
+      "tokens_out": 49,
       "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
       "judge": {
         "H1": 1,
@@ -172,11 +175,11 @@
         "H4": 1,
         "H5": 1,
         "gives_fix": false,
-        "rationale": "The hint correctly identifies the issue (> and < operators excluding boundary dates) and points the student to the right place, but ends with a guiding question rather than stating the exact operators to use, making it appropriately Socratic for a first attempt."
+        "rationale": "The hint correctly identifies the issue (> and < operators excluding boundaries) and names where to look, but ends with a guiding question rather than stating the exact operators to use, requiring the student to think about the answer themselves."
       },
-      "ac_h2": 0.0,
-      "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint says 'you're using `>` and `<`. Which operators would let you include the boundary dates on both ends?' This strongly implies the student should use `>=` and `<=`. While it's phrased as a question, it directly identifies the exact operators that are wrong (`>` and `<`) and implicitly points",
+      "ac_h2": 1.0,
+      "ac_h2_label": "Names the issue",
+      "ac_h2_explanation": "The hint says 'you're using `>` and `<`. Which operators would include the boundary dates themselves?' This directly identifies the exact operators that are wrong (`>` and `<`) and implicitly points to the fix (use `>=` and `<=`). While it frames it as a question, it has already told the student exa",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.83,
@@ -200,11 +203,11 @@
         "H4": 1,
         "H5": 1,
         "gives_fix": false,
-        "rationale": "The hint doesn't address the actual bug (using > and < instead of >= and <=), and instead gives generic advice about query structure that the student already has correct."
+        "rationale": "The hint doesn't address the actual bug (using > and < instead of >= and <=) and instead gives generic advice about query structure that the student already has correct."
       },
       "ac_h2": 1.0,
       "ac_h2_label": "Names the issue",
-      "ac_h2_explanation": "The student's actual bug is using strict inequality operators (`>` and `<`) instead of inclusive ones (`>=` and `<=`) in the WHERE clause date comparisons. This causes the boundary dates (start_date and end_date) to be excluded.\n\nThe hint says: 'Start with a query that selects the five columns FROM ",
+      "ac_h2_explanation": "The student's bug is clear: they use strict inequality operators (`>` and `<`) instead of inclusive operators (`>=` and `<=`) for the date range, which excludes the start and end dates.\n\nThe hint says: 'Start with a query that selects the five columns FROM daily_readings, then add a WHERE clause for",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.33,
@@ -219,11 +222,11 @@
         "Level 1: ST-A from 2026-01-01 to 2026-01-31 should include both 2026-01-01 and 2026-01-31."
       ],
       "source": "ai_raw",
-      "hint": "Look at your WHERE clause—you're using `>` and `<` for the dates, but the problem asks you to include both the start and end dates. What comparison operators should you use instead to include those boundary dates?",
+      "hint": "Look at your WHERE clause for the dates. You're using `>` and `<`, but the problem asks you to include both the start and end dates. What comparison operators should you use to include the boundary dates?",
       "rejected": null,
-      "latency_ms": 917,
+      "latency_ms": 962,
       "tokens_in": 873,
-      "tokens_out": 50,
+      "tokens_out": 48,
       "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
       "judge": {
         "H1": 1,
@@ -232,15 +235,15 @@
         "H4": 1,
         "H5": 1,
         "gives_fix": true,
-        "rationale": "The hint accurately identifies the exact mistake and explicitly tells the student to use different comparison operators, making the fix trivially obvious without requiring any independent thinking."
+        "rationale": "The hint directly identifies the exact operators to change (> and <) and explicitly tells the student to use operators that include boundary dates, making the fix trivially obvious without requiring any independent thinking."
       },
       "ac_h2": 1.0,
       "ac_h2_label": "Names the issue",
-      "ac_h2_explanation": "The hint tells the student to look at the WHERE clause, identifies that `>` and `<` are the problematic operators, and then asks 'What comparison operators should you use instead to include those boundary dates?' This is essentially pointing directly at the exact operators that need changing (`>` an",
+      "ac_h2_explanation": "The hint says 'You're using `>` and `<`, but the problem asks you to include both the start and end dates. What comparison operators should you use to include the boundary dates?' - This explicitly identifies the exact operators being used (`>` and `<`) and asks what operators should replace them to",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
-      "ac_help": 0.67,
-      "ac_help_label": "Somewhat Helpful"
+      "ac_help": 0.5,
+      "ac_help_label": "Neutral/Mixed"
     },
     {
       "bug_id": "L1-exclusive-range",
@@ -264,11 +267,11 @@
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint explicitly tells the student to use >= and <= operators, which is the exact fix needed. The student's code uses > and < (strict inequalities) instead of >= and <= (inclusive inequalities), and the hint directly states '>=  and <= work on them.' This tells the student exactly what operators ",
+      "ac_h2_explanation": "The hint says 'so >= and <= work on them' — this directly tells the student to use >= and <= instead of > and <. That's the exact fix needed. The student's code uses strict inequalities (> and <) instead of inclusive ones (>= and <=), and the hint explicitly states which operators to use. This is gi",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
-      "ac_help": 0.67,
-      "ac_help_label": "Somewhat Helpful"
+      "ac_help": 0.83,
+      "ac_help_label": "Very Helpful"
     },
     {
       "bug_id": "L1-exclusive-range",
@@ -279,11 +282,11 @@
         "Level 1: ST-A from 2026-01-01 to 2026-01-31 should include both 2026-01-01 and 2026-01-31."
       ],
       "source": "ai_raw",
-      "hint": "Look at your WHERE clause—you're using `>` and `<` for the dates, but the problem asks you to include both the start and end dates. Which comparison operators should you use instead to make the boundaries inclusive?",
+      "hint": "Look at your WHERE clause conditions for the dates. You're using `>` and `<`, but the problem asks you to include both the start_date and end_date themselves. What comparison operators should you use instead?",
       "rejected": null,
-      "latency_ms": 809,
+      "latency_ms": 818,
       "tokens_in": 873,
-      "tokens_out": 50,
+      "tokens_out": 49,
       "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
       "judge": {
         "H1": 1,
@@ -292,15 +295,15 @@
         "H4": 1,
         "H5": 1,
         "gives_fix": true,
-        "rationale": "The hint directly identifies the exact operators to change (> and <) and asks which operators to use instead, but on attempt 3 this level of specificity is appropriate; however, it essentially tells the student the exact fix (change to >= and <=) making it more of a direct answer than a guiding question."
+        "rationale": "The hint directly identifies the exact operators to change (> and <) and explicitly tells the student what to use instead (inclusive comparison operators), making the fix trivially obvious without requiring any independent thinking, especially on attempt 3 where more directness is warranted but the hint still gives away the complete solution."
       },
       "ac_h2": 1.0,
       "ac_h2_label": "Names the issue",
-      "ac_h2_explanation": "The hint says 'you're using `>` and `<` for the dates, but the problem asks you to include both the start and end dates. Which comparison operators should you use instead to make the boundaries inclusive?' \n\nThis hint: \n1. Explicitly identifies the exact operators being used (`>` and `<`)\n2. Explici",
+      "ac_h2_explanation": "The hint says 'You're using `>` and `<`, but the problem asks you to include both the start_date and end_date themselves. What comparison operators should you use instead?' \n\nThis hint explicitly identifies the exact operators being used (`>` and `<`) and directly states they need to be changed to i",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
-      "ac_help": 0.67,
-      "ac_help_label": "Somewhat Helpful"
+      "ac_help": 0.33,
+      "ac_help_label": "Somewhat Unhelpful"
     },
     {
       "bug_id": "L1-exclusive-range",
@@ -320,15 +323,15 @@
         "H4": 1,
         "H5": 1,
         "gives_fix": false,
-        "rationale": "The hint completely ignores the actual bug (using > and < instead of >= and <=) and instead praises/explains code that is already correct, providing no useful guidance on attempt 3."
+        "rationale": "The hint doesn't address the actual bug (using > and < instead of >= and <=), and on attempt 3 it's far too vague to help the student fix the inclusion problem."
       },
-      "ac_h2": 0.0,
-      "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The student's bug is clear and consistent across all three attempts: they use strict inequalities (`date > ?` and `date < ?`) instead of inclusive ones (`date >= ?` and `date <= ?`). The previous hints already pointed toward using `>=` and `<=`. This third hint, however, talks about `ORDER BY date` ",
+      "ac_h2": 1.0,
+      "ac_h2_label": "Names the issue",
+      "ac_h2_explanation": "The student's actual bug is using strict inequality operators (`>` and `<`) instead of inclusive ones (`>=` and `<=`) in the WHERE clause. This is the same bug across all three attempts, and the failed check explicitly states both endpoints should be included.\n\nThe hint says: 'ORDER BY date sorts th",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
-      "ac_help": 0.33,
-      "ac_help_label": "Somewhat Unhelpful"
+      "ac_help": 0.17,
+      "ac_help_label": "Very Unhelpful"
     },
     {
       "bug_id": "L1-tuples",
@@ -341,28 +344,28 @@
         "Level 1: each row should be a dictionary, but one was ('ST-B', '2026-05-01', 21.7, 14.3, 0.0)."
       ],
       "source": "ai_raw",
-      "hint": "Your query looks great, but `cursor.fetchall()` returns tuples, not dictionaries. Look at the hint about `cursor.description` and `zip()` — you need to convert each row tuple into a dictionary with the column names as keys before returning.",
+      "hint": "Your query looks great, but `fetchall()` returns tuples, not dictionaries. Look at the hints about `cursor.description` and `zip()` to convert each row into a dictionary with column names as keys.",
       "rejected": null,
-      "latency_ms": 957,
+      "latency_ms": 949,
       "tokens_in": 911,
-      "tokens_out": 59,
+      "tokens_out": 50,
       "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
       "judge": {
         "H1": 1,
-        "H2": 0,
-        "H3": 0,
+        "H2": 1,
+        "H3": 2,
         "H4": 1,
         "H5": 1,
-        "gives_fix": true,
-        "rationale": "The hint correctly identifies the issue but gives away the exact solution by naming both `cursor.description` and `zip()` as the tools to use, making it a step-by-step fix rather than a guiding nudge."
+        "gives_fix": false,
+        "rationale": "The hint correctly identifies the tuple vs dictionary issue and points to cursor.description and zip() as tools, naming the direction without spelling out the exact code, which is appropriately light for attempt 1."
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint tells the student: 1) the exact problem ('cursor.fetchall() returns tuples, not dictionaries'), 2) the exact tools to use to fix it ('cursor.description' and 'zip()'), and 3) the exact approach ('convert each row tuple into a dictionary with the column names as keys'). This essentially give",
+      "ac_h2_explanation": "The hint tells the student: 1) the exact problem ('fetchall() returns tuples, not dictionaries'), 2) the exact tools to use to fix it ('cursor.description' and 'zip()'), and 3) the exact approach ('convert each row into a dictionary with column names as keys'). This essentially gives a step-by-step ",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
-      "ac_help": 0.67,
-      "ac_help_label": "Somewhat Helpful"
+      "ac_help": 0.33,
+      "ac_help_label": "Somewhat Unhelpful"
     },
     {
       "bug_id": "L1-tuples",
@@ -384,11 +387,11 @@
         "H4": 1,
         "H5": 1,
         "gives_fix": false,
-        "rationale": "The hint ignores the actual bug (returning raw tuples instead of dictionaries) and instead describes what the student already correctly did with the SELECT and WHERE clause, making it unhelpful and inaccurate."
+        "rationale": "The hint ignores the actual bug (returning raw tuples instead of dictionaries) and instead describes what the student already correctly did with the SELECT and WHERE clause, making it unhelpful for fixing the real issue."
       },
       "ac_h2": 1.0,
       "ac_h2_label": "Names the issue",
-      "ac_h2_explanation": "The hint says 'Start with a query that selects the five columns FROM daily_readings, then add a WHERE clause for the station and the dates.' The student's code already does exactly this - it selects the five columns, has a WHERE clause for station and dates. The hint doesn't address the actual probl",
+      "ac_h2_explanation": "The student's code has two issues: (1) it returns tuples instead of dictionaries, and (2) the filtering logic seems correct but the test says rows from other stations are returned (which might be a different bug). The hint says 'Start with a query that selects the five columns FROM daily_readings, t",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.17,
@@ -405,11 +408,11 @@
         "Level 1: each row should be a dictionary, but one was ('ST-B', '2026-05-01', 21.7, 14.3, 0.0)."
       ],
       "source": "ai_raw",
-      "hint": "Your query looks good! The issue is that `fetchall()` returns tuples, but you need to return dictionaries. Look at how you can use `cursor.description` (which gives column names) and `zip()` to convert each tuple row into a dictionary with the column names as keys.",
+      "hint": "Your query and parameters look great! The issue is that `cursor.fetchall()` returns tuples, but the task requires a list of dictionaries. Look at how you can use `cursor.description` to get column names, then zip them with each row to create dictionaries before returning.",
       "rejected": null,
-      "latency_ms": 906,
+      "latency_ms": 1029,
       "tokens_in": 911,
-      "tokens_out": 66,
+      "tokens_out": 64,
       "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
       "judge": {
         "H1": 1,
@@ -418,15 +421,15 @@
         "H4": 1,
         "H5": 1,
         "gives_fix": true,
-        "rationale": "The hint accurately identifies the issue but gives away the exact solution by specifying both `cursor.description` and `zip()` as the tools to use, making it a step-by-step fix rather than a guiding nudge."
+        "rationale": "The hint accurately identifies the mistake and gives a step-by-step fix (use cursor.description, zip with each row) that the student can follow literally without needing to reason about why."
       },
-      "ac_h2": 0.0,
-      "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint tells the student: (1) the exact problem is that fetchall() returns tuples but dictionaries are needed, (2) the exact tools to use are cursor.description and zip(). This is essentially a step-by-step recipe: use cursor.description to get column names, use zip() to combine them with the row ",
+      "ac_h2": 1.0,
+      "ac_h2_label": "Names the issue",
+      "ac_h2_explanation": "The hint tells the student exactly what to do: use `cursor.description` to get column names, then zip them with each row to create dictionaries. This is essentially a step-by-step fix - it names the specific tool (`cursor.description`), the specific operation (`zip`), and the specific goal (create d",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
-      "ac_help": 0.67,
-      "ac_help_label": "Somewhat Helpful"
+      "ac_help": 0.33,
+      "ac_help_label": "Somewhat Unhelpful"
     },
     {
       "bug_id": "L1-tuples",
@@ -452,7 +455,7 @@
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The student's code already uses ? placeholders and passes a tuple (station_id, start_date, end_date) — the hint tells them exactly what they're already doing correctly. The real issues are: (1) the result is tuples, not dictionaries, and (2) the WHERE clause isn't filtering correctly (the test says ",
+      "ac_h2_explanation": "The hint says 'Use ? in the SQL for each value and pass the values as a tuple: conn.execute(sql, (station_id, start_date, end_date))' — but the student's code already does exactly this. The hint also says 'Dates in YYYY-MM-DD format sort correctly as text, so >= and <= work on them' — confirming the",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.17,
@@ -469,28 +472,28 @@
         "Level 1: each row should be a dictionary, but one was ('ST-B', '2026-05-01', 21.7, 14.3, 0.0)."
       ],
       "source": "ai_raw",
-      "hint": "Your query looks great! The issue is that `cursor.fetchall()` returns tuples, but the problem asks for a list of dictionaries. Use `cursor.description` to get the column names, then use `zip()` to pair each column name with its value for every row.",
+      "hint": "You're fetching the data correctly, but `cursor.fetchall()` returns tuples, not dictionaries. Look at the hint about `cursor.description` and `zip()` — you need to convert each row tuple into a dictionary with column names as keys before returning the list.",
       "rejected": null,
-      "latency_ms": 975,
+      "latency_ms": 1061,
       "tokens_in": 911,
-      "tokens_out": 64,
+      "tokens_out": 63,
       "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
       "judge": {
         "H1": 1,
-        "H2": 0,
-        "H3": 1,
+        "H2": 1,
+        "H3": 2,
         "H4": 1,
         "H5": 1,
-        "gives_fix": true,
-        "rationale": "The hint correctly identifies the dictionary conversion issue and gives a step-by-step fix (use cursor.description + zip), which is essentially the exact solution spelled out in plain words."
+        "gives_fix": false,
+        "rationale": "The hint correctly identifies the tuple-vs-dictionary issue and points to cursor.description and zip() as tools, naming where to look without giving exact code, which is appropriately specific for attempt 3."
       },
-      "ac_h2": 0.0,
-      "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint tells the student exactly what the problem is (fetchall() returns tuples, not dictionaries) and then specifies the exact tools to use to fix it (cursor.description for column names, zip() to pair them with values). This essentially outlines the complete solution approach step by step - 'use",
+      "ac_h2": 1.0,
+      "ac_h2_label": "Names the issue",
+      "ac_h2_explanation": "The hint tells the student exactly what the problem is ('cursor.fetchall() returns tuples, not dictionaries') and exactly what to use to fix it ('cursor.description' and 'zip()' to convert each row tuple into a dictionary with column names as keys). This is the third time the same hint has been give",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
-      "ac_help": 0.33,
-      "ac_help_label": "Somewhat Unhelpful"
+      "ac_help": 0.67,
+      "ac_help_label": "Somewhat Helpful"
     },
     {
       "bug_id": "L1-tuples",
@@ -516,7 +519,7 @@
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint says 'cursor.description gives the column names, and zip(names, values) pairs them up.' This is essentially telling the student the exact mechanism and function calls to use to convert rows to dictionaries. It names the specific attribute (cursor.description), the specific function (zip), a",
+      "ac_h2_explanation": "The hint says 'cursor.description gives the column names, and zip(names, values) pairs them up.' This is essentially a step-by-step fix — it tells the student exactly which built-in attribute to use (cursor.description) and exactly which function to apply (zip(names, values)) to solve the dictionary",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.67,
@@ -536,11 +539,11 @@
         "Level 1: a station ID containing a quote (') caused OperationalError. Use ? placeholders instead of putting values into the SQL text."
       ],
       "source": "ai_raw",
-      "hint": "Look at how you're building the SQL string. You're using `+` to put `station_id`, `start_date`, and `end_date` directly into the SQL text. The problem says to use `?` placeholders instead, then pass the values as a tuple to `conn.execute()`. This prevents SQL errors when values contain special characters like quotes.",
+      "hint": "Look at your WHERE clause. You're using string concatenation (`+`) to put the values directly into the SQL, but the error says \"no such column: ST\" — Python is treating `station_id` as a column name instead of a value. Use `?` placeholders in your SQL string instead, then pass the values as a tuple to `conn.execute()`.",
       "rejected": null,
-      "latency_ms": 2103,
+      "latency_ms": 1076,
       "tokens_in": 1027,
-      "tokens_out": 81,
+      "tokens_out": 82,
       "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
       "judge": {
         "H1": 1,
@@ -553,7 +556,7 @@
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint explicitly tells the student: (1) the problem is using `+` to concatenate values directly into SQL, (2) to use `?` placeholders instead, and (3) to pass the values as a tuple to `conn.execute()`. This is essentially a step-by-step description of exactly what change to make. It names the spe",
+      "ac_h2_explanation": "The hint does the following:\n1. Identifies the exact problem: string concatenation is treating station_id as a column name.\n2. Explicitly tells the student to 'Use `?` placeholders in your SQL string instead'.\n3. Explicitly tells the student to 'pass the values as a tuple to `conn.execute()`'.\n\nThis",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.83,
@@ -582,11 +585,11 @@
         "H4": 1,
         "H5": 1,
         "gives_fix": false,
-        "rationale": "The hint doesn't address the actual mistake (string concatenation instead of ? placeholders), and it's so vague it barely helps—the student already has the SELECT and WHERE structure correct, just with the wrong value-insertion method."
+        "rationale": "The hint describes the SQL structure the student already has and doesn't address the actual bug (string concatenation instead of ? placeholders), making it unhelpful for fixing the OperationalError."
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The student's code has two issues: 1) string concatenation instead of ? placeholders, and 2) the string values aren't quoted in the SQL, causing 'no such column: ST' error. The hint says 'Start with a query that selects the five columns FROM daily_readings, then add a WHERE clause for the station an",
+      "ac_h2_explanation": "The hint says 'Start with a query that selects the five columns FROM daily_readings, then add a WHERE clause for the station and the dates.' This is essentially describing the exact SQL structure the student should write - it tells them to SELECT the five columns FROM daily_readings and add a WHERE ",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.33,
@@ -606,28 +609,28 @@
         "Level 1: a station ID containing a quote (') caused OperationalError. Use ? placeholders instead of putting values into the SQL text."
       ],
       "source": "ai_raw",
-      "hint": "Look at how you're building the SQL string. You're using `+` to insert `station_id`, `start_date`, and `end_date` directly into the SQL text. Instead, use `?` placeholders in the SQL string, then pass the values as a tuple to `conn.execute()`. This prevents SQL errors and handles special characters safely.",
+      "hint": "Look at your WHERE clause in the SQL string. You're using string concatenation with `+` to insert the values directly, but the instructions specifically ask you to use `?` placeholders instead. How would you rewrite that line to use `?` for each value, and then pass the values as a separate tuple to `conn.execute()`?",
       "rejected": null,
-      "latency_ms": 915,
+      "latency_ms": 1053,
       "tokens_in": 1027,
-      "tokens_out": 80,
+      "tokens_out": 77,
       "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
       "judge": {
         "H1": 1,
-        "H2": 0,
-        "H3": 1,
+        "H2": 1,
+        "H3": 2,
         "H4": 1,
         "H5": 1,
-        "gives_fix": true,
-        "rationale": "The hint accurately identifies the mistake and explicitly tells the student exactly what to do (use ? placeholders and pass values as a tuple to conn.execute()), making it a direct step-by-step fix rather than a guiding hint."
+        "gives_fix": false,
+        "rationale": "The hint accurately identifies the string concatenation problem and points to the WHERE clause, names the fix needed (? placeholders and separate tuple), but stops short of writing the code, making it appropriately more specific for attempt 2 without giving away the exact solution."
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint tells the student exactly what to do: 'use `?` placeholders in the SQL string, then pass the values as a tuple to `conn.execute()`.' This is a precise, step-by-step description of the exact change needed. It names the specific mechanism (`?` placeholders), the specific method (`conn.execute",
+      "ac_h2_explanation": "The hint does two things: (1) it identifies the specific problem — string concatenation with `+` instead of `?` placeholders — and (2) it ends with a guiding question asking how the student would rewrite the line and pass values as a tuple. However, the hint already tells the student exactly what to",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
-      "ac_help": 0.5,
-      "ac_help_label": "Neutral/Mixed"
+      "ac_help": 0.67,
+      "ac_help_label": "Somewhat Helpful"
     },
     {
       "bug_id": "L1-string-concat",
@@ -652,11 +655,11 @@
         "H4": 1,
         "H5": 1,
         "gives_fix": true,
-        "rationale": "The hint directly states the exact fix—use ? placeholders and pass values as a tuple with the precise syntax—so the student can copy it without understanding why, though it is appropriate for attempt 2."
+        "rationale": "The hint directly states the exact fix—use ? placeholders and pass values as a tuple with the precise syntax—so the student can copy it without understanding why, making it too prescriptive even for attempt 2."
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint tells the student exactly what to do: 'Use ? in the SQL for each value and pass the values as a tuple: conn.execute(sql, (station_id, start_date, end_date)).' This is the precise fix — it provides the exact function call with the exact syntax, including the tuple of parameters. It also tell",
+      "ac_h2_explanation": "The hint explicitly tells the student to 'Use ? in the SQL for each value and pass the values as a tuple: conn.execute(sql, (station_id, start_date, end_date))'. This is the exact code change needed to fix the problem. It specifies the exact syntax, the exact function call, and even the exact tuple ",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.83,
@@ -676,11 +679,11 @@
         "Level 1: a station ID containing a quote (') caused OperationalError. Use ? placeholders instead of putting values into the SQL text."
       ],
       "source": "ai_raw",
-      "hint": "Look at your SQL string where you're building the WHERE clause. You're using string concatenation with `+` to put the values directly into the SQL text, but the instructions ask you to use `?` placeholders instead. Replace each `+` variable with a `?`, then pass the values as a tuple to `conn.execute()`.",
+      "hint": "Look at how you're building the SQL string—you're using `+` to concatenate `station_id`, `start_date`, and `end_date` directly into the query. The error \"no such column: ST\" tells you the database is treating these values as column names instead of data. Use `?` placeholders in the SQL and pass the values separately as a tuple to `conn.execute()`.",
       "rejected": null,
-      "latency_ms": 986,
+      "latency_ms": 1058,
       "tokens_in": 1027,
-      "tokens_out": 75,
+      "tokens_out": 91,
       "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
       "judge": {
         "H1": 1,
@@ -689,11 +692,11 @@
         "H4": 1,
         "H5": 1,
         "gives_fix": true,
-        "rationale": "The hint accurately identifies the mistake and gives a step-by-step fix (replace each + variable with ?, pass values as a tuple), which is too explicit for attempt 3 but at least provides actionable guidance."
+        "rationale": "The hint accurately identifies the mistake and explicitly tells the student exactly what to do—use ? placeholders and pass values as a tuple to conn.execute()—which is a complete step-by-step fix rather than a guiding nudge."
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint tells the student to 'Replace each `+` variable with a `?`, then pass the values as a tuple to `conn.execute()`.' This is a step-by-step instruction that tells the student exactly what to do: replace the `+` concatenations with `?` placeholders and pass the values as a tuple. This is essent",
+      "ac_h2_explanation": "The hint tells the student exactly what the problem is ('you're using + to concatenate... directly into the query') and exactly what to do to fix it ('Use ? placeholders in the SQL and pass the values separately as a tuple to conn.execute()'). This is essentially a step-by-step fix stated in plain w",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.67,
@@ -726,7 +729,7 @@
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The student's code hasn't changed across all three attempts - they're still using string concatenation instead of ? placeholders. The actual problem is the SQL construction method, not ORDER BY or dictionary conversion.\n\nThis hint talks about ORDER BY date and cursor.description/zip for dictionary c",
+      "ac_h2_explanation": "The student's code has two main problems: (1) using string concatenation instead of ? placeholders, and (2) missing ORDER BY. The hint addresses ORDER BY and the dictionary-building logic, but completely ignores the actual failing issue (string concatenation vs. ? placeholders). More importantly, th",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.67,
@@ -741,11 +744,11 @@
         "Level 1: rows should be sorted by date, oldest first. Try ORDER BY date."
       ],
       "source": "ai_raw",
-      "hint": "Look at your ORDER BY clause—you're sorting by rain_mm, but the check says you need to sort by date. Which column should come after ORDER BY to get the oldest dates first?",
+      "hint": "Look at your ORDER BY clause. You're currently sorting by rain_mm, but the test expects the results sorted by date from oldest to first. Which column should you be sorting by instead?",
       "rejected": null,
-      "latency_ms": 847,
+      "latency_ms": 864,
       "tokens_in": 849,
-      "tokens_out": 43,
+      "tokens_out": 42,
       "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
       "judge": {
         "H1": 1,
@@ -754,15 +757,15 @@
         "H4": 1,
         "H5": 1,
         "gives_fix": true,
-        "rationale": "The hint explicitly tells the student to change ORDER BY rain_mm to ORDER BY date, giving the exact fix without requiring any independent thinking."
+        "rationale": "The hint explicitly tells the student to sort by date and even specifies the direction (oldest to first), giving away the exact fix on the first attempt."
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint says: 'you're sorting by rain_mm, but the check says you need to sort by date. Which column should come after ORDER BY to get the oldest dates first?' The first part explicitly identifies the exact problem (sorting by rain_mm instead of date) and the second part asks which column to use. Ho",
+      "ac_h2_explanation": "The hint says 'You're currently sorting by rain_mm, but the test expects the results sorted by date from oldest to first. Which column should you be sorting by instead?' - while it ends with a question, it has already told the student exactly what is wrong (sorting by rain_mm instead of date) and ex",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
-      "ac_help": 0.67,
-      "ac_help_label": "Somewhat Helpful"
+      "ac_help": 0.83,
+      "ac_help_label": "Very Helpful"
     },
     {
       "bug_id": "L1-no-order",
@@ -778,15 +781,15 @@
       "judge": {
         "H1": 0,
         "H2": 1,
-        "H3": 0,
+        "H3": 1,
         "H4": 1,
         "H5": 1,
         "gives_fix": false,
-        "rationale": "The hint ignores the actual mistake (ORDER BY rain_mm instead of date) and instead gives generic advice about query structure the student already has correct, making it unhelpful for fixing the bug."
+        "rationale": "The hint ignores the actual mistake (ORDER BY rain_mm instead of date) and instead gives generic advice about query structure that the student already has correct, making it unhelpful for fixing the real bug."
       },
       "ac_h2": 1.0,
       "ac_h2_label": "Names the issue",
-      "ac_h2_explanation": "The hint says 'Start with a query that selects the five columns FROM daily_readings, then add a WHERE clause for the station and the dates.' This is generic advice about SQL query structure and does not address the actual problem at all. The student's code already does exactly this - it selects five",
+      "ac_h2_explanation": "The student's problem is clear: they used ORDER BY rain_mm instead of ORDER BY date. The failed check even tells them exactly what to fix: 'Try ORDER BY date.'\n\nThe hint given says: 'Start with a query that selects the five columns FROM daily_readings, then add a WHERE clause for the station and the",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.33,
@@ -801,11 +804,11 @@
         "Level 1: rows should be sorted by date, oldest first. Try ORDER BY date."
       ],
       "source": "ai_raw",
-      "hint": "Look at your ORDER BY clause—you're sorting by `rain_mm`, but the test wants the rows sorted by `date` (oldest first). Which column should you order by instead?",
+      "hint": "Look at your ORDER BY clause—you're sorting by rain_mm, but the test wants the rows sorted by date with the oldest first. Which column should you order by instead?",
       "rejected": null,
-      "latency_ms": 781,
+      "latency_ms": 779,
       "tokens_in": 849,
-      "tokens_out": 42,
+      "tokens_out": 40,
       "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
       "judge": {
         "H1": 1,
@@ -814,15 +817,15 @@
         "H4": 1,
         "H5": 1,
         "gives_fix": true,
-        "rationale": "The hint directly states the exact fix (change ORDER BY to date), making it trivially actionable without any reasoning required from the student."
+        "rationale": "The hint explicitly identifies the wrong column (rain_mm) and asks which column to use instead, but the answer is obvious from context ('the test wants rows sorted by date'), making it a direct fix rather than a guiding question."
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint says 'you're sorting by `rain_mm`, but the test wants the rows sorted by `date` (oldest first)' and then asks 'Which column should you order by instead?' \n\nThis hint explicitly identifies the exact problem (wrong column in ORDER BY) AND tells the student exactly what it should be changed to",
+      "ac_h2_explanation": "The hint says 'you're sorting by rain_mm, but the test wants the rows sorted by date with the oldest first. Which column should you order by instead?' — This identifies the exact problem (wrong column in ORDER BY) and essentially tells the student the fix is to use 'date' instead of 'rain_mm'. The t",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
-      "ac_help": 0.67,
-      "ac_help_label": "Somewhat Helpful"
+      "ac_help": 0.33,
+      "ac_help_label": "Somewhat Unhelpful"
     },
     {
       "bug_id": "L1-no-order",
@@ -844,13 +847,13 @@
         "gives_fix": false,
         "rationale": "The hint addresses correct use of ? placeholders and date comparison operators, but the student already has those right — the actual bug is ORDER BY rain_mm instead of ORDER BY date, which the hint never mentions."
       },
-      "ac_h2": 0.0,
-      "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The student's actual problem is clear from the failed check: they're sorting by `rain_mm` instead of `date`. The hint the tutor gave talks about using `?` placeholders and explains that YYYY-MM-DD dates sort correctly as text with >= and <=. However, it does NOT address the actual bug (ORDER BY rain",
+      "ac_h2": 1.0,
+      "ac_h2_label": "Names the issue",
+      "ac_h2_explanation": "The student's actual problem is clear from the failed check: they have 'ORDER BY rain_mm' instead of 'ORDER BY date'. The hint doesn't address this at all - instead it talks about using ? placeholders and how YYYY-MM-DD dates sort correctly as text. While the hint is somewhat relevant to the task de",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
-      "ac_help": 0.17,
-      "ac_help_label": "Very Unhelpful"
+      "ac_help": 0.33,
+      "ac_help_label": "Somewhat Unhelpful"
     },
     {
       "bug_id": "L1-no-order",
@@ -861,11 +864,11 @@
         "Level 1: rows should be sorted by date, oldest first. Try ORDER BY date."
       ],
       "source": "ai_raw",
-      "hint": "Look at your ORDER BY clause—you're sorting by `rain_mm`, but the problem asks you to sort by date with the oldest first. Which column should you use instead?",
+      "hint": "Look at your ORDER BY clause. You're sorting by rain_mm, but the test wants the results sorted by date with the oldest first. Which column should you be sorting by instead?",
       "rejected": null,
-      "latency_ms": 807,
+      "latency_ms": 828,
       "tokens_in": 849,
-      "tokens_out": 40,
+      "tokens_out": 41,
       "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
       "judge": {
         "H1": 1,
@@ -874,11 +877,11 @@
         "H4": 1,
         "H5": 1,
         "gives_fix": true,
-        "rationale": "The hint directly identifies the wrong column and asks which column to use instead, but the rhetorical question combined with explicitly naming 'date' as the target makes the fix trivially obvious without requiring the student to think."
+        "rationale": "The hint explicitly tells the student to sort by date instead of rain_mm, which is the exact fix needed, making it too direct for attempt 3."
       },
-      "ac_h2": 1.0,
-      "ac_h2_label": "Names the issue",
-      "ac_h2_explanation": "The hint says 'you're sorting by `rain_mm`, but the problem asks you to sort by date with the oldest first. Which column should you use instead?' This identifies the exact issue (wrong column in ORDER BY) and strongly implies the fix (use 'date' instead of 'rain_mm'). The question 'Which column shou",
+      "ac_h2": 0.0,
+      "ac_h2_label": "Gives the answer",
+      "ac_h2_explanation": "The hint says 'You're sorting by rain_mm, but the test wants the results sorted by date with the oldest first. Which column should you be sorting by instead?' \n\nThis hint explicitly identifies the exact problem (sorting by rain_mm instead of date) and then asks which column to sort by instead. Howev",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.33,
@@ -906,7 +909,7 @@
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint says 'ORDER BY date sorts the rows.' This directly tells the student the exact SQL clause to use, which is the precise fix needed. The error message from the checker already said 'Try ORDER BY date,' and the tutor's hint repeats exactly that fix. This is giving the answer — stating the exac",
+      "ac_h2_explanation": "The hint says 'ORDER BY date sorts the rows.' This directly tells the student the exact fix needed - replace 'ORDER BY rain_mm' with 'ORDER BY date'. The error message from the automated check already said 'Try ORDER BY date', and the hint restates this fix explicitly. The second part about cursor.d",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.67,
@@ -926,7 +929,7 @@
       "source": "ai_raw",
       "hint": "Look at your comparison operators in the two if statements. The problem says \"35.0 or more\" should count, but you're using `>` instead of `>=`. Should 35.0 exactly be included or excluded?",
       "rejected": null,
-      "latency_ms": 899,
+      "latency_ms": 879,
       "tokens_in": 925,
       "tokens_out": 52,
       "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
@@ -937,11 +940,11 @@
         "H4": 1,
         "H5": 1,
         "gives_fix": true,
-        "rationale": "The hint explicitly names both the wrong operators (`>`) and the correct ones (`>=`), giving the student the exact fix without requiring any independent reasoning."
+        "rationale": "The hint explicitly names both the wrong operators (>) and the correct ones (>=), and even restates the fix in plain words, so the student can fix the bug without any independent reasoning."
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint says 'you're using `>` instead of `>=`' — this directly identifies the exact operator that needs to change and implicitly states the fix (use `>=`). The student doesn't need to think about what the problem is or what to change; the hint has done both. This is essentially giving the answer, ",
+      "ac_h2_explanation": "The hint says: 'Look at your comparison operators in the two if statements. The problem says \"35.0 or more\" should count, but you're using `>` instead of `>=`.' This explicitly identifies the exact operators that are wrong (`>`) and states what they should be changed to (`>=`). This is essentially t",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.83,
@@ -972,7 +975,7 @@
       },
       "ac_h2": 1.0,
       "ac_h2_label": "Names the issue",
-      "ac_h2_explanation": "The hint says 'Start with an empty list, labels = [], and add a label for each condition that is true.' The student already has this structure in their code - they do start with an empty list and add labels for each condition. The actual bug is that the student uses strict greater-than (>) instead o",
+      "ac_h2_explanation": "The hint says 'Start with an empty list, labels = [], and add a label for each condition that is true.' The student already has this exact structure in their code — they already start with labels = [] and append labels. The actual bug is the use of strict '>' instead of '>=' for the comparisons. The",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.17,
@@ -990,11 +993,11 @@
         "Level 2: 35.0 °C with 0.0 mm should return ['heat_wave'], but returned ['normal']."
       ],
       "source": "ai_raw",
-      "hint": "Look at your comparison operators in the two if statements. The problem says \"35.0 or more\" should count as a heat wave, but you're using `>` instead of `>=`. The same issue applies to your rain check—should 20.0 mm exactly trigger \"heavy_rain\"?",
+      "hint": "Look at your comparison operators in the two if statements. The problem says \"35.0 or more\" should count, but you're using `>` instead of `>=`. Should 35.0 exactly trigger the label, or only values greater than 35.0?",
       "rejected": null,
-      "latency_ms": 1051,
+      "latency_ms": 980,
       "tokens_in": 925,
-      "tokens_out": 68,
+      "tokens_out": 61,
       "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
       "judge": {
         "H1": 1,
@@ -1003,11 +1006,11 @@
         "H4": 1,
         "H5": 1,
         "gives_fix": true,
-        "rationale": "The hint explicitly names both the wrong operator (>) and the correct one (>=) for both conditions, giving the student the exact fix without requiring any independent reasoning."
+        "rationale": "The hint explicitly names the exact operators to change (> to >=) and tells the student what to do, making the fix trivially obvious without requiring any independent thinking."
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint explicitly tells the student that they are 'using `>` instead of `>=`'. This directly states the exact change to make — swap `>` for `>=` in both comparison operators. The student doesn't need to figure out what the issue is or what to change; the hint spells out both the problem (wrong ope",
+      "ac_h2_explanation": "The hint tells the student exactly what the problem is: they are using `>` instead of `>=`. It explicitly names both the wrong operator (`>`) and the correct operator (`>=`), and directly states the exact change needed. The closing question is rhetorical—it doesn't genuinely leave the student to dis",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.67,
@@ -1038,7 +1041,7 @@
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint says '\"35.0 or more\" means >= 35.0, not > 35.0' — this directly states the exact operator change needed (from > to >=). It also says 'Check the heat wave first and heavy rain second, using two separate if statements' which is already what the student's code does, so that part is not the key",
+      "ac_h2_explanation": "The hint says '\"35.0 or more\" means >= 35.0, not > 35.0.' This directly tells the student exactly what operator to change (from > to >=) and for which condition. It also says to use 'two separate if statements' which the student already has. The core fix — changing > to >= — is explicitly stated. Th",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.83,
@@ -1056,24 +1059,24 @@
         "Level 2: 35.0 °C with 0.0 mm should return ['heat_wave'], but returned ['normal']."
       ],
       "source": "ai_raw",
-      "hint": "Look at your comparison operators on lines with `HEAT_WAVE_C` and `HEAVY_RAIN_MM`. The problem says \"35.0 or more\" should count—should you be using `>` or `>=`?",
+      "hint": "Look at your comparison operators on lines where you check `temp_high_c` and `rain_mm`. The problem says \"35.0 or more\" — should that be `>` or `>=`?",
       "rejected": null,
-      "latency_ms": 931,
+      "latency_ms": 878,
       "tokens_in": 925,
-      "tokens_out": 56,
+      "tokens_out": 49,
       "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
       "judge": {
         "H1": 1,
-        "H2": 0,
-        "H3": 1,
+        "H2": 1,
+        "H3": 2,
         "H4": 1,
         "H5": 1,
-        "gives_fix": true,
-        "rationale": "The hint directly identifies the exact operators to change and even names the replacement (`>=`), making the fix trivially obvious without any reasoning required from the student."
+        "gives_fix": false,
+        "rationale": "The hint accurately identifies the comparison operator issue and names where to look, but stops short of stating the exact fix by framing it as a question about which operator to use, making it appropriately specific for attempt 3 without giving away the answer outright."
       },
-      "ac_h2": 1.0,
-      "ac_h2_label": "Names the issue",
-      "ac_h2_explanation": "The hint says 'should you be using `>` or `>=`?' — this is a guiding question format, but it essentially points to both the exact operators in question and implicitly tells the student that `>=` is the correct one (since the question follows the statement that '35.0 or more should count'). The stude",
+      "ac_h2": 0.0,
+      "ac_h2_label": "Gives the answer",
+      "ac_h2_explanation": "The hint says: 'Look at your comparison operators on lines where you check `temp_high_c` and `rain_mm`. The problem says \"35.0 or more\" — should that be `>` or `>=`?'\n\nThis hint explicitly names the exact operators involved (`>` vs `>=`) and essentially tells the student exactly what to change. By p",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.33,
@@ -1100,11 +1103,11 @@
         "H4": 1,
         "H5": 1,
         "gives_fix": false,
-        "rationale": "The hint describes the logic for the 'normal' case, which the student already has correct; it completely misses the actual bug (using strict > instead of >= for the boundary conditions), and on attempt 3 this vague misdirection cannot help the student fix the problem."
+        "rationale": "The hint describes the logic for the 'normal' case, which the student already has correct; it completely misses the actual bug (using strict > instead of >= for the boundary comparisons), and on attempt 3 the student needs more targeted guidance."
       },
-      "ac_h2": 0.0,
-      "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The student's code hasn't changed between attempts 1, 2, and 3 - it still uses `>` instead of `>=`. The previous hint (attempt 2) already explicitly told the student to use `>=` instead of `>`. Now the hint says 'After both checks, if the list is still empty, the day is normal. Return the list at th",
+      "ac_h2": 1.0,
+      "ac_h2_label": "Names the issue",
+      "ac_h2_explanation": "The student's code has not changed between attempts 1, 2, and 3 - it still uses `>` instead of `>=`. The previous hint (attempt 2) already correctly identified the exact issue: change `>` to `>=`. The new hint for attempt 3 says 'After both checks, if the list is still empty, the day is normal. Retu",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.33,
@@ -1120,24 +1123,24 @@
         "Level 2: 36.2 °C with 23.4 mm should return ['heat_wave', 'heavy_rain'], but returned ['heat_wave']."
       ],
       "source": "ai_raw",
-      "hint": "Look at your if/elif/else structure. Right now, if the heat wave condition is true, the elif never runs. You need two separate if statements (not elif) so both conditions can be checked and both labels can be added to the list.",
+      "hint": "Look at your if/elif/else structure. Right now, when the heat wave condition is true, the elif never runs. You need two separate if statements instead so both conditions can be checked independently. Should a day with 35°C and 20mm rain get one label or two?",
       "rejected": null,
-      "latency_ms": 992,
+      "latency_ms": 976,
       "tokens_in": 882,
-      "tokens_out": 55,
+      "tokens_out": 63,
       "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
       "judge": {
         "H1": 1,
         "H2": 0,
-        "H3": 0,
+        "H3": 1,
         "H4": 1,
         "H5": 1,
         "gives_fix": true,
-        "rationale": "The hint explicitly states the exact fix needed ('two separate if statements (not elif)'), giving away the solution on the first attempt rather than guiding the student to discover it."
+        "rationale": "The hint explicitly states 'You need two separate if statements instead,' which is the exact code change needed, making it too direct for a first attempt."
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint says 'You need two separate if statements (not elif) so both conditions can be checked and both labels can be added to the list.' This explicitly tells the student the exact structural change to make: replace elif with a second if statement. This is essentially giving the fix in plain words",
+      "ac_h2_explanation": "The hint says: 'You need two separate if statements instead so both conditions can be checked independently.' This explicitly tells the student the exact structural change to make — replace if/elif/else with two separate if statements. That's the fix stated in plain words, not just pointing at the p",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.83,
@@ -1166,11 +1169,11 @@
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint says 'Start with an empty list, labels = [], and add a label for each condition that is true.' The student already has labels = [] in their code. The real problem is that they used elif instead of if for the second condition, meaning both conditions can never both be true simultaneously. Th",
+      "ac_h2_explanation": "The hint says 'Start with an empty list, labels = [], and add a label for each condition that is true.' The student already has `labels = []` in their code. The real issue is that they used `elif` instead of separate `if` statements, which prevents both conditions from being checked independently. T",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
-      "ac_help": 0.67,
-      "ac_help_label": "Somewhat Helpful"
+      "ac_help": 0.83,
+      "ac_help_label": "Very Helpful"
     },
     {
       "bug_id": "L2-elif",
@@ -1182,28 +1185,28 @@
         "Level 2: 36.2 °C with 23.4 mm should return ['heat_wave', 'heavy_rain'], but returned ['heat_wave']."
       ],
       "source": "ai_raw",
-      "hint": "Look at your if/elif/else structure. When you use `elif`, the second condition only gets checked if the first one is false. Since a day can be BOTH a heat wave AND have heavy rain, should you use `elif` or a separate `if` statement for the rain check?",
+      "hint": "Look at your if/elif/else structure. Right now, if the heat wave condition is true, the other conditions never get checked. Try using two separate if statements instead of elif, so a day can earn both labels before checking for normal.",
       "rejected": null,
-      "latency_ms": 4753,
+      "latency_ms": 1069,
       "tokens_in": 882,
-      "tokens_out": 65,
+      "tokens_out": 53,
       "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
       "judge": {
         "H1": 1,
-        "H2": 1,
+        "H2": 0,
         "H3": 1,
         "H4": 1,
         "H5": 1,
-        "gives_fix": false,
-        "rationale": "The hint accurately identifies the elif issue and names where to look, but ends with a guiding question rather than stating the exact fix, making it appropriately Socratic for attempt 2."
+        "gives_fix": true,
+        "rationale": "The hint explicitly tells the student to use two separate if statements instead of elif, which is the exact code change needed to fix the bug, leaving nothing for the student to figure out on their own."
       },
-      "ac_h2": 1.0,
-      "ac_h2_label": "Names the issue",
-      "ac_h2_explanation": "The hint identifies the specific issue (elif vs separate if) and then asks a guiding question: 'should you use elif or a separate if statement for the rain check?' However, this question essentially answers itself — by framing it as a choice between elif and 'a separate if statement,' and having alr",
+      "ac_h2": 0.0,
+      "ac_h2_label": "Gives the answer",
+      "ac_h2_explanation": "The hint says 'Try using two separate if statements instead of elif, so a day can earn both labels before checking for normal.' This directly states the exact change to make: replace the elif structure with two separate if statements. This is a step-by-step fix in plain words that tells the student ",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
-      "ac_help": 0.83,
-      "ac_help_label": "Very Helpful"
+      "ac_help": 0.67,
+      "ac_help_label": "Somewhat Helpful"
     },
     {
       "bug_id": "L2-elif",
@@ -1228,7 +1231,7 @@
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint says 'using two separate if statements so a day can get both labels.' This directly tells the student the exact structural change to make — replace the elif with a separate if statement. This is the precise fix needed. The student doesn't need to figure anything out; they're told exactly wh",
+      "ac_h2_explanation": "The hint says 'using two separate if statements so a day can get both labels.' This is the exact fix needed - change elif to a separate if. The tutor is explicitly telling the student to use 'two separate if statements' which is the precise structural change required to fix the code. The student's b",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.67,
@@ -1244,11 +1247,11 @@
         "Level 2: 36.2 °C with 23.4 mm should return ['heat_wave', 'heavy_rain'], but returned ['heat_wave']."
       ],
       "source": "ai_raw",
-      "hint": "Look at your if/elif/else structure. You're using `elif` for the rain check, which means it only runs if the heat wave condition is false. Since a day can be both a heat wave AND have heavy rain, should that second condition be a separate `if` instead?",
+      "hint": "Look at your if/elif/else structure. When you use `elif`, the second condition is only checked if the first one is false. Since a day can be both a heat wave AND heavy rain, should you use `elif` for the rain check, or a separate `if` statement instead?",
       "rejected": null,
-      "latency_ms": 4493,
+      "latency_ms": 931,
       "tokens_in": 882,
-      "tokens_out": 63,
+      "tokens_out": 65,
       "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
       "judge": {
         "H1": 1,
@@ -1257,15 +1260,15 @@
         "H4": 1,
         "H5": 1,
         "gives_fix": true,
-        "rationale": "The hint explicitly tells the student to change `elif` to a separate `if`, which is the exact fix needed, making it a direct solution rather than a guiding question."
+        "rationale": "The hint explicitly tells the student to replace elif with a separate if statement, which is the exact fix needed, leaving no thinking required."
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint tells the student exactly what the problem is ('elif for the rain check... only runs if the heat wave condition is false') and then directly suggests the exact fix ('should that second condition be a separate if instead?'). While it's phrased as a question, it explicitly names both the prob",
+      "ac_h2_explanation": "The hint starts by explaining what `elif` does (only checks if first is false), which identifies the issue. Then it ends with a question: 'should you use `elif` for the rain check, or a separate `if` statement instead?' This question directly names the exact fix — replacing `elif` with a separate `i",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
-      "ac_help": 0.33,
-      "ac_help_label": "Somewhat Unhelpful"
+      "ac_help": 0.67,
+      "ac_help_label": "Somewhat Helpful"
     },
     {
       "bug_id": "L2-elif",
@@ -1286,15 +1289,15 @@
         "H4": 1,
         "H5": 1,
         "gives_fix": false,
-        "rationale": "The hint addresses the 'normal' case logic but misses the actual bug (elif preventing both labels from being added), and on attempt 3 it should be more specific about the elif/if distinction rather than giving a vague structural suggestion."
+        "rationale": "The hint addresses the 'normal' case logic but misses the actual bug (elif preventing both labels from being added), and on attempt 3 it's too vague to help the student fix the real problem."
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint says 'After both checks, if the list is still empty, the day is normal. Return the list at the end.' This tells the student exactly what structural change to make: use two separate if statements (implied by 'after both checks'), check if labels is empty to add 'normal', and return at the en",
+      "ac_h2_explanation": "The hint says 'After both checks, if the list is still empty, the day is normal. Return the list at the end.' This tells the student exactly what structural change to make: use two separate if statements (implied by 'after both checks'), check if the list is empty to add 'normal', and return at the ",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
-      "ac_help": 0.33,
-      "ac_help_label": "Somewhat Unhelpful"
+      "ac_help": 0.67,
+      "ac_help_label": "Somewhat Helpful"
     },
     {
       "bug_id": "L2-always-normal",
@@ -1308,24 +1311,24 @@
         "Level 2: 37.2 °C with 0.0 mm should return ['heat_wave'], but returned ['heat_wave', 'normal']."
       ],
       "source": "ai_raw",
-      "hint": "Look at the last line of your `classify_day` function. You're always appending \"normal\" to the list, even when the day already has heat_wave or heavy_rain labels. Should \"normal\" only be added when neither condition is true?",
+      "hint": "Look at the last line of your function. You're always appending \"normal\" to the list, even when the day already has heat wave or heavy rain labels. You should only add \"normal\" if the labels list is still empty—use an if statement to check that condition.",
       "rejected": null,
-      "latency_ms": 921,
+      "latency_ms": 937,
       "tokens_in": 949,
-      "tokens_out": 57,
+      "tokens_out": 61,
       "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
       "judge": {
         "H1": 1,
-        "H2": 2,
-        "H3": 2,
+        "H2": 0,
+        "H3": 0,
         "H4": 1,
         "H5": 1,
-        "gives_fix": false,
-        "rationale": "The hint accurately identifies the bug and ends with a guiding question that leads the student to discover the fix themselves, without spelling out the exact code change needed."
+        "gives_fix": true,
+        "rationale": "The hint accurately identifies the bug and explicitly tells the student exactly what to do (use an if statement to check if labels is empty), making the fix trivially obvious without any independent thinking required."
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint says: 'You're always appending \"normal\" to the list, even when the day already has heat_wave or heavy_rain labels. Should \"normal\" only be added when neither condition is true?' \n\nThis directly identifies the exact problem (unconditional append of 'normal') and then essentially states the f",
+      "ac_h2_explanation": "The hint says: 'You should only add \"normal\" if the labels list is still empty—use an if statement to check that condition.' This tells the student exactly what to do: check if the labels list is empty using an if statement before appending 'normal'. This is essentially a step-by-step fix in plain w",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.83,
@@ -1352,15 +1355,15 @@
         "H4": 1,
         "H5": 1,
         "gives_fix": false,
-        "rationale": "The hint describes what the student already does correctly (empty list, conditional appends) and completely misses the actual bug: 'normal' is always appended unconditionally rather than only when no other labels were added."
+        "rationale": "The hint describes what the student already does correctly (empty list, conditional appends) and completely misses the actual bug: 'normal' is always appended unconditionally instead of only when no other labels were added."
       },
-      "ac_h2": 1.0,
-      "ac_h2_label": "Names the issue",
-      "ac_h2_explanation": "The hint says 'Start with an empty list, labels = [], and add a label for each condition that is true.' The student already has an empty list and already adds labels for each condition. The actual bug is that 'labels.append(\"normal\")' is unconditional — it always appends 'normal' regardless of wheth",
+      "ac_h2": 0.0,
+      "ac_h2_label": "Gives the answer",
+      "ac_h2_explanation": "The hint says 'Start with an empty list, labels = [], and add a label for each condition that is true.' The student already has an empty list and already adds labels for each condition. The actual bug is that 'normal' is always appended unconditionally, instead of only when no other labels were adde",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
-      "ac_help": 0.67,
-      "ac_help_label": "Somewhat Helpful"
+      "ac_help": 0.17,
+      "ac_help_label": "Very Unhelpful"
     },
     {
       "bug_id": "L2-always-normal",
@@ -1374,9 +1377,9 @@
         "Level 2: 37.2 °C with 0.0 mm should return ['heat_wave'], but returned ['heat_wave', 'normal']."
       ],
       "source": "ai_raw",
-      "hint": "Look at your last line in `classify_day`. You're always appending \"normal\" to the list, even when the day already has other labels. When should you only add \"normal\"—always, or only in certain cases?",
+      "hint": "Look at the last line of your function where you append \"normal\". Right now you're adding it every time—but when should \"normal\" actually be added to the list? Think about when a day deserves the \"normal\" label.",
       "rejected": null,
-      "latency_ms": 918,
+      "latency_ms": 1004,
       "tokens_in": 949,
       "tokens_out": 52,
       "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
@@ -1387,11 +1390,11 @@
         "H4": 1,
         "H5": 1,
         "gives_fix": false,
-        "rationale": "The hint accurately identifies the bug and asks a guiding question about when 'normal' should be added, without giving away the exact fix (using an else or checking if labels is empty)."
+        "rationale": "The hint accurately identifies the bug (unconditional 'normal' append), asks a guiding question about when 'normal' should be added without giving the exact fix, and is appropriately more specific on this second attempt."
       },
-      "ac_h2": 1.0,
-      "ac_h2_label": "Names the issue",
-      "ac_h2_explanation": "The hint says 'You're always appending \"normal\" to the list, even when the day already has other labels' — this directly names the issue (unconditional append of 'normal'). Then it asks 'When should you only add \"normal\"—always, or only in certain cases?' which is a guiding question. However, the hi",
+      "ac_h2": 2.0,
+      "ac_h2_label": "Guiding question",
+      "ac_h2_explanation": "The hint points to the exact line ('the last line of your function where you append \"normal\"') and identifies the issue (adding it every time). It then asks 'when should \"normal\" actually be added?' This is a guiding question rather than a direct statement of the fix. The tutor does not say 'use an ",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.67,
@@ -1422,7 +1425,7 @@
       },
       "ac_h2": 1.0,
       "ac_h2_label": "Names the issue",
-      "ac_h2_explanation": "The hint says '\"35.0 or more\" means >= 35.0, not > 35.0' — but the student's code already uses >= correctly. The real bug is that `labels.append('normal')` runs unconditionally, always adding 'normal' regardless of whether other labels were added. The hint doesn't address this actual bug at all. Ins",
+      "ac_h2_explanation": "The hint says '\"35.0 or more\" means >= 35.0, not > 35.0' - but looking at the student's code, they ARE already using >= correctly. The actual bug is that 'labels.append(\"normal\")' is unconditional - it always appends 'normal' regardless of whether other labels were added. The hint misidentifies the ",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.17,
@@ -1440,9 +1443,9 @@
         "Level 2: 37.2 °C with 0.0 mm should return ['heat_wave'], but returned ['heat_wave', 'normal']."
       ],
       "source": "ai_raw",
-      "hint": "Look at the end of your function—you're appending \"normal\" every time. According to the rules, \"normal\" should only be added when neither condition is true. How can you check if the labels list is empty before adding \"normal\"?",
+      "hint": "Look at the end of your `classify_day` function. You're adding \"normal\" every time, but \"normal\" should only be added when the list is still empty. Should you check if the list is empty before appending \"normal\"?",
       "rejected": null,
-      "latency_ms": 821,
+      "latency_ms": 842,
       "tokens_in": 949,
       "tokens_out": 55,
       "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
@@ -1453,11 +1456,11 @@
         "H4": 1,
         "H5": 1,
         "gives_fix": false,
-        "rationale": "The hint correctly identifies the bug and points to where to look, then asks a guiding question about checking if the list is empty—naming the approach without giving the exact code, which is appropriately specific for attempt 3."
+        "rationale": "The hint correctly identifies the bug and points to the right location, names the issue (unconditional append) and suggests checking if the list is empty, but stops short of giving the exact code change, making it appropriately specific for attempt 3."
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint does two things: (1) it identifies the problem clearly ('you're appending \"normal\" every time'), and (2) it tells the student exactly what to do ('check if the labels list is empty before adding \"normal\"'). The second part is essentially giving the fix in plain words — checking if the label",
+      "ac_h2_explanation": "The hint says: 'You're adding \"normal\" every time, but \"normal\" should only be added when the list is still empty. Should you check if the list is empty before appending \"normal\"?' \n\nThis hint both states the exact problem (adding 'normal' every time) AND states the exact fix (check if the list is e",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.67,
@@ -1480,15 +1483,15 @@
       "judge": {
         "H1": 1,
         "H2": 0,
-        "H3": 1,
+        "H3": 2,
         "H4": 1,
         "H5": 1,
         "gives_fix": true,
-        "rationale": "The hint directly states the exact fix—check if the list is empty before appending 'normal'—which the student can implement literally without needing to reason about why, making it too prescriptive for attempt 3."
+        "rationale": "The hint directly states the exact fix in plain words—check if the list is empty before appending 'normal'—which the student can implement literally without needing to reason about why, making it a step-by-step fix rather than a guiding nudge."
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint says: 'After both checks, if the list is still empty, the day is normal. Return the list at the end.' This tells the student exactly what to do: check if the list is empty after the two if-statements, and if so, append 'normal'. It also tells them where to put the return statement. This is ",
+      "ac_h2_explanation": "The hint says 'After both checks, if the list is still empty, the day is normal. Return the list at the end.' This is essentially a step-by-step fix: it tells the student exactly what to do — check if the list is empty after the two if-statements, and if so, append 'normal', then return. This direct",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.83,
@@ -1505,28 +1508,28 @@
         "Level 3: summarize must not call len() (lines 37, 38, 39). Work it out with a loop instead."
       ],
       "source": "ai_raw",
-      "hint": "Look at lines 37-41 where you're using `len()`, `sum()`, and `max()`. Instead, create counter variables before your loop (like `heat_wave_days = 0`), then increment them inside the loop as you check each label. Do the same for rain total and max temperature.",
+      "hint": "Look at lines 37-41 where you're using `len()`, `sum()`, and `max()`. Instead of these built-in functions, create counter variables before your loop and update them as you iterate through each reading. What value should each counter start at?",
       "rejected": null,
-      "latency_ms": 1088,
+      "latency_ms": 1047,
       "tokens_in": 1346,
-      "tokens_out": 71,
+      "tokens_out": 60,
       "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
       "judge": {
         "H1": 1,
-        "H2": 0,
-        "H3": 0,
+        "H2": 1,
+        "H3": 1,
         "H4": 1,
         "H5": 1,
-        "gives_fix": true,
-        "rationale": "The hint accurately identifies the mistake and gives a step-by-step fix (create counter variables before the loop, increment inside the loop), which is too explicit for a first attempt."
+        "gives_fix": false,
+        "rationale": "The hint accurately identifies the problematic lines and the general approach (counter variables), names the issue without giving exact code, and ends with a guiding question about initial values—appropriate for a first attempt."
       },
-      "ac_h2": 0.0,
-      "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint tells the student to 'create counter variables before your loop (like `heat_wave_days = 0`), then increment them inside the loop as you check each label. Do the same for rain total and max temperature.' This is very close to giving the exact fix - it specifies the exact approach (counter va",
+      "ac_h2": 1.0,
+      "ac_h2_label": "Names the issue",
+      "ac_h2_explanation": "The hint tells the student to 'create counter variables before your loop and update them as you iterate through each reading.' This is fairly explicit about the exact approach: use counter variables initialized before the loop and increment them inside the loop. It also asks 'What value should each ",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
-      "ac_help": 0.83,
-      "ac_help_label": "Very Helpful"
+      "ac_help": 0.67,
+      "ac_help_label": "Somewhat Helpful"
     },
     {
       "bug_id": "L3-builtins",
@@ -1552,7 +1555,7 @@
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint tells the student exactly what to do: 'set up a variable for each answer: counters at 0, total rain at 0.0, max temperature at None, and an empty list for flagged dates.' This is a direct, step-by-step instruction describing precisely what variables to create and what initial values to assi",
+      "ac_h2_explanation": "The hint tells the student exactly what to do: 'set up a variable for each answer: counters at 0, total rain at 0.0, max temperature at None, and an empty list for flagged dates.' This is essentially a step-by-step instruction describing the exact code structure to implement. It tells the student pr",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.67,
@@ -1569,11 +1572,11 @@
         "Level 3: summarize must not call len() (lines 37, 38, 39). Work it out with a loop instead."
       ],
       "source": "ai_raw",
-      "hint": "Look at lines 37-41 where you're building the return dictionary. You're using `len()`, `sum()`, and `max()` with list comprehensions, but the rules say to keep running totals in a loop instead. Set up counter variables before the loop (like `heat_wave_days = 0`), then increment them as you iterate through the readings.",
+      "hint": "Look at lines 37-41 where you're using `len()`, `sum()`, and `max()`. Instead, set up counter variables before your loop (like `heat_wave_days = 0`), then increment them inside the loop as you check each label. Do the same for rain total and max temperature.",
       "rejected": null,
-      "latency_ms": 1280,
+      "latency_ms": 1098,
       "tokens_in": 1346,
-      "tokens_out": 84,
+      "tokens_out": 72,
       "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
       "judge": {
         "H1": 1,
@@ -1582,11 +1585,11 @@
         "H4": 1,
         "H5": 1,
         "gives_fix": true,
-        "rationale": "The hint accurately identifies the mistake and explicitly tells the student exactly what to do (set up counter variables before the loop and increment them), which is a step-by-step fix rather than a guiding nudge."
+        "rationale": "The hint accurately identifies the problem and gives a step-by-step fix (set up counter variables before the loop, increment inside the loop), which is essentially the exact change needed, making it too prescriptive for attempt 2."
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint tells the student exactly what to do: 'Set up counter variables before the loop (like `heat_wave_days = 0`), then increment them as you iterate through the readings.' This is essentially a step-by-step fix - it tells them to set up counter variables before the loop and increment them inside",
+      "ac_h2_explanation": "The hint tells the student to 'set up counter variables before your loop (like `heat_wave_days = 0`), then increment them inside the loop as you check each label. Do the same for rain total and max temperature.' This is essentially a step-by-step description of exactly what to do: initialize counter",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.33,
@@ -1616,7 +1619,7 @@
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint says: 'Inside the loop, write for row, labels in readings: and use if \"heat_wave\" in labels: to add 1 to a counter. Add row[\"rain_mm\"] to the total on every pass.' This tells the student exactly what code to write - the loop structure, the exact condition to check, and the exact operation t",
+      "ac_h2_explanation": "The hint says: 'Inside the loop, write for row, labels in readings: and use if \"heat_wave\" in labels: to add 1 to a counter. Add row[\"rain_mm\"] to the total on every pass.' This is extremely specific — it tells the student exactly what loop construct to write, exactly what condition to use, exactly ",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.67,
@@ -1633,28 +1636,28 @@
         "Level 3: summarize must not call len() (lines 37, 38, 39). Work it out with a loop instead."
       ],
       "source": "ai_raw",
-      "hint": "Look at lines 37-41 where you're using `len()`, `sum()`, and `max()`. Instead, create counter variables before the loop (like `heat_wave_days = 0`) and update them inside your `for row, labels in readings:` loop. What information do you need to track on each iteration?",
-      "rejected": "copies the reference solution",
-      "latency_ms": 2414,
+      "hint": "You're using `len()`, `sum()`, and `max()` in your return dictionary, but the assignment asks you to build these values manually with a loop. Before your loop, create counter variables set to 0, a rain total at 0.0, and max_temp at None—then update them as you loop through each reading.",
+      "rejected": null,
+      "latency_ms": 1247,
       "tokens_in": 1346,
-      "tokens_out": 75,
+      "tokens_out": 76,
       "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
       "judge": {
         "H1": 1,
-        "H2": 1,
-        "H3": 2,
+        "H2": 0,
+        "H3": 1,
         "H4": 1,
         "H5": 1,
-        "gives_fix": false,
-        "rationale": "The hint accurately identifies the problematic lines and forbidden functions, names the fix approach (counter variables updated in a loop) without giving exact code, and is appropriately specific for a third attempt."
+        "gives_fix": true,
+        "rationale": "The hint accurately identifies all three forbidden functions and gives a step-by-step fix (create counter variables at 0, rain total at 0.0, max_temp at None, then update in the loop), which is essentially the complete solution spelled out in plain words."
       },
-      "ac_h2": 1.0,
-      "ac_h2_label": "Names the issue",
-      "ac_h2_explanation": "The hint tells the student to 'create counter variables before the loop (like `heat_wave_days = 0`) and update them inside your `for row, labels in readings:` loop.' This is very specific about the exact approach: initialize counters before the loop, increment them inside the loop. It even gives a c",
+      "ac_h2": 0.0,
+      "ac_h2_label": "Gives the answer",
+      "ac_h2_explanation": "The hint tells the student exactly what to do: 'Before your loop, create counter variables set to 0, a rain total at 0.0, and max_temp at None—then update them as you loop through each reading.' This is the third attempt with the same code, and the hint is essentially spelling out the exact structur",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
-      "ac_help": 0.33,
-      "ac_help_label": "Somewhat Unhelpful"
+      "ac_help": 0.67,
+      "ac_help_label": "Somewhat Helpful"
     },
     {
       "bug_id": "L3-builtins",
@@ -1676,11 +1679,11 @@
         "H4": 1,
         "H5": 1,
         "gives_fix": true,
-        "rationale": "The hint accurately targets the max() issue and gives a step-by-step fix for it, but it only partially addresses the full problem (len() and sum() violations are not mentioned), and it tells the student exactly what to do rather than guiding them to discover the solution."
+        "rationale": "The hint accurately targets the max() issue and gives a step-by-step fix for the temperature tracking, but it only partially addresses the full problem (len() and sum() violations remain unmentioned), and it tells the student exactly what to do rather than guiding them to discover it."
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint says 'replace max_temp when it is None or when the new temperature is bigger' — this is a direct, step-by-step instruction telling the student exactly what condition to check and what action to take. It also tells them to call flagged_dates.sort() after the loop and to use round(total, 1), ",
+      "ac_h2_explanation": "The hint says 'replace max_temp when it is None or when the new temperature is bigger' — this is a precise, step-by-step description of exactly what code to write (an if condition checking for None or greater value, then assignment). It also tells the student to 'round the total with round(total, 1)",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.67,
@@ -1695,24 +1698,24 @@
         "Level 3: with no readings, max_temp_c should be None, but was 0."
       ],
       "source": "ai_raw",
-      "hint": "Look at how you initialize `max_temp` before the loop. When there are no readings, what value does it have, and what should it have instead? Think about what happens when you compare temperatures to that starting value.",
+      "hint": "Look at where you initialize `max_temp` before the loop. Right now it's set to 0, but the problem says it should be `None` when there are no readings. How should you change that starting value so it stays `None` if the loop never runs?",
       "rejected": null,
-      "latency_ms": 1008,
+      "latency_ms": 1034,
       "tokens_in": 1345,
-      "tokens_out": 49,
+      "tokens_out": 61,
       "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
       "judge": {
         "H1": 1,
-        "H2": 2,
-        "H3": 2,
+        "H2": 1,
+        "H3": 1,
         "H4": 1,
         "H5": 1,
         "gives_fix": false,
-        "rationale": "The hint accurately identifies the initialization of max_temp as the problem and asks guiding questions about what value it has versus what it should be, without stating the exact fix."
+        "rationale": "The hint accurately identifies the initialization of max_temp as the problem and points the student to where to look, but stops short of stating the exact fix, leaving the student to figure out that None is the right starting value."
       },
       "ac_h2": 1.0,
       "ac_h2_label": "Names the issue",
-      "ac_h2_explanation": "The hint says 'Look at how you initialize `max_temp` before the loop. When there are no readings, what value does it have, and what should it have instead?' This directly names the exact variable (`max_temp`), the exact location (initialization before the loop), and asks what value it has (0) and wh",
+      "ac_h2_explanation": "The hint tells the student to look at where `max_temp` is initialized and explicitly states it's set to 0, then asks how to change the starting value so it stays `None` if the loop never runs. This directly points at the exact variable and the exact fix needed (change the initial value to `None`). W",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.83,
@@ -1740,11 +1743,11 @@
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint says: 'set up a variable for each answer: counters at 0, total rain at 0.0, max temperature at None, and an empty list for flagged dates.' This directly tells the student to initialize max_temp to None instead of 0, which is the exact fix needed. It specifies the precise change to make (max",
+      "ac_h2_explanation": "The hint says: 'set up a variable for each answer: counters at 0, total rain at 0.0, max temperature at None, and an empty list for flagged dates.' This explicitly tells the student to initialize max_temp to None rather than 0. That is the exact fix needed — changing `max_temp = 0` to `max_temp = No",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
-      "ac_help": 0.83,
-      "ac_help_label": "Very Helpful"
+      "ac_help": 0.67,
+      "ac_help_label": "Somewhat Helpful"
     },
     {
       "bug_id": "L3-max-zero",
@@ -1755,24 +1758,24 @@
         "Level 3: with no readings, max_temp_c should be None, but was 0."
       ],
       "source": "ai_raw",
-      "hint": "Look at where you initialize `max_temp` before the loop. When there are no readings, the loop never runs, so `max_temp` stays at that initial value. What should it be set to instead so that an empty list returns `None`?",
+      "hint": "Look at where you initialize `max_temp` before the loop. When the readings list is empty, the loop never runs, so `max_temp` stays as whatever you set it to—but the test expects `None` in that case. What should you start with instead of 0?",
       "rejected": null,
-      "latency_ms": 1042,
+      "latency_ms": 1030,
       "tokens_in": 1345,
-      "tokens_out": 57,
+      "tokens_out": 64,
       "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
       "judge": {
         "H1": 1,
-        "H2": 2,
+        "H2": 1,
         "H3": 2,
         "H4": 1,
         "H5": 1,
         "gives_fix": false,
-        "rationale": "The hint accurately identifies the initialization of max_temp as the problem and asks a guiding question about what it should be set to, without directly stating 'use None', making it appropriately Socratic for attempt 2."
+        "rationale": "The hint accurately identifies the initialization issue and asks a guiding question ('What should you start with instead of 0?') without explicitly stating to use None, making it appropriately Socratic and well-calibrated for a second attempt."
       },
-      "ac_h2": 0.0,
-      "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint says 'What should it be set to instead so that an empty list returns `None`?' This is very close to giving the answer. It explicitly tells the student that max_temp's initial value needs to change, and the question directly implies the answer is `None` (since it says 'so that an empty list ",
+      "ac_h2": 1.0,
+      "ac_h2_label": "Names the issue",
+      "ac_h2_explanation": "The hint tells the student exactly what to look at (the initialization of `max_temp` before the loop) and explains why it's wrong (when the loop never runs, it stays as the initial value). It also explicitly asks 'What should you start with instead of 0?' — which strongly implies the answer is `None",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.67,
@@ -1800,7 +1803,7 @@
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint says 'Inside the loop, write for row, labels in readings: and use if \"heat_wave\" in labels: to add 1 to a counter. Add row[\"rain_mm\"] to the total on every pass.' This is completely unrelated to the actual problem the student is facing. The failing check is about max_temp_c being 0 instead ",
+      "ac_h2_explanation": "The hint given says: 'Inside the loop, write for row, labels in readings: and use if \"heat_wave\" in labels: to add 1 to a counter. Add row[\"rain_mm\"] to the total on every pass.' This is completely unrelated to the actual bug, which is that max_temp is initialized to 0 instead of None. The hint does",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.17,
@@ -1815,9 +1818,9 @@
         "Level 3: with no readings, max_temp_c should be None, but was 0."
       ],
       "source": "ai_raw",
-      "hint": "Look at how you initialize `max_temp` before the loop. When there are no readings, the loop never runs, so `max_temp` stays at that initial value. What should it be set to instead so that an empty list returns `None`?",
+      "hint": "Look at how you initialize `max_temp` before the loop. When there are no readings, the loop never runs, so `max_temp` stays at its starting value. What should it be set to instead so that an empty list returns `None`?",
       "rejected": null,
-      "latency_ms": 884,
+      "latency_ms": 924,
       "tokens_in": 1345,
       "tokens_out": 57,
       "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
@@ -1828,11 +1831,11 @@
         "H4": 1,
         "H5": 1,
         "gives_fix": false,
-        "rationale": "The hint accurately identifies the initialization of max_temp as the problem and asks what it should be set to instead, naming the issue without giving the exact fix, which is appropriately specific for attempt 3."
+        "rationale": "The hint accurately identifies the initialization issue and asks what the value should be instead, which guides the student without giving the exact answer (None), making it appropriately specific for attempt 3."
       },
-      "ac_h2": 0.0,
-      "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint says 'What should it be set to instead so that an empty list returns `None`?' This question strongly implies the answer: set max_temp to None. The hint directly names the exact variable to change (max_temp), explains why it's wrong (loop never runs), and the question at the end essentially ",
+      "ac_h2": 1.0,
+      "ac_h2_label": "Names the issue",
+      "ac_h2_explanation": "The hint says 'Look at how you initialize `max_temp` before the loop' - this points directly at the exact line/variable. It then says 'What should it be set to instead so that an empty list returns `None`?' - this explicitly tells the student that the fix is to change the initial value of max_temp s",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.33,
@@ -1856,11 +1859,11 @@
         "H4": 1,
         "H5": 1,
         "gives_fix": true,
-        "rationale": "The hint directly states the exact fix ('replace max_temp when it is None or when the new temperature is bigger'), giving the student the complete solution without requiring any independent thinking, which is too explicit for attempt 3."
+        "rationale": "The hint accurately identifies the issue and gives a near-complete step-by-step fix ('replace max_temp when it is None or when the new temperature is bigger'), which is essentially the exact code change needed, leaving little for the student to figure out on their own."
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint says 'replace max_temp when it is None or when the new temperature is bigger.' This directly tells the student the exact logic to use: initialize to None, then check 'if max_temp is None or row[\"temp_high_c\"] > max_temp'. This is essentially giving the complete fix in plain words - it speci",
+      "ac_h2_explanation": "The hint says: 'replace max_temp when it is None or when the new temperature is bigger.' This tells the student exactly what condition to use in their if-statement: check if max_temp is None OR if the new temperature is bigger. This is essentially the exact logic/condition to implement, leaving almo",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.67,
@@ -1876,11 +1879,11 @@
         "Level 3: for 231 random days, flagged_dates should be ['2026-01-01', '2026-01-02', '2026-01-10', '2026-01-26', ..., but was ['2026-02-15', '2026-01-26', '2026-02-06', '2026-12-27', ...."
       ],
       "source": "ai_raw",
-      "hint": "Look at how you're adding dates to `flagged_dates`. You're using `insert(0, ...)` which puts each new date at the front, but the problem asks for oldest first. Instead, append dates to the list during the loop, then sort it once after the loop ends.",
+      "hint": "Look at how you're adding dates to `flagged_dates`. You're using `insert(0, ...)` which puts each new date at the front, but the problem asks for oldest first. Instead, append dates to the list, then sort it after the loop finishes.",
       "rejected": null,
-      "latency_ms": 1027,
+      "latency_ms": 1010,
       "tokens_in": 1485,
-      "tokens_out": 65,
+      "tokens_out": 62,
       "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
       "judge": {
         "H1": 1,
@@ -1889,11 +1892,11 @@
         "H4": 1,
         "H5": 1,
         "gives_fix": true,
-        "rationale": "The hint accurately identifies the sorting issue but gives the exact fix (append then sort after loop) on attempt 1, leaving nothing for the student to figure out, and also misses the rounding bug entirely."
+        "rationale": "The hint accurately identifies the sorting issue but gives the exact fix (append then sort after loop) on attempt 1, and also misses the rounding bug entirely."
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint explicitly tells the student to: (1) use append instead of insert(0, ...) during the loop, and (2) call sort() after the loop. This is a step-by-step fix that states the exact changes to make — both the specific method to use (append) and the specific action to take after the loop (sort it)",
+      "ac_h2_explanation": "The hint explicitly tells the student to: 1) use append instead of insert(0, ...), and 2) sort the list after the loop. This is a step-by-step fix that states the exact changes to make - it names the specific functions to use (append, sort) and when to call them (after the loop). This leaves essenti",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.83,
@@ -1922,7 +1925,7 @@
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The student's actual problem is that flagged_dates is not sorted correctly - they're using `insert(0, ...)` which reverses insertion order, but the readings may not be in date order, so the real fix is to collect dates and then sort them. The hint given says 'Before the loop, set up a variable for e",
+      "ac_h2_explanation": "The student's actual problem is with how flagged_dates is ordered. They use `insert(0, ...)` which reverses insertion order, and they don't sort at the end. The task says 'oldest first' and hints that `.sort()` is allowed.\n\nThe hint the tutor gave says: 'Before the loop, set up a variable for each a",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.17,
@@ -1938,28 +1941,28 @@
         "Level 3: for 231 random days, flagged_dates should be ['2026-01-01', '2026-01-02', '2026-01-10', '2026-01-26', ..., but was ['2026-02-15', '2026-01-26', '2026-02-06', '2026-12-27', ...."
       ],
       "source": "ai_raw",
-      "hint": "Look at how you're adding dates to `flagged_dates`. You're using `insert(0, ...)` which puts each new date at the front, but the readings aren't in order. Instead, append dates to the list, then sort it after the loop ends.",
+      "hint": "Look at how you're adding dates to `flagged_dates` — you're using `insert(0, ...)` which puts each new date at the front. Instead, just append dates to the list, then sort it once after the loop finishes. This way the dates will be in chronological order.",
       "rejected": null,
-      "latency_ms": 907,
+      "latency_ms": 1034,
       "tokens_in": 1485,
-      "tokens_out": 61,
+      "tokens_out": 68,
       "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
       "judge": {
-        "H1": 0,
+        "H1": 1,
         "H2": 0,
         "H3": 1,
         "H4": 1,
         "H5": 1,
         "gives_fix": true,
-        "rationale": "The hint only addresses the sorting issue (and gives the exact fix: append then sort), missing the other actual mistake of not rounding total_rain to 1 decimal place."
+        "rationale": "The hint accurately identifies the sorting issue and gives the exact fix (append then sort after the loop), making it a step-by-step solution rather than a guiding hint, though it appropriately becomes more specific on attempt 2."
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint tells the student exactly what to do: 'append dates to the list, then sort it after the loop ends.' This is a step-by-step fix - it specifies both the exact method to use (append instead of insert) and the exact action to take after the loop (sort). This leaves no thinking for the student; ",
+      "ac_h2_explanation": "The hint tells the student exactly what to do: 'just append dates to the list, then sort it once after the loop finishes.' This specifies both the exact method to use (append instead of insert(0,...)) and the exact timing (after the loop). It also tells them to use .sort(). This is a step-by-step fi",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
-      "ac_help": 0.67,
-      "ac_help_label": "Somewhat Helpful"
+      "ac_help": 0.5,
+      "ac_help_label": "Neutral/Mixed"
     },
     {
       "bug_id": "L3-no-round-sort",
@@ -1980,11 +1983,11 @@
         "H4": 1,
         "H5": 1,
         "gives_fix": false,
-        "rationale": "The hint describes code the student already has correctly written, completely missing the actual bugs (not rounding total_rain and not sorting flagged_dates), and is less helpful than no hint at all on attempt 2."
+        "rationale": "The hint describes code the student already has correctly written, completely missing the actual bugs (missing round() on total_rain and missing .sort() on flagged_dates), and is less helpful than no hint at all on attempt 2."
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint says 'Inside the loop, write for row, labels in readings: and use if \"heat_wave\" in labels: to add 1 to a counter. Add row[\"rain_mm\"] to the total on every pass.' This is essentially repeating code the student already has correctly in their submission. It doesn't address the actual bug at a",
+      "ac_h2_explanation": "The hint says 'Inside the loop, write for row, labels in readings: and use if \"heat_wave\" in labels: to add 1 to a counter. Add row[\"rain_mm\"] to the total on every pass.' This is not addressing the actual bug at all — the student's problem is with `flagged_dates` ordering (they use `insert(0, ...)`",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.17,
@@ -2000,24 +2003,24 @@
         "Level 3: for 231 random days, flagged_dates should be ['2026-01-01', '2026-01-02', '2026-01-10', '2026-01-26', ..., but was ['2026-02-15', '2026-01-26', '2026-02-06', '2026-12-27', ...."
       ],
       "source": "ai_raw",
-      "hint": "Look at how you're adding dates to `flagged_dates`. Right now you're using `insert(0, ...)` which puts each new date at the front, but that scrambles the order. Instead, append dates to the list as you find them, then sort the entire list once after the loop finishes.",
+      "hint": "Look at how you're adding dates to `flagged_dates`. Right now you're using `insert(0, ...)` which puts each new date at the front, but you need to add all flagged dates to the list first, then sort them at the end using `.sort()`.",
       "rejected": null,
-      "latency_ms": 2978,
+      "latency_ms": 955,
       "tokens_in": 1485,
-      "tokens_out": 70,
+      "tokens_out": 64,
       "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
       "judge": {
-        "H1": 1,
+        "H1": 0,
         "H2": 0,
         "H3": 1,
         "H4": 1,
         "H5": 1,
         "gives_fix": true,
-        "rationale": "The hint accurately identifies the ordering issue and gives the exact two-step fix (append then sort after the loop), leaving nothing for the student to figure out themselves."
+        "rationale": "The hint addresses the sorting issue but misses the actual ground-truth bug (not rounding total_rain_mm), and it gives the exact fix step-by-step (add all dates first, then call .sort()), making it non-Socratic."
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint tells the student exactly what to do: (1) change `insert(0, ...)` to `append(...)`, and (2) call `.sort()` on the list after the loop. This is a step-by-step fix stated in plain words — it names both the specific method to stop using and the specific methods to use instead, in the correct o",
+      "ac_h2_explanation": "The hint tells the student exactly what to do: stop using `insert(0, ...)` and instead append dates, then call `.sort()` after the loop. This is a step-by-step fix — it identifies both the problematic line (`insert(0, ...)`) and the exact solution (append + `.sort()` at the end). The student doesn't",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.33,
@@ -2046,7 +2049,7 @@
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint tells the student exactly what to do: 'call flagged_dates.sort()' and 'round the total with round(total, 1)'. It also restates what the student already has for max_temp logic. The actual bug the student has is using `flagged_dates.insert(0, row[\"date\"])` instead of `flagged_dates.append(row",
+      "ac_h2_explanation": "The hint tells the student exactly what to do: (1) 'replace max_temp when it is None or when the new temperature is bigger' — this describes the exact logic already in the student's code, so it's not the actual bug; (2) 'After the loop, call flagged_dates.sort()' — this is the exact fix for the orde",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.83,
@@ -2064,11 +2067,11 @@
         "Level 4: build_report should call your get_readings, classify_day, summarize function(s)."
       ],
       "source": "ai_raw",
-      "hint": "Look at your `build_report` function—it's not using the three helper functions you already wrote. Instead of writing new SQL and logic, call `get_readings` to fetch the data, then loop through each row to call `classify_day` on it, build a list of (row, labels) pairs, and finally pass that list to `summarize`.",
-      "rejected": null,
-      "latency_ms": 1166,
+      "hint": "Look at your `build_report` function. You're querying the database directly instead of calling your `get_readings` function. Also, you're only returning two fields instead of using `summarize` to build the complete report. Follow the teacher's hint: start with `rows = get_readings(...)`, loop through rows to pair each with `classify_day(row)`, then `return summarize(readings)`.",
+      "rejected": "copies the reference solution",
+      "latency_ms": 1379,
       "tokens_in": 1402,
-      "tokens_out": 80,
+      "tokens_out": 93,
       "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
       "judge": {
         "H1": 1,
@@ -2077,11 +2080,11 @@
         "H4": 1,
         "H5": 1,
         "gives_fix": true,
-        "rationale": "The hint accurately identifies the mistake but gives a complete step-by-step fix (call get_readings, loop to call classify_day, build pairs list, pass to summarize), which is too explicit for attempt 1."
+        "rationale": "The hint explicitly states the exact three-step fix (call get_readings, loop with classify_day, return summarize), giving the student the complete solution without requiring any independent thinking."
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint tells the student exactly what to do step by step: 'call `get_readings` to fetch the data, then loop through each row to call `classify_day` on it, build a list of (row, labels) pairs, and finally pass that list to `summarize`.' This is essentially a complete algorithm/pseudocode for the fi",
+      "ac_h2_explanation": "The hint tells the student exactly what to do: 'start with rows = get_readings(...), loop through rows to pair each with classify_day(row), then return summarize(readings).' This is a step-by-step fix with the exact function calls and variable names spelled out. It doesn't just point to the issue or",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.83,
@@ -2108,15 +2111,15 @@
         "H4": 1,
         "H5": 1,
         "gives_fix": false,
-        "rationale": "The hint accurately identifies that build_report should use the existing functions rather than new logic, names the issue without giving the exact code change, and is appropriately light for attempt 1."
+        "rationale": "The hint accurately identifies that build_report should use the existing functions rather than new logic, names the issue without giving the exact code change, and is appropriately light for a first attempt."
       },
       "ac_h2": 1.0,
       "ac_h2_label": "Names the issue",
-      "ac_h2_explanation": "The hint says 'build_report doesn't need any new logic. Each step is one of the functions you already wrote.' This directly tells the student exactly what to do: replace the custom logic in build_report with calls to get_readings, classify_day, and summarize. It essentially states the exact fix in p",
+      "ac_h2_explanation": "The hint says 'build_report doesn't need any new logic. Each step is one of the functions you already wrote.' This directly tells the student that they should be calling get_readings, classify_day, and summarize (the functions they already wrote) rather than writing new database query logic. The fai",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
-      "ac_help": 0.83,
-      "ac_help_label": "Very Helpful"
+      "ac_help": 0.67,
+      "ac_help_label": "Somewhat Helpful"
     },
     {
       "bug_id": "L4-reimplements-sql",
@@ -2130,9 +2133,9 @@
         "Level 4: build_report should call your get_readings, classify_day, summarize function(s)."
       ],
       "source": "ai_raw",
-      "hint": "Look at your `build_report` function. Right now it's querying the database directly and counting things itself, but the instructions say to call your three helper functions instead: first `get_readings`, then loop through rows calling `classify_day` on each one, then call `summarize` on the list of pairs. You've already written all the logic—just use it!",
+      "hint": "Look at your `build_report` function—it's writing its own query instead of calling `get_readings`. Use `get_readings` to fetch the data, then loop through each row calling `classify_day` on it, collect the (row, labels) pairs, and finally pass them to `summarize`. This way the checker can see you're using all three functions.",
       "rejected": null,
-      "latency_ms": 1344,
+      "latency_ms": 1077,
       "tokens_in": 1402,
       "tokens_out": 83,
       "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
@@ -2143,15 +2146,15 @@
         "H4": 1,
         "H5": 1,
         "gives_fix": true,
-        "rationale": "The hint accurately identifies the mistake and gives a step-by-step fix (call get_readings, loop calling classify_day, then call summarize), which is essentially the exact change needed, making it too prescriptive for attempt 2."
+        "rationale": "The hint accurately identifies the mistake and then provides a complete step-by-step fix (call get_readings, loop calling classify_day, collect pairs, pass to summarize), which the student can follow literally without needing to reason about why."
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint tells the student exactly what to do step by step: 'first `get_readings`, then loop through rows calling `classify_day` on each one, then call `summarize` on the list of pairs.' This is essentially a complete recipe for the fix — it names the exact functions to call in the exact order with ",
+      "ac_h2_explanation": "The hint tells the student exactly what to do step by step: 'Use `get_readings` to fetch the data, then loop through each row calling `classify_day` on it, collect the (row, labels) pairs, and finally pass them to `summarize`.' This is essentially a complete recipe for rewriting `build_report` — it ",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
-      "ac_help": 0.5,
-      "ac_help_label": "Neutral/Mixed"
+      "ac_help": 0.67,
+      "ac_help_label": "Somewhat Helpful"
     },
     {
       "bug_id": "L4-reimplements-sql",
@@ -2178,11 +2181,11 @@
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint says: 'Start with rows = get_readings(conn, station_id, start_date, end_date). Then make an empty list and, in a loop, append (row, classify_day(row)) for each row.' This is essentially giving the student the exact code structure and function calls to use. It tells them: 1) the exact first ",
+      "ac_h2_explanation": "The hint says: 'Start with rows = get_readings(conn, station_id, start_date, end_date). Then make an empty list and, in a loop, append (row, classify_day(row)) for each row.' This is essentially giving the student the exact code to write, just in plain English. It specifies the variable name (rows),",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
-      "ac_help": 0.83,
-      "ac_help_label": "Very Helpful"
+      "ac_help": 0.67,
+      "ac_help_label": "Somewhat Helpful"
     },
     {
       "bug_id": "L4-reimplements-sql",
@@ -2196,11 +2199,11 @@
         "Level 4: build_report should call your get_readings, classify_day, summarize function(s)."
       ],
       "source": "ai_raw",
-      "hint": "Look at your `build_report` function. You're writing your own SQL query instead of calling `get_readings`, and you're returning a hardcoded dictionary instead of using `classify_day` and `summarize`. Follow the hint: start with `rows = get_readings(...)`, loop through rows to build pairs with `classify_day`, then return `summarize(readings)`.",
-      "rejected": null,
-      "latency_ms": 1131,
+      "hint": "Look at your `build_report` function. You're querying the database directly instead of calling `get_readings` like the hint suggests. Also, you're only returning two fields, but `summarize` returns six fields including `normal_days`, `total_rain_mm`, `max_temp_c`, and `flagged_dates`. Follow the three steps: call `get_readings`, loop through rows to pair each with `classify_day`, then return `summarize`.",
+      "rejected": "too long",
+      "latency_ms": 1233,
       "tokens_in": 1402,
-      "tokens_out": 86,
+      "tokens_out": 106,
       "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
       "judge": {
         "H1": 1,
@@ -2209,11 +2212,11 @@
         "H4": 1,
         "H5": 1,
         "gives_fix": true,
-        "rationale": "The hint accurately identifies the mistake and provides a step-by-step fix (rows = get_readings(...), loop with classify_day, return summarize(readings)), which the student can follow literally without needing to understand why."
+        "rationale": "The hint accurately identifies the mistake and then gives a literal step-by-step fix (call get_readings, loop to pair with classify_day, return summarize), making it a direct solution rather than a guiding nudge."
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint explicitly tells the student exactly what changes to make: 'start with `rows = get_readings(...)`, loop through rows to build pairs with `classify_day`, then return `summarize(readings)`.' This is essentially a step-by-step fix with the exact function calls and variable names to use. It doe",
+      "ac_h2_explanation": "The hint tells the student exactly what to do in three explicit steps: 'call get_readings', 'loop through rows to pair each with classify_day', then 'return summarize'. This is essentially a step-by-step fix stated in plain words, even if no actual code is written. It also explicitly identifies both",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.67,
@@ -2240,11 +2243,11 @@
         "H4": 1,
         "H5": 1,
         "gives_fix": true,
-        "rationale": "The hint only addresses the last line (return summarize) but misses the core mistake—the student wrote a completely new SQL query instead of calling get_readings, classify_day, and summarize—and on attempt 3 it gives a direct code-level fix without guiding the student to understand the real problem."
+        "rationale": "The hint only addresses the last line (return summarize) but misses the core mistake—the student wrote a completely new SQL query instead of calling get_readings, classify_day, and summarize; it also gives the exact code change to make on attempt 3."
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint says 'The last line should be return summarize(readings)' and 'Call each function by name so the checker can see you used it.' This directly tells the student the exact code to write - 'return summarize(readings)' is the precise function call and variable name to use. It also implies the fu",
+      "ac_h2_explanation": "The hint says 'The last line should be return summarize(readings)' and 'Call each function by name so the checker can see you used it.' This directly tells the student the exact code to write: `return summarize(readings)`. It also implicitly tells them to use `get_readings`, `classify_day`, and `sum",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.83,
@@ -2263,11 +2266,11 @@
         "Level 4: build_report should call get_readings once, classify_day for each row, then summarize once. Your code raised ValueError: too many values to unpack (expected 2)"
       ],
       "source": "ai_raw",
-      "hint": "Look at your `build_report` function. You're passing `rows` directly to `summarize`, but `summarize` expects a list of pairs—each pair should be `(row, labels)`. You need to loop through the rows, call `classify_day` on each one, and build that list of tuples before passing it to `summarize`.",
+      "hint": "Look at your `build_report` function. You're passing `rows` directly to `summarize`, but `summarize` expects a list of pairs—each pair should be `(row, labels)`. You need to loop through the rows and call `classify_day` on each one to build that list of pairs before passing it to `summarize`.",
       "rejected": null,
-      "latency_ms": 1005,
+      "latency_ms": 1026,
       "tokens_in": 1322,
-      "tokens_out": 80,
+      "tokens_out": 78,
       "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
       "judge": {
         "H1": 1,
@@ -2276,11 +2279,11 @@
         "H4": 1,
         "H5": 1,
         "gives_fix": true,
-        "rationale": "The hint explicitly states the exact fix needed—loop through rows, call classify_day on each, build a list of tuples—giving the student the complete solution on attempt 1."
+        "rationale": "The hint explicitly states the exact fix needed—loop through rows, call classify_day on each, build pairs, then pass to summarize—leaving nothing for the student to figure out on their own."
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint tells the student: (1) the problem is in build_report, (2) rows is being passed directly to summarize, (3) summarize expects a list of (row, labels) pairs, (4) they need to loop through rows, call classify_day on each one, and build a list of tuples before passing to summarize. This is esse",
+      "ac_h2_explanation": "The hint tells the student: 1) that they're passing rows directly to summarize, 2) that summarize expects a list of pairs (row, labels), 3) that they need to loop through the rows and call classify_day on each one, 4) that they need to build that list of pairs before passing to summarize. This is es",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.83,
@@ -2308,11 +2311,11 @@
         "H4": 1,
         "H5": 1,
         "gives_fix": false,
-        "rationale": "The hint doesn't point at the actual mistake (missing classify_day call to create (row, labels) pairs) and is too vague to guide the student toward the fix, though it's not harmful."
+        "rationale": "The hint doesn't point at the actual mistake (missing classify_day call to create (row, labels) pairs before passing to summarize), and while it vaguely suggests using existing functions, it doesn't guide the student toward the specific missing step."
       },
       "ac_h2": 1.0,
       "ac_h2_label": "Names the issue",
-      "ac_h2_explanation": "The student's error is 'too many values to unpack (expected 2)' which occurs in summarize() when it tries to unpack 'for row, labels in readings'. The problem is that build_report passes raw rows (dicts) to summarize() instead of (row, labels) pairs. The task says to call classify_day on each row an",
+      "ac_h2_explanation": "The student's actual error is in `build_report`: it calls `summarize(rows)` directly without first calling `classify_day` on each row to create `(row, labels)` pairs. The error 'too many values to unpack (expected 2)' occurs because `summarize` tries to unpack each row as `(row, labels)` but instead",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.67,
@@ -2331,11 +2334,11 @@
         "Level 4: build_report should call get_readings once, classify_day for each row, then summarize once. Your code raised ValueError: too many values to unpack (expected 2)"
       ],
       "source": "ai_raw",
-      "hint": "Look at your `build_report` function. You're passing `rows` directly to `summarize`, but `summarize` expects a list of pairs—each pair should be `(row, labels)`. You need to loop through the rows and call `classify_day` on each one to create those pairs before passing them to `summarize`.",
+      "hint": "Look at your `build_report` function. You're passing `rows` directly to `summarize`, but `summarize` expects a list of pairs `(row, labels)`. You need to loop through each row, call `classify_day` on it, and build a list of tuples before passing it to `summarize`.",
       "rejected": null,
-      "latency_ms": 984,
+      "latency_ms": 955,
       "tokens_in": 1322,
-      "tokens_out": 76,
+      "tokens_out": 74,
       "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
       "judge": {
         "H1": 1,
@@ -2344,11 +2347,11 @@
         "H4": 1,
         "H5": 1,
         "gives_fix": true,
-        "rationale": "The hint accurately identifies the mistake and explicitly tells the student exactly what to do—loop through rows, call classify_day on each, create pairs—which is a complete step-by-step fix rather than a guiding nudge."
+        "rationale": "The hint accurately identifies the mistake and explicitly states the exact fix needed (loop through rows, call classify_day, build list of tuples), making it a step-by-step solution rather than a guiding hint."
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint tells the student exactly what is wrong (passing rows directly to summarize instead of pairs) and exactly what to do to fix it (loop through the rows, call classify_day on each one to create pairs, then pass those pairs to summarize). This is essentially a step-by-step description of the fi",
+      "ac_h2_explanation": "The hint tells the student: (1) the problem is in `build_report`, (2) the issue is that `rows` is passed directly to `summarize`, (3) what `summarize` expects (a list of pairs `(row, labels)`), and (4) exactly what to do: loop through each row, call `classify_day` on it, and build a list of tuples b",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.67,
@@ -2380,7 +2383,7 @@
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint tells the student exactly what to do step by step: 'Start with rows = get_readings(...). Then make an empty list and, in a loop, append (row, classify_day(row)) for each row.' This is essentially the complete fix spelled out in plain words - it describes the exact variable name, the exact f",
+      "ac_h2_explanation": "The hint says: 'Start with rows = get_readings(conn, station_id, start_date, end_date). Then make an empty list and, in a loop, append (row, classify_day(row)) for each row.' This is essentially a step-by-step implementation guide. It tells the student exactly what code to write: create a variable r",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.83,
@@ -2399,11 +2402,11 @@
         "Level 4: build_report should call get_readings once, classify_day for each row, then summarize once. Your code raised ValueError: too many values to unpack (expected 2)"
       ],
       "source": "ai_raw",
-      "hint": "Look at your `build_report` function. You're calling `summarize(rows)` directly, but `summarize` expects a list of pairs—each pair should be `(row, labels)`. You need to loop through the rows, call `classify_day` on each one, and build a list of tuples before passing it to `summarize`.",
+      "hint": "Look at your `build_report` function. You're passing `rows` directly to `summarize`, but `summarize` expects a list of pairs like `(row, labels)`. You need to loop through each row, call `classify_day` on it, and build that list of pairs before calling `summarize`.",
       "rejected": null,
-      "latency_ms": 926,
+      "latency_ms": 963,
       "tokens_in": 1322,
-      "tokens_out": 80,
+      "tokens_out": 72,
       "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
       "judge": {
         "H1": 1,
@@ -2412,11 +2415,11 @@
         "H4": 1,
         "H5": 1,
         "gives_fix": true,
-        "rationale": "The hint accurately identifies the mistake and explicitly tells the student exactly what to do—loop through rows, call classify_day on each, build a list of tuples—which is a step-by-step fix rather than a guiding nudge, especially on attempt 3 where more specificity is warranted but the full solution is still handed over."
+        "rationale": "The hint accurately identifies the mistake and explicitly states the exact steps to fix it (loop through rows, call classify_day, build pairs list), making it a direct fix rather than a guiding hint."
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint tells the student exactly what is wrong and exactly what to do to fix it: (1) 'You're calling summarize(rows) directly' - identifies the exact problematic line, (2) 'summarize expects a list of pairs—each pair should be (row, labels)' - tells them exactly what structure is needed, (3) 'You ",
+      "ac_h2_explanation": "The hint tells the student exactly what is wrong and exactly what they need to do to fix it: (1) the problem is that `rows` is passed directly to `summarize`, (2) the fix is to loop through each row, call `classify_day` on it, and build a list of pairs before calling `summarize`. This is the third t",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
       "ac_help": 0.33,
@@ -2448,11 +2451,11 @@
       },
       "ac_h2": 0.0,
       "ac_h2_label": "Gives the answer",
-      "ac_h2_explanation": "The hint says 'The last line should be return summarize(readings).' This directly tells the student what exact code to write - it specifies the variable name 'readings' and the exact function call. However, the student's actual problem is that they never created the 'readings' list of (row, labels) ",
+      "ac_h2_explanation": "The hint says 'The last line should be return summarize(readings).' This directly tells the student the exact code change to make - rename the variable from 'rows' to 'readings' in the summarize call. It also adds 'Call each function by name so the checker can see you used it,' which doesn't address",
       "ac_harm": 1.0,
       "ac_harm_label": "Not Harmful",
-      "ac_help": 0.33,
-      "ac_help_label": "Somewhat Unhelpful"
+      "ac_help": 0.67,
+      "ac_help_label": "Somewhat Helpful"
     }
   ]
 }

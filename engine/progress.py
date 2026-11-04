@@ -34,6 +34,8 @@ class ProgressRecord:
     complete: bool = False
     routing_log: List[dict] = field(default_factory=list)
     quiz_scores: Dict[str, Dict[str, Optional[int]]] = field(default_factory=dict)
+    return_to: Optional[str] = None          # level to go back to after an inserted practice problem
+    interventions: List[str] = field(default_factory=list)   # concepts that already got a struggle practice
 
     def stages(self) -> Dict[str, int]:
         return {cid: state.stage for cid, state in self.concepts.items()}
@@ -52,6 +54,8 @@ class ProgressRecord:
             "complete": self.complete,
             "routing_log": list(self.routing_log),
             "quiz_scores": {k: dict(v) for k, v in self.quiz_scores.items()},
+            "return_to": self.return_to,
+            "interventions": list(self.interventions),
         }
 
     @classmethod
@@ -72,6 +76,8 @@ class ProgressRecord:
             complete=bool(data["complete"]),
             routing_log=list(data["routing_log"]),
             quiz_scores={k: dict(v) for k, v in (data.get("quiz_scores") or {}).items()},  # optional: added later
+            return_to=data.get("return_to"),                                     # optional: added later
+            interventions=list(data.get("interventions") or []),                 # optional: added later
         )
 
 

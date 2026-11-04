@@ -51,7 +51,7 @@ class FullQuest(TempDirCase):
         for screen in screens:
             self.assertEqual(find_leaks(screen, BANNED), [], screen)
         self.assertTrue(done["done"])
-        self.assertIn("Build a game", done["goal_connection"] + done["message"])
+        self.assertIn("Make a game", done["goal_connection"] + done["message"])
         self.assertIn("quest_done", [b["id"] for b in done["game"]["badges"]])
         self.assertTrue(done["next_stop"]["activity"]["title"])
 

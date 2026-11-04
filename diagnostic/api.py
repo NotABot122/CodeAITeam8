@@ -5,7 +5,7 @@ package runs without it. Run it with:
 
     uvicorn diagnostic.api:create_default_app --factory
 
-Student routes return only what a child's screen may show. The teacher report is a
+Student routes return only what a student's screen may show. The teacher report is a
 separate route that is OFF unless CODEAI_TEACHER_TOKEN is set, and then needs that
 token in the X-Teacher-Token header. Do not expose this service to the internet
 without authentication, TLS and rate limiting in front of it: student ids are

@@ -54,6 +54,15 @@ When a check fails, Bedrock writes one hint about the student's actual mistake. 
 
 Settings: `--ai off` (or `CODEAI_AI=off`) turns both AI features off. `CODEAI_MODEL_ID` changes the model (default `us.anthropic.claude-haiku-4-5-20251001-v1:0`). `CODEAI_AWS_REGION` changes the region (default `us-west-2`). Needs `pip install --user boto3` and AWS credentials. Each hint or theme event is logged in `.codeai-data/logs/events.jsonl` with its source and model.
 
+## Landing page and lesson pathway (Strands Decider 2B on Amazon Bedrock)
+
+The site opens on a landing page. The student picks a grade (9-12) and takes the readiness check. The Strands Decider 2B (`engine/decider.py`, spec section 4.3) then picks their lesson pathway in two stages:
+
+1. **Rules (point and DAG classifier):** from the stages the readiness check is confident about, work out which pathways in `projects/catalog.yaml` (`pathways:`) the student can get, and the rules' own pick. For example, "Jump to the full project" needs three concepts at Meeting and functions at Beginning.
+2. **Bedrock:** the model reads the evidence (stage estimates, how sure the check is, right answers, mistake patterns, time per question), the grade, and the CSTA standards the check's skill tree is mapped to, read from `curriculum database/CSTA_2026_PK12_Standards_by_Grade.xlsx` (`engine/curriculum.py`, standard library only). It answers through a forced tool call with one eligible pathway, its stance (`STANCE_REINFORCE`, `STANCE_ADVANCE`, `STANCE_BRIDGE`, `STANCE_PROJECT_SYNTHESIS`), the standards to cite, a message for the student and a note for the teacher.
+
+The model can't pick a pathway the rules didn't allow. A model error, a disallowed pathway, a stance that doesn't match its pathway, or a student message that mentions stages or scores all fall back to the rules (logged as a `fallback` event). The decision is kept per student (`POST /api/students/<id>/pathway {"grade": 10}`) and `GET /api/teacher/students/<id>` returns it with the stance and note (the teacher screen doesn't show it yet). When a pathway project is finished, the next one is offered first, unless the course recommends a review after a struggle. The model is the team's Bedrock model (`CODEAI_MODEL_ID`), not a separate 2-billion-parameter model.
+
 ## What comes next: the adaptive path
 
 When a student finishes a project, the Course looks at how each concept went (attempts, hints, practice problems) and picks the next step. Anyone can sit down and follow it, with no teacher setup.

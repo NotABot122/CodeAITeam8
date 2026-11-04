@@ -81,7 +81,7 @@ class OutputFilter(unittest.TestCase):
 
     def test_long_or_hard_to_read_text_is_blocked(self):
         self.assertFalse(self.check("word " * 100).ok)
-        self.assertFalse(self.check("This extraordinarily complicated explanation overwhelms.").ok)
+        self.assertFalse(self.check("This incomprehensibilities explanation overwhelms.").ok)  # word over the 9-12 limit
 
 
 class ParsingModelOutput(unittest.TestCase):

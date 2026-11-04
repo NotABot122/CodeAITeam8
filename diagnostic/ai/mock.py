@@ -47,7 +47,7 @@ class RuleBasedProvider(ModelProvider):
         stage, quotes = keyword_stage(ExplainPrompt(task.get("prompt_id", "x"), "", (), "", ideas),
                                       prompts.extract_submission(prompt))
         return {"stage": stage, "confidence": 0.7 if stage == 0 else 0.62,
-                "rationale": f"Found {stage} step(s) of the rubric in the child's own words.",
+                "rationale": f"Found {stage} step(s) of the rubric in the student's own words.",
                 "evidence_quotes": quotes}
 
     # Placement ----------------------------------------------------------------------
@@ -70,7 +70,7 @@ class RuleBasedProvider(ModelProvider):
                 if quotes:
                     confidence = min(confidence, 0.7)
             out.append({"concept": c["concept"], "stage": stage, "confidence": round(confidence, 3),
-                        "rationale": "Based on the answers and the child's own words.", "evidence_quotes": quotes})
+                        "rationale": "Based on the answers and the student's own words.", "evidence_quotes": quotes})
         order = sorted(concepts, key=lambda c: (next(o["stage"] for o in out if o["concept"] == c["concept"]),
                                                 -float(emphasis.get(c["concept"], 0.5))))
         stages = {o["concept"]: o["stage"] for o in out}

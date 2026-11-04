@@ -22,6 +22,12 @@ from .router import Decision, PROJECT_COMPLETE, next_problem
 from .stages import MAX_STAGE, STAGE_NAMES, StageChange, initial_states, record_result
 
 FALLBACK_MESSAGE = "The lesson will continue in a fixed order from here."
+STRUGGLE_AFTER = None      # failed attempts on one level before a practice is inserted; None = off (see catalog.yaml)
+STRUGGLE_MESSAGE = "Let\'s warm up with a short practice problem, then come back to this level."
+PLANNED_PRACTICE = "planned_practice"
+STRUGGLE_PRACTICE = "struggle_practice"
+BACK_TO_LEVEL = "back_to_level"
+DIAGNOSTIC_MISMATCH = "diagnostic_mismatch"
 
 # Reasons logged when a student moves to the fallback path.
 ROUTER_ERROR = "router_error"
@@ -54,7 +60,9 @@ class Engine:
                  grader: Optional[g.Grader] = None, adaptive: bool = True,
                  router: Callable[..., Decision] = next_problem,
                  hint_provider: Optional[ModelProvider] = None,
-                 initial_stages: Optional[Dict[str, int]] = None):
+                 initial_stages: Optional[Dict[str, int]] = None,
+                 planned_practice: Optional[List[str]] = None,
+                 struggle_after: Optional[int] = STRUGGLE_AFTER):
         self.project = project
         self.manifest = project.manifest
         self.store = store
@@ -63,6 +71,10 @@ class Engine:
         self.adaptive = adaptive
         self.router = router
         self.initial_stages = dict(initial_stages or {})
+        # Practice planned before its level (from the readiness diagnostic), and how many failed attempts
+        # on a level count as struggling (then the concept\'s practice is inserted once).
+        self.planned_practice = [p for p in (planned_practice or []) if self.manifest.practice(p) is not None]
+        self.struggle_after = int(struggle_after) if struggle_after else None
         self.hinter = None
         self.rubric_grader = RubricGrader(hint_provider) if hint_provider is not None else None
         if hint_provider is not None:
@@ -155,8 +167,13 @@ class Engine:
         notices: List[str] = []
         if self.adaptive and not record.on_fallback:
             try:
-                decision = self.router(self.manifest, record.stages(), list(record.passed_problems),
-                                       record.current_problem, record.origin_level)
+                if record.return_to and self.manifest.practice(record.current_problem) is not None:
+                    decision = Decision(record.return_to, BACK_TO_LEVEL)
+                    record.return_to = None
+                else:
+                    decision = self.router(self.manifest, record.stages(), list(record.passed_problems),
+                                           record.current_problem, record.origin_level)
+                    decision = self._planned_first(record, decision)
                 if decision.problem_id is not None and not self.manifest.has_problem(decision.problem_id):
                     raise LookupError(NOT_IN_MANIFEST)
                 self._apply(record, decision, "adaptive")
@@ -167,6 +184,50 @@ class Engine:
                 notices.append(FALLBACK_MESSAGE)
         self._apply(record, self._fallback_decision(record), "fallback")
         return notices
+
+    def _planned_first(self, record: ProgressRecord, decision: Decision) -> Decision:
+        """Before a level, do the practice the diagnostic planned for one of its concepts. Never skips a level."""
+        level = self.manifest.level(decision.problem_id) if decision.problem_id else None
+        if level is None or level.id in record.passed_problems:
+            return decision
+        for pid in self.planned_practice:
+            practice = self.manifest.practice(pid)
+            if practice.concept in level.concepts and pid not in record.passed_problems:
+                anchor = record.current_problem if self.manifest.level(record.current_problem) else record.origin_level
+                return Decision(pid, PLANNED_PRACTICE, anchor)
+        return decision
+
+    def _struggle(self, record: ProgressRecord, problem: Problem) -> Optional[Problem]:
+        """After repeated failures on a level, insert its concept's practice once, then come back to the level.
+
+        If the concept's stage came from the diagnostic, the student is doing worse than it predicted: the
+        stage is lowered to 0 and a diagnostic_mismatch event is logged (live evidence on diagnostic accuracy).
+        """
+        level = self.manifest.level(problem.id)
+        if (self.struggle_after is None or level is None or not self.adaptive or record.on_fallback
+                or record.attempts.get(problem.id, 0) < self.struggle_after):
+            return None
+        for concept in level.concepts:
+            if concept in record.interventions:
+                continue
+            practice = next((p for p in self.manifest.practice_problems
+                             if p.concept == concept and p.id not in record.passed_problems), None)
+            if practice is None:
+                continue
+            record.interventions.append(concept)
+            state = record.concepts.get(concept)
+            if state is not None and state.stage > 0 and self.initial_stages.get(concept, 0) > 0:
+                state.stage, state.streak, state.streak_problems = 0, 0, []
+                self.events.write("intervention", student_id=record.student_id, project_id=self.project.id,
+                                  problem_id=problem.id, selected=practice.id, reason=DIAGNOSTIC_MISMATCH,
+                                  stages=record.stages())
+            record.return_to = problem.id
+            self._apply(record, Decision(practice.id, STRUGGLE_PRACTICE, record.origin_level), "adaptive")
+            self.events.write("intervention", student_id=record.student_id, project_id=self.project.id,
+                              problem_id=problem.id, selected=practice.id, reason=STRUGGLE_PRACTICE,
+                              stages=record.stages())
+            return self.project.problem(practice.id)
+        return None
 
     # Submissions ------------------------------------------------------------
     def current_problem(self, student_id: str) -> Tuple[Optional[Problem], List[str]]:
@@ -198,9 +259,12 @@ class Engine:
         if not result.passed:
             hint, record.hints_seen[problem.id] = next_hint(problem, record.hints_seen.get(problem.id, 0))
             hint, source = self._ai_hint(record, problem, messages, submission_path, hint)
+            inserted = self._struggle(record, problem)
+            if inserted is not None:
+                notices.append(STRUGGLE_MESSAGE)
             notices.extend(self._save(record))
-            return SubmitOutcome(result.status, False, messages, hint=hint, next_problem=problem, notices=notices,
-                                 hint_source=source if hint else None)
+            return SubmitOutcome(result.status, False, messages, hint=hint, next_problem=inserted or problem,
+                                 notices=notices, hint_source=source if hint else None)
 
         return self._after_pass(record, problem, result.status, messages, notices)
 
@@ -241,6 +305,38 @@ class Engine:
         following = None if record.complete else self.project.problem(record.current_problem)
         return SubmitOutcome(status, True, messages, stage_changes=changes,
                              next_problem=following, complete=record.complete, notices=notices)
+
+    def request_hint(self, student_id: str, submission_path=None) -> SubmitOutcome:
+        """The student asked for a hint without submitting. Reveals the next authored hint (counted in
+        hints_seen, like a hint after a failed run) and, for code problems with the AI on, lets the AI
+        tutor phrase it from the current code. The attempt count does not change.
+
+        status is "hint", "no_hints" (none left or none written) or "complete"."""
+        record, notices = self.open(student_id)
+        if record.complete:
+            return SubmitOutcome("complete", True, [], complete=True, notices=notices)
+        problem = self.project.problem(record.current_problem)
+        seen = record.hints_seen.get(problem.id, 0)
+        if seen >= len(problem.hints):
+            return SubmitOutcome("no_hints", False, [], next_problem=problem, notices=notices)
+        authored, record.hints_seen[problem.id] = next_hint(problem, seen)
+        hint, source = authored, "authored"
+        if not problem.is_quiz and submission_path is not None and self.hinter is not None:
+            messages: List[str] = []
+            try:
+                result = self.grader.grade(self.project, problem, submission_path)
+                if not result.ungraded and not result.passed:
+                    messages = messages_for(problem, result)
+            except Exception:  # a broken grader must not cost the student their hint
+                messages = []
+            if messages:
+                hint, source = self._ai_hint(record, problem, messages, submission_path, authored)
+        if source == "authored":
+            self.events.write("hint", student_id=student_id, project_id=self.project.id, problem_id=problem.id,
+                              source="authored", reason="requested")
+        notices.extend(self._save(record))
+        return SubmitOutcome("hint", False, [], hint=hint, next_problem=problem, notices=notices,
+                             hint_source=source)
 
     def _ai_hint(self, record: ProgressRecord, problem: Problem, messages: List[str], submission_path,
                  authored: Optional[str]) -> Tuple[Optional[str], str]:

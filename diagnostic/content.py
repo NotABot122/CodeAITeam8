@@ -117,6 +117,11 @@ class Content:
 
 # Small validation helpers --------------------------------------------------
 
+def _card_text(value: Any, where: str, errors: "_Errors") -> str:
+    """Card text keeps its leading spaces: an order card can be an indented line of code."""
+    return value.rstrip() if errors.text(value, where, "text") else ""
+
+
 class _Errors:
     def __init__(self) -> None:
         self.items: List[str] = []
@@ -422,7 +427,7 @@ def _parse_item(entry: Any, where: str, concept: Optional[str], config: Config, 
         for index, raw in enumerate(_sequence(entry.get("cards"), f"{where} cards", errors), start=1):
             raw = _mapping(raw, f"{where} card #{index}", errors)
             cards.append(Card(errors.ident(raw.get("id"), f"{where} card #{index}"),
-                              errors.text(raw.get("text"), f"{where} card #{index}", "text"), raw.get("misconception")))
+                              _card_text(raw.get("text"), f"{where} card #{index}", errors), raw.get("misconception")))
         if len(cards) < 3:
             errors.add(where, "needs at least 3 cards")
         if len({c.id for c in cards}) != len(cards):

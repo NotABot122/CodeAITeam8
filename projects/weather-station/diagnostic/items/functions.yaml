@@ -1,93 +1,86 @@
-# Zone: Helper Workshop (functions)
+# Zone: Function Workshop (functions). Grades 9-12. Code is Python, as in the lesson.
 concept: functions
-
 explain:
   id: helper-explain
   nodes: [inputs_outputs]
-  prompt: "Tell Nimbus: what is a helper, and why is it handy?"
+  prompt: "Explain to Nimbus: what is a function, and why is it useful?"
   key_ideas:
-    - {id: reuse, level: 1, label: "a named set of steps to use again", words: ["helper", "name", "reuse", "use again", "same steps", "again", "over and over"]}
-    - {id: in_out, level: 2, label: "takes something in and gives something back", words: ["give back", "gives back", "get back", "returns", "return", "input", "output", "goes in", "comes out", "you give it"]}
-    - {id: teams, level: 3, label: "helpers team up", words: ["team", "together", "one after", "pass", "hand it", "combine", "each helper", "in order", "next helper"]}
-
+    - {id: reuse, level: 1, label: "a named set of steps to use again", words: ["helper", "name", "reuse", "use again", "same steps", "again", "over and over", "def", "call it", "named"]}
+    - {id: in_out, level: 2, label: "takes something in and gives something back", words: ["give back", "gives back", "get back", "returns", "return", "input", "output", "goes in", "comes out", "you give it", "parameter", "argument"]}
+    - {id: teams, level: 3, label: "functions work together", words: ["team", "together", "one after", "pass", "hand it", "combine", "each helper", "in order", "next helper", "calls another", "result of one", "into the next"]}
 items:
   - id: fun-1a
     tier: 1
     type: choice
     nodes: [named_steps]
-    prompt: "You need the same 3 steps in many places. What is a smart way to do it?"
+    prompt: "The same three lines appear in five places in your program. What is the best fix?"
     options:
-      - {id: a, text: "Make a helper with a name and use it each time", correct: true}
-      - {id: b, text: "Copy the steps again and again", misconception: copies_instead_of_reuse, why: "A helper lets you write the steps once."}
-      - {id: c, text: "Do the steps once and hope", misconception: does_it_once, why: "We need the steps in many places."}
-      - {id: d, text: "Make the steps smaller", misconception: ignores_task, why: "A helper packs the steps under one name."}
-    feedback_right: "Yes! A helper is a named set of steps."
-
+      - {id: a, text: "Put them in a function with a clear name and call it", correct: true}
+      - {id: b, text: "Keep copying and pasting the lines", misconception: copies_instead_of_reuse, why: "A function lets you write the lines once and fix bugs in one place."}
+      - {id: c, text: "Keep one copy and delete the other four", misconception: does_it_once, why: "The program still needs those steps in five places."}
+      - {id: d, text: "Rename the variables", misconception: ignores_task, why: "Renaming does not remove the repetition."}
+    feedback_right: "Yes. Write it once, call it many times."
   - id: fun-1b
     tier: 1
     type: order
     nodes: [named_steps]
     misconception: steps_out_of_order
-    prompt: "The helper hot_card has these steps. Drag them into the best order."
+    prompt: "Put the lines of the function hot_label in order."
     cards:
-      - {id: s1, text: "Get today's temperature"}
-      - {id: s2, text: "Decide if it is hot (35 or more)"}
-      - {id: s3, text: "Write HOT or NOT HOT on a card"}
-      - {id: s4, text: "Give the card back"}
-    feedback_right: "Yes! Each step needs the one before it."
-    feedback_wrong: "Think about what each step needs from the step before it."
-
+      - {id: s1, text: "def hot_label(temp):"}
+      - {id: s2, text: "    is_hot = temp >= 35.0"}
+      - {id: s3, text: "    label = 'HOT' if is_hot else 'NOT HOT'"}
+      - {id: s4, text: "    return label"}
+    feedback_right: "Yes. Each line uses the one before it."
+    feedback_wrong: "A line can only use a variable that an earlier line created."
   - id: fun-2a
     tier: 2
     type: sort
     nodes: [inputs_outputs]
     misconception: mixes_input_output
-    prompt: "The helper add_rain takes two rain amounts and gives back the total. Drag each thing to Goes in or Comes out."
+    prompt: "def add_rain(a, b): return a + b. Drag each item to Goes in (parameter) or Comes out (return value)."
     buckets:
       - {id: in, text: "Goes in"}
       - {id: out, text: "Comes out"}
     cards:
-      - {id: c1, text: "the first rain amount", bucket: in}
-      - {id: c2, text: "the second rain amount", bucket: in}
-      - {id: c3, text: "the total rain", bucket: out}
-      - {id: c4, text: "the number you get back", bucket: out}
-    feedback_right: "Yes! Amounts go in. The total comes out."
-    feedback_wrong: "Things you give the helper go in. What it hands back comes out."
-
+      - {id: c1, text: "a", bucket: in}
+      - {id: c2, text: "b", bucket: in}
+      - {id: c3, text: "a + b", bucket: out}
+      - {id: c4, text: "the value of add_rain(2, 3)", bucket: out}
+    feedback_right: "Yes. Parameters go in, the return value comes out."
+    feedback_wrong: "Parameters are listed after def. The return value is what the call gives back."
   - id: fun-2b
     tier: 2
     type: trace
     nodes: [inputs_outputs]
-    prompt: "The helper twice_rain takes a rain amount and gives back that amount plus itself. What does twice_rain(6) give back?"
+    prompt: "def twice(x): return x + x. What does twice(6) return?"
     options:
       - {id: a, text: "12", correct: true}
-      - {id: b, text: "6", misconception: returns_input, why: "The helper adds the amount to itself first."}
-      - {id: c, text: "36", misconception: multiplies_instead, why: "Plus itself means 6 + 6, not 6 times 6."}
-      - {id: d, text: "66", misconception: joins_digits, why: "We add the numbers. We do not write them side by side."}
-    feedback_right: "Yes! 6 + 6 is 12."
-
+      - {id: b, text: "6", misconception: returns_input, why: "The function returns x + x, not x."}
+      - {id: c, text: "36", misconception: multiplies_instead, why: "x + x is 6 + 6, not 6 * 6."}
+      - {id: d, text: "66", misconception: joins_digits, why: "6 is a number, so + adds. It would join only if x were the text '6'."}
+    feedback_right: "Yes. 6 + 6 is 12."
   - id: fun-3a
     tier: 3
     type: order
     nodes: [combine_helpers]
     misconception: wrong_call_order
-    prompt: "A report uses helpers. Drag them into the order the report calls them."
+    prompt: "build_report uses three functions you wrote. Put its lines in order."
     cards:
-      - {id: s1, text: "get_days finds the days in the log"}
-      - {id: s2, text: "label_day marks each day hot or rainy"}
-      - {id: s3, text: "summarize counts the marked days"}
-      - {id: s4, text: "report hands back the finished numbers"}
-    feedback_right: "Yes! Each helper passes its answer to the next."
-    feedback_wrong: "Each helper needs the answer from the one before it."
-
+      - {id: s1, text: "rows = get_readings(conn, station, start, end)"}
+      - {id: s2, text: "pairs = [(r, classify_day(r)) for r in rows]"}
+      - {id: s3, text: "report = summarize(pairs)"}
+      - {id: s4, text: "return report"}
+    feedback_right: "Yes. Each function's result feeds the next."
+    feedback_wrong: "Each line needs the value the line before it made."
   - id: fun-3b
     tier: 3
     type: choice
     nodes: [combine_helpers]
-    prompt: "A report calls get_days, then label_day, then summarize. summarize needs the labels. What must the report do?"
+    prompt: "summarize needs a list of (row, labels) pairs. Which call should build_report make?"
     options:
-      - {id: a, text: "Give label_day's answer to summarize", correct: true}
-      - {id: b, text: "Call summarize first", misconception: wrong_call_order, why: "summarize needs the labels, so it comes last."}
-      - {id: c, text: "Skip label_day", misconception: skips_a_helper, why: "Without label_day there are no labels."}
-      - {id: d, text: "Copy every helper into summarize", misconception: copies_instead_of_reuse, why: "Helpers can call each other. No copying."}
-    feedback_right: "Yes! Pass the answer along."
+      - {id: a, text: "summarize([(r, classify_day(r)) for r in rows])", correct: true}
+      - {id: b, text: "summarize(rows)", misconception: skips_a_helper, why: "summarize needs the labels from classify_day too."}
+      - {id: c, text: "classify_day(summarize(rows))", misconception: wrong_call_order, why: "summarize needs the labels, so classify_day runs first."}
+      - {id: d, text: "Copy summarize's code into build_report", misconception: copies_instead_of_reuse, why: "Functions can call each other. No copying needed."}
+    feedback_right: "Yes. Pass each result along."

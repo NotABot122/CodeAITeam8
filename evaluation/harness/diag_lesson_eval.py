@@ -5,13 +5,14 @@ lesson at their level. This harness checks that with simulated students whose tr
 per concept is known, run through the real code: the diagnostic quest (diagnostic/), its
 handoff, and the lesson through engine.course.Course (what the student web API uses).
 
-Four conditions, same students, same random draws (common random numbers):
-  no_diagnostic       today's lesson without a diagnostic
-  diagnostic_today    quest + Course.apply_diagnostic as shipped (confident stages seeded into the
-                      profile, lesson starts at the quest's placement)
-  diagnostic_proposed today's handoff plus the missing piece: each diagnosed gap gets its practice
-                      problem before its level (the quest's planned practice is used)
-  oracle              the proposed handoff fed with the TRUE stages: the upper bound
+Five conditions, same students, same random draws (common random numbers):
+  no_diagnostic                today's lesson, nothing known about the student
+  no_diagnostic_intervention   the same, with in-lesson help: after STRUGGLE_AFTER failed attempts on a
+                               level, the engine inserts that concept's practice and returns to the level
+  diagnostic                   quest + Course.apply_diagnostic (seeded stages, start problem, practice
+                               planned before each diagnosed gap's level)
+  diagnostic_intervention      the same, with in-lesson help (also lowers a stage the diagnostic overrated)
+  oracle                       the handoff fed with the TRUE stages, with in-lesson help: the upper bound
 
 Learner model (an assumption, stated in the report): chance to pass an attempt depends on the
 true stage of the problem's concept, rises with each attempt (feedback, hints), and practice is
@@ -19,8 +20,8 @@ easier. Passing a practice problem, or a level after struggling, lifts a true st
 Passing submissions are the reference solution; failing ones are a seeded bug for that concept;
 proto's grader grades every one.
 
-No engine or diagnostic code is changed. The proposed condition only uses public pieces that
-exist today (the profile store, apply_placement, ProgressRecord through the lesson's own store).
+The harness only drives public entry points (Course, the diagnostic engine); in-lesson help is the
+catalog switch `intervention.struggle_after`.
 
 Usage: python -m evaluation.harness.diag_lesson_eval [--students 40] [--seed 2026]
 """
@@ -30,6 +31,7 @@ import argparse
 import ast
 import json
 import random
+import shutil
 import re
 import statistics
 import tempfile
@@ -45,13 +47,15 @@ from engine.progress import JsonProgressStore
 ROOT = Path(__file__).resolve().parents[1]
 RESULTS = ROOT / "results"
 MAX_SUBMISSIONS = 40
-CONDITIONS = ("no_diagnostic", "diagnostic_today", "diagnostic_proposed", "oracle")
+CONDITIONS = ("no_diagnostic", "no_diagnostic_intervention", "diagnostic", "diagnostic_intervention", "oracle")
 LABELS = {
     "no_diagnostic": "No diagnostic",
-    "diagnostic_today": "Diagnostic, handoff as built today",
-    "diagnostic_proposed": "Diagnostic, proposed handoff",
-    "oracle": "Perfect knowledge of the student (upper bound)",
+    "no_diagnostic_intervention": "No diagnostic, in-lesson help on",
+    "diagnostic": "Diagnostic handoff",
+    "diagnostic_intervention": "Diagnostic handoff, in-lesson help on",
+    "oracle": "Perfect knowledge, in-lesson help on (upper bound)",
 }
+STRUGGLE_AFTER = 3   # in-lesson help: failed attempts on a level before its practice is inserted
 
 # Learner model
 BASE_PASS = {0: 0.20, 1: 0.50, 2: 0.80, 3: 0.95}
@@ -130,9 +134,8 @@ def _quest(diag, sim_student):
     stages = {c["concept"]: c["stage"] for c in rep["concepts"]}
     next_stop = out["student_view"].get("next_stop") or {}
     zone_name = next_stop.get("zone")
-    # The zone named in "next stop" is the first concept of the placement's focus order.
-    focus = rep["placement"].get("focus_order") or []
-    zone_concept = focus[0] if focus else None
+    # Map the zone the student is shown in "next stop" back to its concept.
+    zone_concept = next((z.concept for z in diag.content.zones if z.name == zone_name), None)
     return {"student_id": out["student_id"], "stages": stages, "next_task": rep["placement"]["next_task_id"],
             "practice_ahead": list(rep["placement"].get("practice_ahead") or []),
             "next_stop_zone": zone_name, "next_stop_concept": zone_concept}
@@ -150,9 +153,8 @@ def _set_current(store: JsonProgressStore, sid: str, problem_id: str, origin: st
     store.save(rec)
 
 
-def _run_lesson(course: Course, sid: str, latent: dict, files: Files, rng_seed: str, gaps_ahead: set[str]):
-    """Drive one student through the lesson. Returns metrics. `gaps_ahead`: concepts whose practice
-    is inserted before their level (the proposed handoff); empty for today's behaviour."""
+def _run_lesson(course: Course, sid: str, latent: dict, files: Files, rng_seed: str):
+    """Drive one student through the lesson. Returns metrics."""
     prj = pa.project()
     store = course.store
     latent = dict(latent)
@@ -171,12 +173,6 @@ def _run_lesson(course: Course, sid: str, latent: dict, files: Files, rng_seed: 
         pid = rec.current_problem
         prob = prj.problem(pid)
         concept = prob.concepts[0]
-        # Proposed handoff: before a level whose concept was diagnosed as a gap, do its practice first.
-        if prob.kind == "level" and concept in gaps_ahead and concept not in practice_done and pid not in rec.passed_problems:
-            pr = _practice_for(concept)
-            if pr is not None and pr.id not in rec.passed_problems:
-                _set_current(store, sid, pr.id, pid)
-                continue
         if first_problem is None:
             first_problem = pid
         path.append(pid)
@@ -210,9 +206,15 @@ def _run_lesson(course: Course, sid: str, latent: dict, files: Files, rng_seed: 
     }
 
 
+def _events(root: Path, reason: str) -> int:
+    log = Path(root) / "logs" / "events.jsonl"
+    if not log.exists():
+        return 0
+    return sum(1 for line in log.read_text().splitlines() if '"intervention"' in line and f'"{reason}"' in line)
+
+
 def run(n_students: int, seed: int) -> dict:
     from diagnostic import simulation as sim
-    from diagnostic.handoff import apply_placement
     tmp = Path(tempfile.mkdtemp(prefix="codeai-diag-lesson-"))
     files = Files(tmp)
     grader = Grader(timeout_s=10)
@@ -222,41 +224,49 @@ def run(n_students: int, seed: int) -> dict:
     for i, st in enumerate(cohort):
         latent = dict(st.latent)
         rng_seed = f"{seed}:{st.sim_id}"
+        # One quest per student, copied into every diagnostic condition, so the conditions differ only in
+        # what happens in the lesson (the quest picks questions from the student id, so a new quest would differ).
+        quest_root = tmp / f"{i:03d}-quest"
+        quest = _quest(Course(quest_root, grader=grader).diagnostic(), st)
         for cond in CONDITIONS:
             root = tmp / f"{i:03d}-{cond}"
+            if not cond.startswith("no_diagnostic"):
+                shutil.copytree(quest_root, root)
             course = Course(root, grader=grader)
+            # In-lesson help is on by default in catalog.yaml; pin it per condition so the comparison is fair.
+            course.catalog.intervention["struggle_after"] = (
+                STRUGGLE_AFTER if (cond.endswith("intervention") or cond == "oracle") else None)
             row = {"student": st.sim_id, "condition": cond, "true": latent,
                    "band": "low" if statistics.mean(latent.values()) < 1 else ("high" if statistics.mean(latent.values()) >= 2 else "middle")}
-            if cond == "no_diagnostic":
+            if cond.startswith("no_diagnostic"):
                 sid = course.new_student()
-                gaps_ahead = set()
             else:
-                q = _quest(course.diagnostic(), st)
+                q = quest
                 sid = q["student_id"]
                 row.update(diag_stages=q["stages"], diag_next=q["next_task"], diag_practice_ahead=q["practice_ahead"],
                            next_stop_zone=q["next_stop_zone"], next_stop_concept=q["next_stop_concept"])
-                stages = q["stages"] if cond != "oracle" else latent
-                if cond in ("diagnostic_today", "diagnostic_proposed"):
-                    profile = course.store.profile(sid)
-                    profile.update(active_project=str(pa.project().root), concepts={}, completed=[], next_step=None)
+                profile = course.store.profile(sid)
+                profile.update(active_project=str(pa.project().root), concepts={}, completed=[], next_step=None)
+                course.store.save_profile(sid, profile)
+                if cond == "oracle":
+                    profile["concepts"] = dict(latent)
+                    profile["planned_practice"] = {"project": pa.project().id, "problems": [
+                        _practice_for(c).id for c, v in latent.items() if v == 0 and _practice_for(c)]}
                     course.store.save_profile(sid, profile)
+                    order = [l.concepts[0] for l in pa.project().manifest.levels_in_order()]
+                    first = order[0]
+                    course.engine(sid).open(sid)
+                    if latent[first] == 0 and _practice_for(first):
+                        _set_current(course.store, sid, _practice_for(first).id, "level-1")
+                else:
                     applied = course.apply_diagnostic(sid)
                     row["stages_used"] = sum(d["used"] for d in applied["decisions"].values())
                     row["stages_found"] = len(applied["decisions"])
-                    gaps_ahead = set() if cond == "diagnostic_today" else {c for c, s in q["stages"].items() if s == 0}
-                else:
-                    profile = course.store.profile(sid)
-                    profile.update(active_project=str(pa.project().root), concepts=dict(stages), completed=[], next_step=None)
-                    course.store.save_profile(sid, profile)
-                    course.engine(sid).open(sid)  # fresh record now carries the stages (Engine.initial_stages)
-                    gaps_ahead = {c for c, s in stages.items() if s == 0}
-                    order = [l.concepts[0] for l in pa.project().manifest.levels_in_order()]
-                    first_gap = next((c for c in order if c in gaps_ahead), None)
-                    start = (_practice_for(first_gap).id if first_gap == order[0] and _practice_for(first_gap) else "level-1")
-                    origin = "level-1" if start != "level-1" else None
-                    _set_current(course.store, sid, start, origin)
+                    row["planned_practice"] = course.store.profile(sid).get("planned_practice", {}).get("problems", [])
                 row["lesson_start_stages"] = course.engine(sid).open(sid)[0].stages()
-            row.update(_run_lesson(course, sid, latent, files, rng_seed, gaps_ahead))
+            row.update(_run_lesson(course, sid, latent, files, rng_seed))
+            row["mismatch_events"] = _events(root, "diagnostic_mismatch")
+            row["struggle_events"] = _events(root, "struggle_practice")
             rows.append(row)
         print(f"  student {i + 1}/{len(cohort)} done", flush=True)
     return {"rows": rows, "checks": integration_checks(tmp)}
@@ -351,10 +361,12 @@ def summarize(rows: list[dict]) -> dict:
             "gaps": gaps,
             "gaps_practiced_first": round(sum(len(r["gaps_practiced_first"]) for r in rs) / gaps, 3) if gaps else None,
             "practice_unneeded": sum(r["practice_unneeded"] for r in rs),
+            "struggle_practice": sum(r.get("struggle_events", 0) for r in rs),
+            "diagnostic_mismatch": sum(r.get("mismatch_events", 0) for r in rs),
             "start_counts": dict(Counter(r["first_problem"] for r in rs)),
             "by_band": per_band,
         }
-    diag_rows = [r for r in rows if r["condition"] == "diagnostic_today"]
+    diag_rows = [r for r in rows if r["condition"] == "diagnostic"]
     if diag_rows:
         pairs = [(r["true"][c], r["diag_stages"][c]) for r in diag_rows for c in r["true"]]
         out["diagnostic_accuracy"] = {"n": len(pairs), "exact": round(sum(a == b for a, b in pairs) / len(pairs), 3),
@@ -383,7 +395,9 @@ def report(summary: dict, checks: list[dict], n: int, seed: int) -> str:
     rowsdef = [("Finished the lesson", "completed"), ("Failed attempts on levels (mean)", "failed_on_levels"),
                ("Submissions to finish (mean)", "submissions"),
                ("Gaps that got practice before their level", "gaps_practiced_first"),
-               ("Practice given where it was not needed", "practice_unneeded")]
+               ("Practice given where it was not needed", "practice_unneeded"),
+               ("In-lesson help given (practice inserted)", "struggle_practice"),
+               ("Diagnostic overrated a concept (caught in the lesson)", "diagnostic_mismatch")]
     for label, k in rowsdef:
         L.append(f"| {label} | " + " | ".join(f(summary[c][k]) for c in CONDITIONS) + " |")
     L += ["", "Failed attempts on levels, by the student's true level:", "",
@@ -402,9 +416,8 @@ def report(summary: dict, checks: list[dict], n: int, seed: int) -> str:
           f"- Learner model: pass chance per attempt {BASE_PASS} by true stage, +{PER_ATTEMPT} per extra attempt, "
           f"+{PRACTICE_BONUS} on practice problems; passing practice (or a level after struggling) lifts stage 0 to 1. "
           "Real students will differ; the comparison between conditions is the point, not the absolute numbers.",
-          "- The proposed handoff uses only what exists: the student profile's `concepts` (read by `Course` as initial "
-          "stages), `apply_placement` for the start problem, and the lesson's own progress record for practice before "
-          "a level. The engine and diagnostic owners decide how to build it for real.",
+          f"- In-lesson help: after {STRUGGLE_AFTER} failed attempts on a level the engine inserts that concept's "
+          "practice once and returns to the level (catalog `intervention.struggle_after`).",
           "- The diagnostic quest uses rules only (no model); the simulated children come from `diagnostic/simulation.py`.", ""]
     return "\n".join(L)
 
@@ -417,15 +430,16 @@ def main(argv=None) -> int:
     res = run(args.students, args.seed)
     summary = summarize(res["rows"])
     # Two checks are about the whole class, not one student: recompute them from the cohort.
-    today = [r for r in res["rows"] if r["condition"] == "diagnostic_today"]
-    lost = [r for r in today if r.get("diag_practice_ahead")]
+    today = [r for r in res["rows"] if r["condition"] == "diagnostic"]
+    lost = [r for r in today if set(r.get("diag_practice_ahead") or []) - set(r.get("planned_practice") or [])]
     told = [r for r in today if r.get("next_stop_concept")]
     mismatch = [r for r in told if r["next_stop_concept"] not in pa.project().problem(r["first_problem"]).concepts]
     for c in res["checks"]:
         if c["id"] == "practice_carried":
             c["passed"] = not lost
-            c["detail"] = (f"{len(lost)} of {len(today)} students had practice planned by the diagnostic "
-                           f"({sum(len(r['diag_practice_ahead']) for r in lost)} problems) that the lesson never receives")
+            n_lost = sum(len(set(r["diag_practice_ahead"]) - set(r.get("planned_practice") or [])) for r in lost)
+            c["detail"] = (f"{len(lost)} of {len(today)} students: {n_lost} practice problem(s) the quest planned are not in "
+                           "the lesson plan (only gaps the diagnostic is confident about are planned)")
         if c["id"] == "message_matches":
             c["passed"] = not mismatch
             c["detail"] = (f"{len(mismatch)} of {len(told)} students are told a different first stop than the "

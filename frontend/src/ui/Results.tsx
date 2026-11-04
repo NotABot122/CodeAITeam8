@@ -13,7 +13,27 @@ const HEADLINE: Record<Outcome['status'], string> = {
   syntax_error: "Python couldn't read your code.",
   import_error: "Your code couldn't be loaded.",
   ungraded: "We couldn't check this one.",
+  // Hint requests don't come through Results; these keep the record complete.
+  hint: 'Here is a hint.',
+  no_hints: 'No hints left for this one.',
+  complete: "You've finished the project.",
 };
+
+/** A hint, after a failed run or on request. `note` is an extra line under it. */
+export function HintCard({hint, source, note}: {hint: string; source: Outcome['hintSource']; note?: string}) {
+  return (
+    <Box sx={{display: 'flex', gap: 1.25, p: 1.5, borderRadius: '10px', border: 1, borderColor: 'primary.main', bgcolor: 'action.hover'}}>
+      <RubberDuck title="Ducky, your helper" />
+      <Box>
+        <Typography variant="caption" sx={{fontWeight: 700, color: 'primary.dark'}}>
+          {source === 'ai' ? 'Hint from Ducky, your AI tutor' : 'Hint from Ducky'}
+        </Typography>
+        <Typography>{hint}</Typography>
+        {note && <Typography variant="caption" color="text.secondary" component="p" sx={{mt: 0.5}}>{note}</Typography>}
+      </Box>
+    </Box>
+  );
+}
 
 export default function Results({outcome}: {outcome: Outcome}) {
   return (
@@ -26,17 +46,7 @@ export default function Results({outcome}: {outcome: Outcome}) {
           </Box>
         )}
       </Alert>
-      {outcome.hint && (
-        <Box sx={{display: 'flex', gap: 1.25, p: 1.5, borderRadius: '10px', border: 1, borderColor: 'primary.main', bgcolor: 'action.hover'}}>
-          <RubberDuck title="Ducky, your helper" />
-          <Box>
-            <Typography variant="caption" sx={{fontWeight: 700, color: 'primary.dark'}}>
-              {outcome.hintSource === 'ai' ? 'Hint from Ducky, your AI tutor' : 'Hint from Ducky'}
-            </Typography>
-            <Typography>{outcome.hint}</Typography>
-          </Box>
-        </Box>
-      )}
+      {outcome.hint && <HintCard hint={outcome.hint} source={outcome.hintSource} />}
       {outcome.stageChanges.map(c => (
         <Box key={c.concept} sx={{display: 'flex', gap: 1, alignItems: 'center', color: c.newStage > c.oldStage ? 'success.main' : 'text.secondary'}}>
           <TrendingUpIcon fontSize="small" />

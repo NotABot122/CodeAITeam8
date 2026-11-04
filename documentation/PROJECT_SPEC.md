@@ -77,7 +77,7 @@ flowchart TD
   - Inspired by Code.org's `UserLevel` and student level data tracking.
   - In lesson mode, the AI monitors the **live code feed** (live keystrokes, compilation errors, execution attempts, idle time) to provide proactive Socratic guidance before the student experiences cognitive frustration.
 - **Pre-Diagnostic**:
-  - *Implemented for the Weather Station lesson (grades 3-5) in `diagnostic/`: tap-and-drag quest, deterministic scoring, optional model placement. See `diagnostic/README.md`.*
+  - *Implemented for the Weather Station lesson (grades 9-12) in `diagnostic/`: short code-reading check, deterministic scoring, optional model placement. See `diagnostic/README.md`.*
   - **Demographics & Profile**: Grade level (K-12), previous coding exposure (Scratch, Python, None, etc.), target project interests.
   - **Tri-Modal Assessment**:
     1. *Multiple Choice*: Measures syntactic and structural knowledge.
