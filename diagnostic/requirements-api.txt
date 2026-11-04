@@ -1,0 +1,6 @@
+# Only needed for the optional HTTP layer (diagnostic/api.py).
+# The rest of the diagnostic needs just PyYAML (see diagnostic/README.md).
+fastapi>=0.100,<1
+uvicorn>=0.23
+# For the API tests:
+httpx>=0.24
