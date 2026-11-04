@@ -1,10 +1,10 @@
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import {Alert, Box, Typography} from '@mui/material';
 
 import type {Outcome} from '@/api/types';
+import RubberDuck from './RubberDuck';
 
 const HEADLINE: Record<Outcome['status'], string> = {
   passed: 'Nice work, that passes.',
@@ -28,10 +28,10 @@ export default function Results({outcome}: {outcome: Outcome}) {
       </Alert>
       {outcome.hint && (
         <Box sx={{display: 'flex', gap: 1.25, p: 1.5, borderRadius: '10px', border: 1, borderColor: 'primary.main', bgcolor: 'action.hover'}}>
-          <LightbulbOutlinedIcon color="primary" />
+          <RubberDuck title="Ducky, your helper" />
           <Box>
             <Typography variant="caption" sx={{fontWeight: 700, color: 'primary.main'}}>
-              {outcome.hintSource === 'ai' ? 'Hint from your AI tutor' : 'Hint'}
+              {outcome.hintSource === 'ai' ? 'Hint from Ducky, your AI tutor' : 'Hint from Ducky'}
             </Typography>
             <Typography>{outcome.hint}</Typography>
           </Box>
