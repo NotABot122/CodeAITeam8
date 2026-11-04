@@ -9,7 +9,12 @@ import SkillTree from './SkillTree';
 
 export function CourseBody({view}: {view: CourseView}) {
   return (
-    <Box sx={{display: 'grid', gap: 2.5}}>
+    <Box sx={{display: 'grid', gap: 2.5, gridTemplateColumns: {xs: '1fr', md: 'minmax(0, 7fr) minmax(0, 5fr)'}, alignItems: 'start'}}>
+      <Box sx={{gridRow: {md: '1 / span 1'}}}>
+        <Typography sx={{fontWeight: 700, mb: 1}}>Your skill tree</Typography>
+        <SkillTree concepts={view.concepts} />
+      </Box>
+      <Box sx={{display: 'grid', gap: 2.5}}>
       <Box>
         <Typography variant="overline" color="text.secondary" sx={{fontWeight: 700}}>Right now</Typography>
         <Typography variant="h5" component="p">{view.now.project}{view.now.isReview ? ' (review)' : ''}{view.now.complete ? ' · finished' : ''}</Typography>
@@ -46,12 +51,8 @@ export function CourseBody({view}: {view: CourseView}) {
         </Box>
       )}
 
-      <Box>
-        <Typography sx={{fontWeight: 700, mb: 1}}>Your skill tree</Typography>
-        <SkillTree concepts={view.concepts} />
-      </Box>
-
       {view.nextStep && <Alert severity="info">{view.nextStep}</Alert>}
+      </Box>
     </Box>
   );
 }
@@ -61,7 +62,7 @@ export default function CoursePage({client, studentId, onBack}: {client: ApiClie
   const [err, setErr] = useState<string | null>(null);
   useEffect(() => { client.getCourse(studentId).then(setView, e => setErr(e instanceof Error ? e.message : 'Something went wrong.')); }, [client, studentId]);
   return (
-    <Box sx={{display: 'grid', gap: 2, maxWidth: 820, mx: 'auto', py: 1}}>
+    <Box sx={{display: 'grid', gap: 2, maxWidth: 1280, mx: 'auto', py: 1}}>
       <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
         <Typography variant="h4" component="h2" sx={{flex: 1}}>My course</Typography>
         <Button variant="contained" onClick={onBack}>Back to my lesson</Button>

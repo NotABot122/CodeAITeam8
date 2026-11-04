@@ -57,11 +57,11 @@ export function SkillTreeBoard({concepts, onPick, picked}: {concepts: Concept[];
   return (
     <Box
       component="svg"
-      viewBox="0 70 720 460"
+      viewBox="28 92 685 400"
       role="group"
       aria-label="Skill tree: one hexagon for each idea"
       sx={{
-        width: '100%', display: 'block', borderRadius: '16px',
+        width: '100%', maxHeight: 'calc(100vh - 330px)', minHeight: 220, display: 'block', borderRadius: '16px',
         background: 'radial-gradient(ellipse at 30% 40%, #2f2a82 0%, #1b1750 70%)',
         '@keyframes pulse': {'0%': {opacity: 0.9, transform: 'scale(1)'}, '100%': {opacity: 0, transform: 'scale(1.35)'}},
         '@keyframes bob': {'0%,100%': {transform: 'translateY(0)'}, '50%': {transform: 'translateY(-4px)'}},
