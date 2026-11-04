@@ -1,43 +1,37 @@
-# CodeAI front end
+# CodeAI student UI
 
-React 18, TypeScript, MUI 7, Vite. Versions match Code.org's `apps/package.json`
-(React 18.3, MUI 7.3, zod 4, TS 5.9) so code can move between the two.
+React 18 + TypeScript + MUI 7 + Vite. Styled after Code.org's CodeAI (purple brand, orange Run, Geist/Space Grotesk).
+It talks to the Weather Station engine from `proto-branch` through `webapi/` (a small JSON server in the repo root).
 
+## Run it
+
+```bash
+# 1. API (from the repo root; needs PyYAML; --ai off skips Bedrock)
+python -m webapi.server --port 8080 --ai off
+
+# 2a. Dev server with hot reload (proxies /api to :8080)
+cd frontend && npm install && npm run dev
+
+# 2b. Or build once; the API server then serves frontend/dist itself at http://127.0.0.1:8080
+cd frontend && npm run build
 ```
-npm install
-npm run dev        # runs against mock data
-npm test           # unit + server-render smoke tests
-npm run build      # typecheck, then production build
-```
 
-Set `VITE_API_BASE_URL` (for example `http://localhost:3000`) to call the Rails
-backend instead of the mock.
+Remove `--ai off` (and install `boto3`, set AWS creds) to get AI hints and the "Make it yours" themes.
 
-## Layout
+## What's here
 
-| Path | What |
-|---|---|
-| `src/api/schema.ts` | zod schemas: the contract with the backend |
-| `src/api/client.ts` | `ApiClient` interface and the HTTP client; responses are validated at this boundary |
-| `src/api/mock/` | In-memory backend, kept valid against the schemas by a test |
-| `src/features/skilltree/` | Skill tree: layout (adapted from Code.org), poly-hierarchy categories, detail panel |
-| `src/features/diagnostic/` | One-question-at-a-time diagnostic with AI follow-up probes |
-| `src/features/stance/` | Asks for the next step and shows the screen for its stance |
-| `src/features/lesson/` | Lesson screen; editor is a textarea until a real one is chosen |
-| `src/features/telemetry/` | Batched editor telemetry; sends counts and durations, never typed text |
+- `src/api/` – typed client and response shapes (mirror `webapi/service.py`)
+- `src/ui/PathStrip` – the level path; an assigned practice problem appears next to its level
+- `src/ui/CodeEditor` – textarea with line numbers (Tab = 4 spaces, Esc then Tab leaves the box, Ctrl/Cmd+Enter runs)
+- `src/ui/Results` – grader messages, hint (labelled AI or teacher-written), stage changes
+- `src/ui/ConceptMeters` – Missing / Beginning / Meeting / Exceeding per concept
+- `src/ui/Dialogs` – "A quick practice first" pop-up and the theme dialog
+- `src/ui/markdown` – tiny renderer for the instructions (React nodes only, no innerHTML)
 
-## Open items for the team
+The UI never grades or routes; it shows what the engine returns. The student id is kept in `localStorage`.
 
-- Only `GET /api/v1/student/skill_tree` is in `PROJECT_SPEC.md`. The other
-  paths in `client.ts` are proposals; backend should accept or change them.
-- Node states are `LOCKED / AVAILABLE / MASTERED` per the spec. Code.org also
-  has `inProgress` and `skipped`; add them to `schema.ts` if we want them.
-- Which language do students write? Decides the editor and how code runs.
-- The telemetry events carry no code text. Raw code snapshots to S3 need a
-  decision on student privacy first.
-- Student-facing "Dev" buttons in `LessonView` simulate runs and errors until a
-  real runner exists. Remove them then.
+## Checks
 
-## Attribution
+`npm run typecheck`, `npm test`, `npm run build`; API tests: `python -m pytest tests/test_webapi.py`.
 
-Some files are adapted from Code.org (Apache-2.0). See `NOTICE-codeorg.md`.
+Attribution for the Code.org design reference: `NOTICE-codeorg.md`.

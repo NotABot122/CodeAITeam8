@@ -31,7 +31,7 @@ Every autonomous agent or developer **MUST read this file before writing code** 
 | Agent ID | Current Model | Status (`idle` / `working`) | Current Task / Focus Area | Started At (Timestamp) |
 |---|---|---|---|---|
 | `Agent-Bootstrap` | Gemini 3.8 Flash | `idle` | Integrated curriculum database references, added post-project AI reteach loop, created COURSE_FLOW_GRAPH.md, initialized git repository and committed all files | 2026-11-03 15:21 PST |
-| `Pratheek-Claude` | Claude Sonnet 5.5 | `working` | Building the student UI in `frontend/` against the `proto-branch` engine (Weather Station): JSON server over `engine.session`, path map, code editor, hints, practice pop-up, themes. Styled after Code.org's CodeAI adaptive UI. Touches `frontend/` and a new `webapi/` only; engine code untouched | 2026-11-04 09:55 PST |
+| `Pratheek-Claude` | Claude Sonnet 5.5 | `idle` | Built the student UI in `frontend/` against the `proto-branch` engine (Weather Station) plus `webapi/` JSON server | 2026-11-04 10:20 PST |
 | `Agent-3` | Unassigned | `idle` | None | - |
 | `zane-claude` | Claude Opus 5.5 (Kiro) | `idle` | Renamed "Stance Decider 2B" to "Strands Decider 2B" in documentation/ | 2026-11-03 15:30 PST |
 | `Kiro-Demo` | Claude Opus 5.5 (Kiro) | `idle` | Added student-chosen themes and Bedrock AI tutor hints to the demo (`engine/themes/`, `engine/ai.py`, `engine/hints.py`, `engine/safety.py`) on `proto-branch` | 2026-11-04 09:39 PST |
@@ -42,7 +42,12 @@ Every autonomous agent or developer **MUST read this file before writing code** 
 
 > *Most recent on top. Maximum 10 items.*
 
-1. **[Task 012] Student-Chosen Themes & Bedrock AI Tutor Hints**
+1. **[Task 014] Student UI on the Weather Station Engine (CodeAI styling)**
+   - **Model:** Claude Sonnet 5.5
+   - **Agent:** `Pratheek-Claude`
+   - **Timestamp:** 2026-11-04 10:20 PST
+   - **Summary:** Added `webapi/` (stdlib JSON server over `engine.session`: new student, state, submit, theme, theme reset; serves `frontend/dist`) and replaced the earlier mock-data scaffold in `frontend/` with screens for the real engine: level path with assigned practice problems, Python editor, instructions renderer, grader messages and hints (AI vs teacher-written), Missing/Beginning/Meeting/Exceeding meters, "quick practice" pop-up, theme dialog, completion screen. Styled after Code.org's CodeAI (design reference only, see `frontend/NOTICE-codeorg.md`). Engine code untouched. Run: `python -m webapi.server --ai off`, then `cd frontend && npm run build`. 75 Python tests, 5 vitest tests, typecheck and build pass; clicked through all 4 levels in a browser against the real engine. Not done: demo mode without the API, CodeMirror, telemetry endpoint.
+2. **[Task 012] Student-Chosen Themes & Bedrock AI Tutor Hints**
    - **Model:** Claude Opus 5.5 (Kiro)
    - **Agent:** `Kiro-Demo`
    - **Timestamp:** 2026-11-04 09:39 PST
@@ -52,11 +57,6 @@ Every autonomous agent or developer **MUST read this file before writing code** 
    - **Agent:** `Kiro-Demo`
    - **Timestamp:** 2026-11-04 08:56 PST
    - **Summary:** Added a local Python prototype of the adaptive engine on `proto-branch` (commit `4f7669a`), with no cloud calls. One project, `projects/weather-station/`: a seeded synthetic SQLite dataset and four levels (SQL retrieval, conditionals, loops, functions) with three practice problems. The engine grades each submission in a separate process with a 10 s limit, enforces a loop rule on Level 3, gives ordered hand-written hints, tracks a Stage 0–3 per concept, routes struggling students to practice problems, and falls back to fixed level order if routing fails. Progress is saved per student. Run `python3 -m engine.demo` or see `README.md`. 51 tests pass. Spec is in `.kiro/specs/weather-station-adaptive-lesson/`. Not built yet: Bedrock rubric grading, content filter, grader benchmark. Numbered 011 because `main` already uses 009 and 010.
-3. **[Task 013] Front-End Scaffold Adapted from Code.org Adaptive Pathway UI**
-   - **Model:** Claude Sonnet 5.5
-   - **Agent:** `Pratheek-Claude`
-   - **Timestamp:** 2026-11-03 15:47 PST
-   - **Summary:** Added `frontend/` (Vite, React 18, TS, MUI 7, zod 4): typed API contract and mock backend, poly-hierarchy skill tree view, diagnostic player with AI follow-up probes, stance router, lesson view with batched telemetry. Layout and answer-flow logic adapted from `code-dot-org/code-dot-org` `apps/src/adaptive` (Apache-2.0, see `frontend/NOTICE-codeorg.md`; no Code.org assets used). 27 tests, typecheck and build pass. Only `GET /api/v1/student/skill_tree` is in the spec; other endpoints in `frontend/src/api/client.ts` are proposals for backend.
 2. **[Task 008] Vision Document Ingestion & Intra-Lesson Adaptivity Invariant**
    - **Model:** Gemini 3.8 Flash (Authoritative)
    - **Agent:** Lead-Antigravity

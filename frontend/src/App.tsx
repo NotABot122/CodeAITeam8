@@ -1,82 +1,162 @@
-import {Alert, Box, CircularProgress, Container, Tab, Tabs, Typography} from '@mui/material';
-import {useEffect, useMemo, useState} from 'react';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import {Alert, Box, Button, CircularProgress, Container, Paper, Typography} from '@mui/material';
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
-import {createHttpClient, type ApiClient} from '@/api/client';
-import {createMockClient} from '@/api/mock/mockClient';
-import type {DiagnosticQuestion, SkillTree as SkillTreeData} from '@/api/types';
+import {ApiError, createHttpClient, type ApiClient} from '@/api/client';
+import type {Health, Outcome, StudentState} from '@/api/types';
 
-import DiagnosticPlayer from './features/diagnostic/DiagnosticPlayer';
-import SkillTree from './features/skilltree/SkillTree';
-import StanceRouter from './features/stance/StanceRouter';
+import ConceptMeters from './ui/ConceptMeters';
+import CodeEditor from './ui/CodeEditor';
+import {PracticeDialog, ThemeDialog} from './ui/Dialogs';
+import {Markdown} from './ui/markdown';
+import PathStrip from './ui/PathStrip';
+import Results from './ui/Results';
 
-const API_BASE_URL: string | undefined = import.meta.env.VITE_API_BASE_URL;
+const KEY = 'codeai.studentId';
+const store = {
+  get: () => { try { return localStorage.getItem(KEY); } catch { return null; } },
+  set: (v: string) => { try { localStorage.setItem(KEY, v); } catch { /* private mode */ } },
+  clear: () => { try { localStorage.removeItem(KEY); } catch { /* private mode */ } },
+};
+const msg = (e: unknown) => (e instanceof Error ? e.message : 'Something went wrong. Try again.');
 
-type Loaded<T> =
-  | {status: 'loading'}
-  | {status: 'error'; message: string}
-  | {status: 'ready'; value: T};
+export default function App({client: injected}: {client?: ApiClient}) {
+  const client = useMemo(() => injected ?? createHttpClient(import.meta.env.VITE_API_BASE_URL ?? ''), [injected]);
+  const [state, setState] = useState<StudentState | null>(null);
+  const [health, setHealth] = useState<Health | null>(null);
+  const [code, setCode] = useState('');
+  const [outcome, setOutcome] = useState<Outcome | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [running, setRunning] = useState(false);
+  const [practiceShown, setPracticeShown] = useState(false);
+  const [themeOpen, setThemeOpen] = useState(false);
+  const [themeBusy, setThemeBusy] = useState(false);
+  const [themeError, setThemeError] = useState<string | null>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
 
-function useLoaded<T>(load: () => Promise<T>): Loaded<T> {
-  const [state, setState] = useState<Loaded<T>>({status: 'loading'});
+  const adopt = useCallback((s: StudentState, keepCode = false) => {
+    setState(s);
+    if (!keepCode) setCode(s.code);
+    store.set(s.studentId);
+  }, []);
+
   useEffect(() => {
-    let cancelled = false;
-    load().then(
-      value => !cancelled && setState({status: 'ready', value}),
-      (e: unknown) =>
-        !cancelled &&
-        setState({
-          status: 'error',
-          message: e instanceof Error ? e.message : 'Request failed.',
-        })
-    );
-    return () => {
-      cancelled = true;
-    };
-  }, [load]);
-  return state;
-}
+    let off = false;
+    (async () => {
+      try {
+        setHealth(await client.health());
+        const saved = store.get();
+        if (saved) {
+          try { if (!off) adopt(await client.getState(saved)); return; }
+          catch (e) { if (!(e instanceof ApiError && e.status === 404)) throw e; store.clear(); }
+        }
+        if (!off) adopt(await client.newStudent());
+      } catch (e) { if (!off) setLoadError(msg(e)); }
+    })();
+    return () => { off = true; };
+  }, [client, adopt]);
 
-function Async<T>({state, children}: {state: Loaded<T>; children: (value: T) => React.ReactNode}) {
-  if (state.status === 'loading') return <CircularProgress aria-label="Loading" />;
-  if (state.status === 'error') return <Alert severity="error">{state.message}</Alert>;
-  return <>{children(state.value)}</>;
-}
+  const run = async () => {
+    if (!state || running) return;
+    setRunning(true); setError(null);
+    try {
+      const prevId = state.problem?.id;
+      const res = await client.submit(state.studentId, code);
+      setOutcome(res.outcome);
+      // Keep what they typed unless a new problem loaded (then the starter code replaces it).
+      const moved = res.state.problem?.id !== prevId;
+      adopt(res.state, !moved);
+      if (moved && res.outcome.passed) setOutcome(res.outcome);
+      if (res.state.problem?.kind === 'practice' && moved) setPracticeShown(true);
+      requestAnimationFrame(() => resultsRef.current?.scrollIntoView({block: 'nearest', behavior: 'smooth'}));
+    } catch (e) { setError(msg(e)); } finally { setRunning(false); }
+  };
 
-export default function App() {
-  const client: ApiClient = useMemo(
-    () => (API_BASE_URL ? createHttpClient(API_BASE_URL) : createMockClient()),
-    []
-  );
-  const [tab, setTab] = useState(0);
-  const tree = useLoaded<SkillTreeData>(useMemo(() => () => client.getSkillTree(), [client]));
-  const diagnostic = useLoaded<DiagnosticQuestion[]>(
-    useMemo(() => () => client.getDiagnostic(), [client])
-  );
+  const build = async (request: string) => {
+    if (!state) return;
+    setThemeBusy(true); setThemeError(null);
+    try {
+      const res = await client.buildTheme(state.studentId, request);
+      if (res.built) { adopt(res.state); setOutcome(null); setThemeOpen(false); }
+      else setThemeError(res.message);
+    } catch (e) { setThemeError(msg(e)); } finally { setThemeBusy(false); }
+  };
 
+  const resetTheme = async () => {
+    if (!state) return;
+    setThemeBusy(true);
+    try { adopt(await client.resetTheme(state.studentId)); setOutcome(null); setThemeOpen(false); }
+    catch (e) { setThemeError(msg(e)); } finally { setThemeBusy(false); }
+  };
+
+  const restart = async () => {
+    store.clear(); setOutcome(null); setLoadError(null);
+    try { adopt(await client.newStudent()); } catch (e) { setLoadError(msg(e)); }
+  };
+
+  if (loadError) return <Container sx={{py: 6}}><Alert severity="error" action={<Button color="inherit" onClick={() => location.reload()}>Retry</Button>}>{loadError}</Alert></Container>;
+  if (!state) return <Box sx={{display: 'grid', placeItems: 'center', minHeight: '60vh'}}><CircularProgress aria-label="Loading" /></Box>;
+
+  const p = state.problem;
+  const themed = state.project.id !== 'weather-station';
   return (
-    <Container maxWidth="lg" sx={{py: 3}}>
-      <Typography variant="h4" component="h1" sx={{mb: 1}}>
-        CodeAI
-      </Typography>
-      {!API_BASE_URL && (
-        <Alert severity="info" sx={{mb: 2}}>
-          Using mock data. Set VITE_API_BASE_URL to use the backend.
-        </Alert>
-      )}
-      <Tabs value={tab} onChange={(_, v: number) => setTab(v)} sx={{mb: 3}}>
-        <Tab label="Skill tree" />
-        <Tab label="Diagnostic" />
-        <Tab label="Next step" />
-      </Tabs>
-      <Box role="tabpanel">
-        {tab === 0 && <Async state={tree}>{value => <SkillTree tree={value} />}</Async>}
-        {tab === 1 && (
-          <Async state={diagnostic}>
-            {value => <DiagnosticPlayer client={client} questions={value} />}
-          </Async>
-        )}
-        {tab === 2 && <StanceRouter client={client} />}
+    <Box sx={{minHeight: '100vh', bgcolor: 'background.default'}}>
+      <Box component="header" sx={{bgcolor: 'primary.main', color: 'primary.contrastText'}}>
+        <Container maxWidth="xl" sx={{display: 'flex', alignItems: 'center', gap: 2, py: 1.25}}>
+          <Typography component="h1" variant="h5" sx={{flex: 1, display: 'flex', gap: 1.5, alignItems: 'baseline', flexWrap: 'wrap'}}>
+            CodeAI <Typography component="span" sx={{opacity: 0.85, fontWeight: 400}}>{state.project.title}</Typography>
+          </Typography>
+          <Button color="inherit" startIcon={<AutoAwesomeIcon />} onClick={() => { setThemeError(null); setThemeOpen(true); }}>Make it yours</Button>
+        </Container>
       </Box>
-    </Container>
+
+      <Container maxWidth="xl" sx={{py: 2}}>
+        <PathStrip path={state.path} />
+        {state.onFallback && <Alert severity="info" sx={{my: 1}}>You're on the standard path for the rest of this project.</Alert>}
+        {state.notices.map((n, i) => <Alert key={i} severity="info" sx={{my: 1}}>{n}</Alert>)}
+
+        {state.complete || !p ? (
+          <Paper variant="outlined" sx={{p: 4, mt: 2, textAlign: 'center'}}>
+            <Typography variant="h4" component="h2">You finished {state.project.title}!</Typography>
+            <Typography sx={{my: 2}}>Here's where you ended up on each idea.</Typography>
+            <Box sx={{maxWidth: 420, mx: 'auto', textAlign: 'left'}}><ConceptMeters state={state} highlight={[]} /></Box>
+            <Box sx={{display: 'flex', gap: 1, justifyContent: 'center', mt: 3}}>
+              <Button variant="outlined" onClick={() => setThemeOpen(true)}>Try it in your own theme</Button>
+              <Button variant="contained" onClick={restart}>Start over as a new student</Button>
+            </Box>
+          </Paper>
+        ) : (
+          <Box sx={{display: 'grid', gap: 2, mt: 1, gridTemplateColumns: {xs: '1fr', md: 'minmax(0,5fr) minmax(0,6fr)', xl: 'minmax(0,5fr) minmax(0,6fr) 240px'}, alignItems: 'start'}}>
+            <Paper variant="outlined" component="section" aria-label="Instructions" sx={{p: 2.5, borderRadius: '12px', maxHeight: {md: 'calc(100vh - 220px)'}, overflow: 'auto'}}>
+              {p.kind === 'practice' && <Typography variant="overline" color="secondary" sx={{fontWeight: 700}}>Practice</Typography>}
+              <Markdown source={p.instructions} />
+            </Paper>
+
+            <Box sx={{display: 'grid', gap: 1.5}}>
+              <CodeEditor value={code} onChange={setCode} onRun={run} disabled={running} />
+              <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
+                <Button variant="contained" color="secondary" size="large" startIcon={running ? <CircularProgress size={18} color="inherit" /> : <PlayArrowIcon />} disabled={running} onClick={run}>
+                  {running ? 'Checking…' : 'Run'}
+                </Button>
+                <Typography variant="caption" color="text.secondary">Ctrl/⌘ + Enter</Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ml: 'auto'}}>Attempts: {p.attempts}</Typography>
+              </Box>
+              {error && <Alert severity="error">{error}</Alert>}
+              <div ref={resultsRef}>{outcome && <Results outcome={outcome} />}</div>
+            </Box>
+
+            <Paper variant="outlined" sx={{p: 2, borderRadius: '12px', gridColumn: {md: '1 / -1', xl: 'auto'}}}>
+              <ConceptMeters state={state} highlight={p.concepts} />
+            </Paper>
+          </Box>
+        )}
+      </Container>
+
+      {practiceShown && <PracticeDialog state={state} onClose={() => setPracticeShown(false)} />}
+      <ThemeDialog open={themeOpen} aiOn={!!health?.ai} aiReason={health?.aiReason ?? null} themed={themed} busy={themeBusy} error={themeError}
+        onBuild={build} onReset={resetTheme} onClose={() => setThemeOpen(false)} />
+    </Box>
   );
 }

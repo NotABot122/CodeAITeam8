@@ -1,66 +1,51 @@
-import {z} from 'zod';
+import type {Health, StudentState, SubmitResult, ThemeResult} from './types';
 
-import {
-  answerResultSchema,
-  growthReportSchema,
-  diagnosticQuestionSchema,
-  nextStepSchema,
-  skillTreeSchema,
-  telemetryAckSchema,
-} from './schema';
-import type {
-  AnswerResult,
-  AnswerSubmission,
-  DiagnosticQuestion,
-  GrowthReport,
-  NextStep,
-  SkillTree,
-  TelemetryAck,
-  TelemetryBatch,
-} from './types';
+export class ApiError extends Error {
+  constructor(message: string, readonly code: string, readonly status: number) {
+    super(message);
+  }
+}
 
 export interface ApiClient {
-  getSkillTree(): Promise<SkillTree>;
-  getDiagnostic(): Promise<DiagnosticQuestion[]>;
-  submitAnswer(answer: AnswerSubmission): Promise<AnswerResult>;
-  getNextStep(): Promise<NextStep>;
-  sendTelemetry(batch: TelemetryBatch): Promise<TelemetryAck>;
-  getGrowthReport(): Promise<GrowthReport>;
+  health(): Promise<Health>;
+  newStudent(): Promise<StudentState>;
+  getState(id: string): Promise<StudentState>;
+  submit(id: string, code: string): Promise<SubmitResult>;
+  buildTheme(id: string, request: string): Promise<ThemeResult>;
+  resetTheme(id: string): Promise<StudentState>;
 }
 
-async function request<T>(
-  schema: z.ZodType<T>,
-  url: string,
-  init?: RequestInit
-): Promise<T> {
-  const response = await fetch(url, {
-    ...init,
-    headers: {'Content-Type': 'application/json', ...init?.headers},
-  });
-  if (!response.ok) {
-    throw new Error(`${init?.method ?? 'GET'} ${url} failed: ${response.status}`);
+export function createHttpClient(base = ''): ApiClient {
+  async function call<T>(method: 'GET' | 'POST', path: string, body?: unknown): Promise<T> {
+    let res: Response;
+    try {
+      res = await fetch(`${base}${path}`, {
+        method,
+        headers: body === undefined ? undefined : {'Content-Type': 'application/json'},
+        body: body === undefined ? undefined : JSON.stringify(body),
+      });
+    } catch {
+      throw new ApiError("Can't reach the server. Check your connection and try again.", 'network', 0);
+    }
+    let data: unknown = null;
+    try {
+      data = await res.json();
+    } catch {
+      /* non-JSON error page */
+    }
+    if (!res.ok) {
+      const err = (data as {error?: {code?: string; message?: string}} | null)?.error;
+      throw new ApiError(err?.message ?? 'Something went wrong. Try again.', err?.code ?? 'error', res.status);
+    }
+    return data as T;
   }
-  // A response that does not match the contract fails here, at the boundary,
-  // not somewhere inside a component.
-  return schema.parse(await response.json());
-}
-
-/** Talks to the Rails backend. Paths other than skill_tree are proposed. */
-export function createHttpClient(baseUrl: string): ApiClient {
-  const base = `${baseUrl}/api/v1/student`;
-  const post = (body: unknown): RequestInit => ({
-    method: 'POST',
-    body: JSON.stringify(body),
-  });
+  const s = (id: string) => `/api/students/${encodeURIComponent(id)}`;
   return {
-    getSkillTree: () => request(skillTreeSchema, `${base}/skill_tree`),
-    getDiagnostic: () =>
-      request(z.array(diagnosticQuestionSchema), `${base}/diagnostic`),
-    submitAnswer: answer =>
-      request(answerResultSchema, `${base}/answers`, post(answer)),
-    getNextStep: () => request(nextStepSchema, `${base}/next_step`),
-    sendTelemetry: batch =>
-      request(telemetryAckSchema, `${base}/telemetry`, post(batch)),
-    getGrowthReport: () => request(growthReportSchema, `${base}/growth_report`),
+    health: () => call('GET', '/api/health'),
+    newStudent: () => call('POST', '/api/students'),
+    getState: id => call('GET', s(id)),
+    submit: (id, code) => call('POST', `${s(id)}/submit`, {code}),
+    buildTheme: (id, request) => call('POST', `${s(id)}/theme`, {request}),
+    resetTheme: id => call('POST', `${s(id)}/theme/reset`, {}),
   };
 }
