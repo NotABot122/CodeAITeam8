@@ -1,0 +1,2 @@
+- Start with count = 0 before the loop.
+- Inside the loop, add 1 when row["speed"] >= 60. Return count after.

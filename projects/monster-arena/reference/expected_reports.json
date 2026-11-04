@@ -1,0 +1,72 @@
+{
+  "seed": 2026,
+  "teacher_reviewed": false,
+  "generated_by": "independent_checker",
+  "reports": [
+    {
+      "args": {
+        "group": "Forest",
+        "start": 1,
+        "end": 10
+      },
+      "report": {
+        "strong_count": 4,
+        "fast_count": 4,
+        "balanced_count": 4,
+        "total_speed": 555.6,
+        "max_power": 106.5,
+        "flagged_monster_numbers": [
+          2,
+          5,
+          7,
+          8,
+          9,
+          10
+        ]
+      }
+    },
+    {
+      "args": {
+        "group": "Desert",
+        "start": 3,
+        "end": 9
+      },
+      "report": {
+        "strong_count": 2,
+        "fast_count": 2,
+        "balanced_count": 4,
+        "total_speed": 336.1,
+        "max_power": 113.8,
+        "flagged_monster_numbers": [
+          5,
+          8,
+          9
+        ]
+      }
+    },
+    {
+      "args": {
+        "group": "Volcano",
+        "start": 1,
+        "end": 13
+      },
+      "report": {
+        "strong_count": 6,
+        "fast_count": 5,
+        "balanced_count": 5,
+        "total_speed": 614.0,
+        "max_power": 107.0,
+        "flagged_monster_numbers": [
+          1,
+          2,
+          5,
+          8,
+          9,
+          10,
+          11,
+          13
+        ]
+      }
+    }
+  ]
+}

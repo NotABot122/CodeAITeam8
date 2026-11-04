@@ -14,6 +14,13 @@ topics:
     project: weather-station
     themeable: true            # students can ask for this one in their own theme
     concepts: [database_retrieval, conditionals, loops, functions]
+    # Same four levels and skills, different stories. The student picks one (the readiness check's goal
+    # suggests it). `goals` are the readiness check's goal ids (projects/weather-station/diagnostic/diagnostic.yaml).
+    choices:
+      - {project: weather-station, goals: [weather_report, not_sure], pitch: "Turn a year of weather readings into a report for a meteorologist."}
+      - {project: monster-arena,   goals: [build_game],              pitch: "Balance the monsters in a creature-battling game before the next update."}
+      - {project: wildlife-watch,  goals: [find_facts],              pitch: "Find patterns in tracking data from animals in three parks."}
+      - {project: library-helper,  goals: [make_helpers],            pitch: "Build a tool that helps library volunteers find and flag books."}
   - id: collections
     title: Lists and Dictionaries
     project: weather-collections
@@ -91,3 +98,28 @@ pathways:
     steps:
       - {project: weather-station, start: level-4}
       - {project: weather-collections}
+
+# Adaptive support (engine/support.py): help fades as a concept's stage rises. The weakest concept of a
+# problem picks the level. Being stuck on a problem gives one level MORE help there until it passes;
+# passing problems quickly gives one level LESS (momentum). Students can always ask for a hint.
+#   auto_hint_after: failed runs before a hint shows on its own (null: only when the student asks)
+#   function_bank: full | names (calls only) | hidden (behind a "show" button)
+#   outline: steps (commented outline of the function) | signature (def line only) | none
+#   error_detail: full (what happened + where to look) | brief (what happened)
+#   ai_explain: the AI tutor phrases error explanations from the student's code (rules otherwise)
+#   name_mistake: show the likely mistake's tip after a failed run
+#   suggest_blocks: suggest Blocks mode after errors several runs in a row
+support:
+  levels:
+    full:    {for_stage: 0, auto_hint_after: 1,    function_bank: full,   outline: steps,     error_detail: full,  ai_explain: true,  name_mistake: true,  suggest_blocks: true}
+    guided:  {for_stage: 1, auto_hint_after: 1,    function_bank: full,   outline: signature, error_detail: full,  ai_explain: true,  name_mistake: true,  suggest_blocks: true}
+    light:   {for_stage: 2, auto_hint_after: 2,    function_bank: names,  outline: none,      error_detail: brief, ai_explain: false, name_mistake: false, suggest_blocks: false}
+    minimal: {for_stage: 3, auto_hint_after: null, function_bank: hidden, outline: none,      error_detail: brief, ai_explain: false, name_mistake: false, suggest_blocks: false}
+  stuck:
+    same_code_twice: true          # the same failing code run again
+    errors_in_a_row: 2             # syntax/load errors or timeouts, runs in a row
+    failed_after_hint: true        # a failed run right after asking for a hint
+    counts_toward_practice: true   # each signal counts as one more try toward intervention.struggle_after
+  momentum:
+    passes_in_a_row: 2             # problems passed in at most max_attempts runs with no hints, in a row
+    max_attempts: 2

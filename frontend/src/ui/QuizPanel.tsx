@@ -43,6 +43,19 @@ export default function QuizPanel({questions, answers, onChange, results, disabl
   );
 }
 
-export function SubmitQuiz({onClick, disabled, busy}: {onClick: () => void; disabled: boolean; busy: boolean}) {
-  return <Button variant="contained" color="secondary" size="large" disabled={disabled || busy} onClick={onClick}>{busy ? 'Checking…' : 'Check my answers'}</Button>;
+/** `wait`: seconds left on the slow-down timer (0 when it's off). */
+export function SubmitQuiz({onClick, disabled, busy, wait = 0}: {onClick: () => void; disabled: boolean; busy: boolean; wait?: number}) {
+  return (
+    <>
+      <Button variant="contained" color="secondary" size="large" disabled={disabled || busy} onClick={onClick}
+        aria-describedby={wait > 0 ? 'quiz-wait' : undefined}>
+        {busy ? 'Checking…' : wait > 0 ? `Check my answers (${wait})` : 'Check my answers'}
+      </Button>
+      {wait > 0 && (
+        <Typography id="quiz-wait" variant="body2" color="text.secondary" role="timer" aria-live="off">
+          Read each question again. Ready in {wait} second{wait === 1 ? '' : 's'}.
+        </Typography>
+      )}
+    </>
+  );
 }

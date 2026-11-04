@@ -1,0 +1,3 @@
+- build_animal_report doesn't need new logic. Each step is a function you already wrote.
+- Start with rows = get_animals(conn, park, start_number, end_number), then loop and append (row, classify_animal(row)) to a list.
+- The last line should return summarize_animals(your_list). Call each function by name.

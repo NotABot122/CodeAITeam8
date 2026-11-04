@@ -1,0 +1,150 @@
+# Likely mistakes for the Weather Station project (engine/support.py).
+# DRAFT for teacher review. Ids reuse the readiness check's misconception codes where they match.
+#
+# mistakes: label is for teachers; tip is what a student sees after a failed run at the levels with more help.
+#           A tip says where to look, never the fix (the content check rejects code in tips).
+# checks:   problem id -> failing check -> mistake, ROOT CAUSE FIRST: one bug often fails several checks (rows that
+#           aren't dictionaries also fail the station check), so with the AI off the first listed failing check wins.
+#           With the AI on, several candidates (or an unmapped failure) let it pick from the allowed list only.
+# practice: which mistakes each practice problem works on. In-lesson help picks the practice that matches the
+#           student's most frequent mistake on that concept.
+
+mistakes:
+  # database_retrieval
+  ignores_one_filter:
+    concept: database_retrieval
+    label: Doesn't filter by every condition (station and dates)
+    tip: Your query keeps rows it shouldn't. Check that it filters by the station and by both dates.
+  forgets_end_date:
+    concept: database_retrieval
+    label: Date range leaves out an end day, or repeats days
+    tip: The range includes both the start date and the end date, each day once. Check whether your date comparisons include the edges.
+  reads_wrong_column:
+    concept: database_retrieval
+    label: Rows aren't dictionaries with the five column names and values
+    tip: Each row should be a dictionary whose keys are the five column names. Check how you turn each database row into a dictionary.
+  unsorted_rows:
+    concept: database_retrieval
+    label: Rows aren't sorted by date
+    tip: The rows need to come back oldest first. Which part of a query puts the results in order?
+  empty_is_error:
+    concept: database_retrieval
+    label: Breaks or returns the wrong thing when nothing matches
+    tip: Try a case where nothing matches. Your function should give back an empty result, not crash.
+  builds_sql_with_text:
+    concept: database_retrieval
+    label: Puts values into the SQL text instead of ? placeholders
+    tip: Put a ? in the SQL for each value and pass the values separately. Gluing text into the query breaks on names that contain quotes.
+
+  # conditionals
+  at_least_means_over:
+    concept: conditionals
+    label: Uses > where the rule says "or more" (edge value left out)
+    tip: The rule says "or more", so the edge value itself counts. Check which comparison you used at the edge.
+  stops_at_first_match:
+    concept: conditionals
+    label: Stops after the first matching rule, so a day can't get both labels
+    tip: A day can be a heat wave and have heavy rain at the same time. Check whether your code can give one day both labels.
+  wrong_default:
+    concept: conditionals
+    label: Gives "normal" at the wrong time
+    tip: A day is normal only when neither rule matches. Check when your code adds the normal label.
+  returns_text_not_list:
+    concept: conditionals
+    label: Returns a single label instead of a list of labels
+    tip: The function should give back a list of labels, even when there is only one label.
+  changes_the_input:
+    concept: conditionals
+    label: Changes the row it was given
+    tip: Your function changes the row it was given. Keep the labels in a new list and leave the row as it was.
+
+  # loops
+  keeps_last_only:
+    concept: loops
+    label: Replaces the total instead of adding to it
+    tip: The total has to grow on every pass of the loop. Check that each value is added to the total instead of replacing it.
+  keeps_first_only:
+    concept: loops
+    label: Doesn't keep the highest value seen so far
+    tip: To find the highest temperature, compare each day with the highest one seen so far and keep the bigger one.
+  counts_every_day:
+    concept: loops
+    label: Counts every item instead of only the ones that match the rule
+    tip: Only days that match the rule count. Check that your counter goes up only when the rule is true.
+  flagged_dates_wrong:
+    concept: loops
+    label: The list of flagged dates is missing dates, repeats them, or isn't sorted
+    tip: The flagged dates are every day that isn't normal, each once, oldest first. Check when you add a date and whether you sort the list.
+  empty_list_crash:
+    concept: loops
+    label: Breaks or gives wrong starting values for an empty list
+    tip: Try an empty list. The loop never runs, so your starting values are the answer. Check that they are right and that nothing crashes.
+  wrong_result_keys:
+    concept: loops
+    label: The summary dictionary has missing, extra or misspelled keys
+    tip: The summary needs exactly the six keys from the instructions, spelled the same way.
+  no_loop:
+    concept: loops
+    label: Doesn't go through the items with a loop
+    tip: This problem asks you to go through the items one at a time with a loop. Check how your code visits each one.
+
+  # functions
+  skips_a_helper:
+    concept: functions
+    label: Doesn't reuse the functions from earlier levels
+    tip: Use the functions you already wrote. Get the readings, label each day, then summarize.
+  changes_the_database:
+    concept: functions
+    label: Changes the database instead of only reading it
+    tip: The report should only read from the database. Check that your code doesn't add, change or remove rows.
+  keeps_state_between_calls:
+    concept: functions
+    label: Gives a different answer the second time it is called
+    tip: Calling the function twice should give the same report. Look for values that carry over from one call to the next.
+
+checks:
+  level-1:
+    check_rows_are_dictionaries: reads_wrong_column
+    check_only_requested_station: ignores_one_filter
+    check_exact_date_range: forgets_end_date
+    check_sorted_by_date: unsorted_rows
+    check_empty_ranges: empty_is_error
+    check_uses_placeholders: builds_sql_with_text
+  level-2:
+    check_returns_list_of_labels: returns_text_not_list
+    check_heat_wave_boundary: at_least_means_over
+    check_heavy_rain_boundary: at_least_means_over
+    check_both_labels: stops_at_first_match
+    check_normal_day: wrong_default
+    check_does_not_change_row: changes_the_input
+    # check_matches_every_day: left to the AI (any of the mistakes above)
+  level-3:
+    check_keys: wrong_result_keys
+    check_total_rain: keeps_last_only
+    check_max_temp: keeps_first_only
+    check_flagged_dates: flagged_dates_wrong
+    check_empty_input: empty_list_crash
+    loop_check: no_loop
+    # check_counts, check_matches_many_ranges: left to the AI
+  level-4:
+    check_uses_your_functions: skips_a_helper
+    check_database_unchanged: changes_the_database
+    check_same_result_twice: keeps_state_between_calls
+    check_empty_report: empty_is_error
+    # check_january_report, check_second_report: left to the AI
+  practice-db-count:
+    check_full_year: ignores_one_filter
+    check_unknown_station: empty_is_error
+    check_uses_placeholders: builds_sql_with_text
+  practice-temp-band:
+    check_bands: at_least_means_over
+  practice-rainy-days:
+    check_small_list: counts_every_day
+    check_empty_list: empty_list_crash
+    check_whole_station: counts_every_day
+    loop_check: no_loop
+
+practice:
+  practice-db-count: [ignores_one_filter, builds_sql_with_text, empty_is_error]
+  practice-temp-band: [at_least_means_over, stops_at_first_match, wrong_default]
+  practice-rainy-days: [counts_every_day, keeps_last_only, empty_list_crash, no_loop]

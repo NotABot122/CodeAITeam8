@@ -1,0 +1,1 @@
+Pre-built project for the readiness-check goal 'find_facts'. Authored spec; teacher review pending.

@@ -63,6 +63,52 @@ The site opens on a landing page. The student picks a grade (9-12) and takes the
 
 The model can't pick a pathway the rules didn't allow. A model error, a disallowed pathway, a stance that doesn't match its pathway, or a student message that mentions stages or scores all fall back to the rules (logged as a `fallback` event). The decision is kept per student (`POST /api/students/<id>/pathway {"grade": 10}`) and `GET /api/teacher/students/<id>` returns it with the stance and note (the teacher screen doesn't show it yet). When a pathway project is finished, the next one is offered first, unless the course recommends a review after a struggle. The model is the team's Bedrock model (`CODEAI_MODEL_ID`), not a separate 2-billion-parameter model.
 
+## Slowing down rushed answers
+
+`frontend/src/ui/pace.ts`. Each question has an expected time from its own text: reading at about 240 words a minute, plus a moment per answer choice or card, more per line of code, and 2 seconds to decide (3 to 40 seconds; readiness-check questions come out at 8-17 s). An answer in under 20% of that time (at least 1.5 s) counts as rushed: about 1.6-3.4 s on readiness-check questions.
+
+- **Readiness check:** two rushed answers in the last three show a "slow down" message, and the Check button then counts down the expected time for each question ("Check (11)"). Three answers in a row that aren't rushed turn the timer off again. Typed "explain" answers aren't timed.
+- **Lesson quizzes:** the whole page counts (up to 2 minutes). One rushed "Check my answers" turns the timer on; a retry after wrong answers waits half the time. Two calm pages turn it off.
+- Client side only; the readiness check already sends each answer's time to the server (`elapsedMs`), which the Strands Decider 2B uses.
+
+## Pick a project: same skills, different stories
+
+The first topic can be learned in four projects with the same four levels, checks and skills (database retrieval, conditionals, loops, functions):
+
+| Project | Readiness-check goal | Story |
+|---|---|---|
+| `weather-station` | Build a weather report; I'm not sure yet | A year of weather readings → a report for a meteorologist |
+| `monster-arena` | Make a game | Balance the monsters in a creature-battling game |
+| `wildlife-watch` | Find patterns in data | Tracking data from animals in three parks |
+| `library-helper` | Build tools people can use | A tool that helps library volunteers find and flag books |
+
+The three new projects were rendered from hand-written specs with the theme templates (`engine/themes/`, the same ones the AI theme builder uses, but no AI involved), then given function banks, a `mistakes.yaml` and outlines. Each has its spec in `theme.json`. They pass the content check; the expected values and the new texts are drafts for teacher review. The choices are listed in `projects/catalog.yaml` (`topics[0].choices`, with the goals each one matches).
+
+- The readiness check's goal suggests a project ("Matches your goal"). The check's placement is translated into that project (a Weather Station practice becomes the same concept's practice), and the result card names the real first problem.
+- The pathway screen has a project picker; the pathway's steps and message follow the choice. Students who skip the check pick a project first.
+- The choice can change until the student runs code in it. After that it stays until the project is finished; then the course moves on to the next topic (Lists and Dictionaries).
+- API: `GET /api/students/<id>/projects`, `POST /api/students/<id>/project {"project": "monster-arena"}`.
+- **Make it yours** (the AI theme builder) is a card in the picker and a button at the top right of every lesson screen whenever the first topic is current or still ahead on the pathway. On a review step, the theme replaces the upcoming project and starts when the student gets there. "Back to the ready-made projects" undoes it.
+
+## Help that fades as students improve (adaptive support)
+
+`engine/support.py`, configured in `projects/catalog.yaml` (`support:`). Each code problem gets a help level from the stage of its weakest concept: **full** (Missing), **guided** (Beginning), **light** (Meeting), **minimal** (Exceeding). Passing two problems in a row quickly with no hints gives one level less help; being stuck gives one level more on that problem until it passes. The Hint button works at every level.
+
+| | full | guided | light | minimal |
+|---|---|---|---|---|
+| Hint shown on its own | after 1 failed run | after 1 | after 2 | only on request |
+| Function bank | with examples | with examples | descriptions only | hidden ("Show functions") |
+| Outline offered | the steps (`outline.py`) | the `def` line | no | no |
+| Error explanation | AI tutor, with where to look | AI tutor | short (rules) | short (rules) |
+| "Where to look" tip for the likely mistake | yes | yes | no | no |
+| Suggest Blocks after errors in a row | yes | yes | no | no |
+
+- **Error explainer:** syntax, load and runtime errors (including SQL errors) get a plain-language explanation. Rules cover the common Python errors; at full and guided the AI tutor phrases it from the student's code (no code, filtered, rules as fallback). A Python error gets the explanation instead of a hint.
+- **Likely mistake:** `<project>/mistakes.yaml` lists each project's mistakes (a teacher label and a student tip) and maps each problem's checks to them, root cause first. One mapped mistake is labelled by rule; several (or an unmapped failure) let the AI pick from the allowed list only. Labels are logged (`mistake` events), counted per student (teacher API), sent to the AI hint as context, and used to pick the in-lesson practice that works on that mistake. Runs that crash aren't labelled.
+- **Stuck:** the same failing code twice, errors (syntax, load, timeout) several runs in a row, or a failed run right after asking for a hint. Stuck adds one level of help and the Blocks suggestion. Stuck runs with failed checks count as one more try toward the in-lesson practice (`intervention.struggle_after`); syntax errors don't.
+- **AI hints match the level:** full may be concrete, minimal is a brief nudge.
+- The content check validates `mistakes.yaml` (concepts, checks, plain-language tips) and `outline.py` (one function from the reference solution, comments and `pass` only). Weather Station has both; other projects work without them.
+
 ## What comes next: the adaptive path
 
 When a student finishes a project, the Course looks at how each concept went (attempts, hints, practice problems) and picks the next step. Anyone can sit down and follow it, with no teacher setup.

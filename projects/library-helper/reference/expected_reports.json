@@ -1,0 +1,76 @@
+{
+  "seed": 2026,
+  "teacher_reviewed": false,
+  "generated_by": "independent_checker",
+  "reports": [
+    {
+      "args": {
+        "group": "Mystery",
+        "start": 1,
+        "end": 10
+      },
+      "report": {
+        "long_count": 4,
+        "popular_count": 6,
+        "regular_count": 3,
+        "total_checkouts": 367.1,
+        "max_pages": 765.3,
+        "flagged_shelf_numbers": [
+          1,
+          2,
+          5,
+          7,
+          8,
+          9,
+          10
+        ]
+      }
+    },
+    {
+      "args": {
+        "group": "Science",
+        "start": 3,
+        "end": 9
+      },
+      "report": {
+        "long_count": 3,
+        "popular_count": 4,
+        "regular_count": 2,
+        "total_checkouts": 242.3,
+        "max_pages": 883.1,
+        "flagged_shelf_numbers": [
+          4,
+          5,
+          7,
+          8,
+          9
+        ]
+      }
+    },
+    {
+      "args": {
+        "group": "Adventure",
+        "start": 1,
+        "end": 12
+      },
+      "report": {
+        "long_count": 6,
+        "popular_count": 7,
+        "regular_count": 3,
+        "total_checkouts": 396.0,
+        "max_pages": 838.0,
+        "flagged_shelf_numbers": [
+          1,
+          2,
+          4,
+          5,
+          7,
+          8,
+          9,
+          10,
+          12
+        ]
+      }
+    }
+  ]
+}

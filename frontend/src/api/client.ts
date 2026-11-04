@@ -1,5 +1,5 @@
 import type {AnswerResult, QuestNext, QuestOptions, QuestStart} from '@/quest/types';
-import type {BlocksResult, CourseView, Health, PathwayResult, StartResult, StudentState, SubmitResult, ThemeResult} from './types';
+import type {BlocksResult, ChooseResult, CourseView, Health, PathwayResult, ProjectChoices, StartResult, StudentState, SubmitResult, ThemeResult} from './types';
 
 export class ApiError extends Error {
   constructor(message: string, readonly code: string, readonly status: number) {
@@ -18,6 +18,10 @@ export interface ApiClient {
   getState(id: string): Promise<StudentState>;
   getCourse(id: string): Promise<CourseView>;
   submit(id: string, code: string): Promise<SubmitResult>;
+  /** The projects the student can learn the first topic in, and whether the choice is still open. */
+  projectChoices(id: string): Promise<ProjectChoices>;
+  /** Pick a project (before it's started). Placement and pathway follow the choice. */
+  chooseProject(id: string, project: string): Promise<ChooseResult>;
   /** After the readiness check: the Strands Decider 2B picks and starts a lesson pathway (once per student). */
   pathway(id: string, grade: number): Promise<PathwayResult>;
   /** The next hint for the current problem. Not a submission; it does count as a hint used. */
@@ -66,6 +70,8 @@ export function createHttpClient(base = ''): ApiClient {
     getState: id => call('GET', s(id)),
     getCourse: id => call('GET', `${s(id)}/course`),
     submit: (id, code) => call('POST', `${s(id)}/submit`, {code}),
+    projectChoices: id => call('GET', `${s(id)}/projects`),
+    chooseProject: (id, project) => call('POST', `${s(id)}/project`, {project}),
     pathway: (id, grade) => call('POST', `${s(id)}/pathway`, {grade}),
     hint: (id, code) => call('POST', `${s(id)}/hint`, {code}),
     answer: (id, answers) => call('POST', `${s(id)}/answer`, {answers}),

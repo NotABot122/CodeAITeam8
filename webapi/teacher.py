@@ -177,8 +177,55 @@ class Teacher:
             "quest": report,
             # The Strands Decider 2B's choice, with the teacher-only fields (stance, note, evidence, fallback).
             "pathway": profile.get("pathway"),
+            # Adaptive support: the likely mistakes seen, and how much help the current problem gets.
+            "mistakes": self._mistakes(sid),
+            "support": self._support(sid),
             "lastActive": _iso(self._last_active(sid)) if self._last_active(sid) else None,
         }
+
+    def _mistakes(self, sid: str) -> List[Dict[str, Any]]:
+        from engine.support import load_mistakes
+        out = []
+        for project in self._projects_for(sid):
+            catalog = load_mistakes(project)
+            try:
+                record = self.course.store.load(sid, project.id)
+            except Exception:
+                record = None
+            if record is None:
+                continue
+            for mid, n in sorted(record.mistakes.items(), key=lambda kv: -kv[1]):
+                m = catalog.mistakes.get(mid) if catalog else None
+                out.append({"project": project.id, "id": mid, "count": n, "label": m.label if m else mid,
+                            "concept": m.concept if m else None})
+        return out
+
+    def _support(self, sid: str) -> Optional[Dict[str, Any]]:
+        engine = self.course.engine(sid)
+        try:
+            record, _ = engine.open(sid)
+        except Exception:
+            return None
+        if record.complete or not record.current_problem:
+            return None
+        problem = engine.project.problem(record.current_problem)
+        if problem.is_quiz:
+            return None
+        view = engine.support_view(record, problem)
+        state = record.support.get(problem.id) or {}
+        return {"problem": problem.title, "level": view["level"], "stuck": view["stuck"],
+                "stuckReasons": list(state.get("reasons") or []), "stuckSignals": int(state.get("signals", 0))}
+
+    def _projects_for(self, sid: str):
+        from pathlib import Path as _P
+        out, seen = [], set()
+        folders = [self.course.store.active_project(sid)] + [str(self.course.projects_root / c.get("project_id", ""))
+                                                              for c in self.course.store.profile(sid).get("completed") or []]
+        for folder in folders:
+            if folder and _P(folder).is_dir() and folder not in seen:
+                seen.add(folder)
+                out.append(self.course._project(folder))
+        return out or [self.course.default_project()]
 
     def content_check(self) -> Dict[str, Any]:
         out = []

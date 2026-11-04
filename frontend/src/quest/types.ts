@@ -39,7 +39,7 @@ export interface QuestDone {
   done: true;
   message: string;
   goal_connection?: string;
-  next_stop?: {zone: string; activity: {id: string; title: string} | null};
+  next_stop?: {zone: string; activity: {id: string; title: string} | null; project?: string};
   skill_tree: SkillNode[];
   zones: Zone[];
 }

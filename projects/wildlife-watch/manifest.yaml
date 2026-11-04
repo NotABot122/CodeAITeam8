@@ -1,0 +1,172 @@
+title: Wildlife Watch
+streak_length: 1
+concepts:
+- id: database_retrieval
+  name: Database Retrieval
+- id: conditionals
+  name: Conditionals
+- id: loops
+  name: Loops
+- id: functions
+  name: Functions
+stage_criteria:
+  1:
+    max_attempts: 3
+    max_hints: null
+  2:
+    max_attempts: 2
+    max_hints: null
+  3:
+    max_attempts: 1
+    max_hints: 0
+levels:
+- id: level-1
+  number: 1
+  title: Find the animals
+  folder: levels/level-1
+  concepts:
+  - database_retrieval
+  advance_at_stage: 1
+  loop_check: null
+  format: code
+- id: level-2
+  number: 2
+  title: Label Each Entry
+  folder: levels/level-2
+  concepts:
+  - conditionals
+  advance_at_stage: 1
+  loop_check: null
+  format: code
+- id: level-3
+  number: 3
+  title: Count Them All Up
+  folder: levels/level-3
+  concepts:
+  - loops
+  advance_at_stage: 1
+  loop_check: summarize_animals
+  format: code
+- id: level-4
+  number: 4
+  title: Build the Report
+  folder: levels/level-4
+  concepts:
+  - functions
+  advance_at_stage: null
+  loop_check: null
+  format: code
+practice_problems:
+- id: practice-count
+  title: 'Practice: Count Each Park'
+  folder: practice/count
+  concept: database_retrieval
+  target_stage: 1
+  loop_check: null
+- id: practice-band
+  title: 'Practice: Weight Bands'
+  folder: practice/band
+  concept: conditionals
+  target_stage: 1
+  loop_check: null
+- id: practice-loop
+  title: 'Practice: Count the Roamer Ones'
+  folder: practice/loop
+  concept: loops
+  target_stage: 1
+  loop_check: count_roamer
+fallback_path:
+- level-1
+- level-2
+- level-3
+- level-4
+dataset:
+  generator: dataset/generate.py
+  database: dataset/data.db
+parameters:
+  topic: data-logic
+  theme:
+    title: Wildlife Watch
+    story: 'Park rangers put tracking tags on animals in three parks. They need help
+      finding patterns in the tag data: which animals are heavy, which roam far each
+      day, and what each park looks like in a report they can share with the wildlife
+      team.'
+    entity_singular: animal
+    entity_plural: animals
+    table: tagged_animals
+    group_column: park
+    group_description: The park where the animal was tagged
+    groups:
+    - Pine Ridge
+    - Cedar Lake
+    - Red Canyon
+    number_column: tag_number
+    name_column: species
+    metric_a:
+      column: weight_kg
+      label: heavy
+      unit: kg
+      description: Body weight
+      minimum: 1.0
+      maximum: 600.0
+      threshold: 100.0
+    metric_b:
+      column: daily_km
+      label: roamer
+      unit: km
+      description: Distance moved in a day
+      minimum: 0.5
+      maximum: 40.0
+      threshold: 15.0
+    normal_label: typical
+    names:
+      Pine Ridge:
+      - Black Bear
+      - Mule Deer
+      - Gray Wolf
+      - Red Fox
+      - Bobcat
+      - Elk
+      - Porcupine
+      - Snowshoe Hare
+      - Pine Marten
+      - Moose
+      - Lynx
+      - Coyote
+      - Badger
+      Cedar Lake:
+      - Beaver
+      - River Otter
+      - Mink
+      - Raccoon
+      - Muskrat
+      - White-tailed Deer
+      - Snapping Turtle
+      - Great Blue Heron
+      - Bald Eagle
+      - Osprey
+      - Loon
+      - Fisher
+      Red Canyon:
+      - Bighorn Sheep
+      - Pronghorn
+      - Mountain Lion
+      - Kit Fox
+      - Jackrabbit
+      - Desert Tortoise
+      - Gila Monster
+      - Ringtail
+      - Javelina
+      - Golden Eagle
+      - Roadrunner
+      - Coati
+  expected_report_args:
+  - group: Pine Ridge
+    start: 1
+    end: 10
+  - group: Cedar Lake
+    start: 3
+    end: 9
+  - group: Red Canyon
+    start: 1
+    end: 12

@@ -1,0 +1,83 @@
+{
+  "title": "Monster Arena",
+  "story": "You're on the team building Monster Arena, a creature-battling game. Before the next update, the game designer needs a tool that finds monsters by zone, spots the strong and fast ones, and builds a balance report so no zone is too easy or too hard.",
+  "entity_singular": "monster",
+  "entity_plural": "monsters",
+  "table": "monsters",
+  "group_column": "zone",
+  "group_description": "The game zone where the monster lives",
+  "groups": [
+    "Forest",
+    "Desert",
+    "Volcano"
+  ],
+  "number_column": "monster_number",
+  "name_column": "name",
+  "metric_a": {
+    "column": "power",
+    "label": "strong",
+    "unit": "points",
+    "description": "Attack power",
+    "minimum": 5.0,
+    "maximum": 120.0,
+    "threshold": 70.0
+  },
+  "metric_b": {
+    "column": "speed",
+    "label": "fast",
+    "unit": "points",
+    "description": "Movement speed",
+    "minimum": 5.0,
+    "maximum": 100.0,
+    "threshold": 60.0
+  },
+  "normal_label": "balanced",
+  "names": {
+    "Forest": [
+      "Mossling",
+      "Barkbeak",
+      "Thornpup",
+      "Fernwhisp",
+      "Acornox",
+      "Vinelash",
+      "Puffcap",
+      "Briarback",
+      "Leafwing",
+      "Rootgnaw",
+      "Sapsprite",
+      "Twigtail",
+      "Burrowbun",
+      "Lichenlord"
+    ],
+    "Desert": [
+      "Dunecrawler",
+      "Sandviper",
+      "Cactopus",
+      "Mirageon",
+      "Scorchtail",
+      "Dustling",
+      "Pebblepaw",
+      "Sunfang",
+      "Oasisprite",
+      "Rattlerock",
+      "Quillback",
+      "Hazehorn",
+      "Embermole"
+    ],
+    "Volcano": [
+      "Magmaw",
+      "Cinderkit",
+      "Ashwing",
+      "Lavaloo",
+      "Obsidrake",
+      "Smoulder",
+      "Pyrebat",
+      "Basaltor",
+      "Flarefin",
+      "Sootsnout",
+      "Ignitoad",
+      "Craterclaw",
+      "Blazemite"
+    ]
+  }
+}

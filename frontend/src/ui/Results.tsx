@@ -1,5 +1,7 @@
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import ManageSearchIcon from '@mui/icons-material/ManageSearch';
+import TranslateIcon from '@mui/icons-material/Translate';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import {Alert, Box, Typography} from '@mui/material';
 
@@ -46,7 +48,30 @@ export default function Results({outcome}: {outcome: Outcome}) {
           </Box>
         )}
       </Alert>
+      {outcome.explanation && (
+        <Box sx={{display: 'flex', gap: 1.25, p: 1.5, borderRadius: '10px', border: 1, borderColor: 'divider', bgcolor: 'background.paper'}}>
+          <TranslateIcon color="action" />
+          <Box>
+            <Typography variant="caption" sx={{fontWeight: 700}}>
+              What this error means{outcome.explanation.line ? ` (line ${outcome.explanation.line})` : ''}
+            </Typography>
+            <Typography>{outcome.explanation.text}</Typography>
+          </Box>
+        </Box>
+      )}
+      {outcome.mistake && (
+        <Box sx={{display: 'flex', gap: 1.25, p: 1.5, borderRadius: '10px', border: 1, borderColor: 'secondary.main', bgcolor: 'action.hover'}}>
+          <ManageSearchIcon color="secondary" />
+          <Box>
+            <Typography variant="caption" sx={{fontWeight: 700, color: 'secondary.main'}}>Where to look</Typography>
+            <Typography>{outcome.mistake.tip}</Typography>
+          </Box>
+        </Box>
+      )}
       {outcome.hint && <HintCard hint={outcome.hint} source={outcome.hintSource} />}
+      {!outcome.passed && !outcome.hint && !outcome.explanation && !outcome.mistake && ['failed', 'timeout'].includes(outcome.status) && (
+        <Typography variant="body2" color="text.secondary">Read the messages above and try again. The Hint button is there if you want it.</Typography>
+      )}
       {outcome.stageChanges.map(c => (
         <Box key={c.concept} sx={{display: 'flex', gap: 1, alignItems: 'center', color: c.newStage > c.oldStage ? 'success.main' : 'text.secondary'}}>
           <TrendingUpIcon fontSize="small" />

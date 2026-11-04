@@ -13,6 +13,8 @@ Routes (JSON):
     GET  /api/students/<id>                 -> state
     GET  /api/students/<id>/course          -> the whole course: topics, finished work, ideas, what's next
     POST /api/students/<id>/submit          {"code": "..."} -> {outcome, state}
+    GET  /api/students/<id>/projects        -> {choices: [{project, title, pitch, suggested, current}], locked, topic}
+    POST /api/students/<id>/project         {"project": "monster-arena"} -> {state, choices, locked} (before it's started)
     POST /api/students/<id>/pathway         {"grade": 9-12} -> {pathway, state} (Strands Decider 2B; once per student)
     POST /api/students/<id>/hint            {"code": "..."} -> {outcome, state} (next hint; not a submission)
     POST /api/students/<id>/answer          {"answers": {"q1": 1, "q3": "text"}} -> {outcome, state}
@@ -58,6 +60,8 @@ ROUTES = [
     ("GET", re.compile(rf"^/api/students/{ID}$"), lambda s, m, b: s.state(m[1])),
     ("GET", re.compile(rf"^/api/students/{ID}/course$"), lambda s, m, b: s.course_view(m[1])),
     ("POST", re.compile(rf"^/api/students/{ID}/submit$"), lambda s, m, b: s.submit(m[1], b.get("code"))),
+    ("GET", re.compile(rf"^/api/students/{ID}/projects$"), lambda s, m, b: s.project_choices(m[1])),
+    ("POST", re.compile(rf"^/api/students/{ID}/project$"), lambda s, m, b: s.choose_project(m[1], b.get("project"))),
     ("POST", re.compile(rf"^/api/students/{ID}/pathway$"), lambda s, m, b: s.pathway(m[1], b.get("grade"))),
     ("POST", re.compile(rf"^/api/students/{ID}/hint$"), lambda s, m, b: s.hint(m[1], b.get("code"))),
     ("POST", re.compile(rf"^/api/students/{ID}/answer$"), lambda s, m, b: s.answer(m[1], b.get("answers"))),

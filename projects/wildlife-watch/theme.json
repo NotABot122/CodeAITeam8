@@ -1,0 +1,80 @@
+{
+  "title": "Wildlife Watch",
+  "story": "Park rangers put tracking tags on animals in three parks. They need help finding patterns in the tag data: which animals are heavy, which roam far each day, and what each park looks like in a report they can share with the wildlife team.",
+  "entity_singular": "animal",
+  "entity_plural": "animals",
+  "table": "tagged_animals",
+  "group_column": "park",
+  "group_description": "The park where the animal was tagged",
+  "groups": [
+    "Pine Ridge",
+    "Cedar Lake",
+    "Red Canyon"
+  ],
+  "number_column": "tag_number",
+  "name_column": "species",
+  "metric_a": {
+    "column": "weight_kg",
+    "label": "heavy",
+    "unit": "kg",
+    "description": "Body weight",
+    "minimum": 1.0,
+    "maximum": 600.0,
+    "threshold": 100.0
+  },
+  "metric_b": {
+    "column": "daily_km",
+    "label": "roamer",
+    "unit": "km",
+    "description": "Distance moved in a day",
+    "minimum": 0.5,
+    "maximum": 40.0,
+    "threshold": 15.0
+  },
+  "normal_label": "typical",
+  "names": {
+    "Pine Ridge": [
+      "Black Bear",
+      "Mule Deer",
+      "Gray Wolf",
+      "Red Fox",
+      "Bobcat",
+      "Elk",
+      "Porcupine",
+      "Snowshoe Hare",
+      "Pine Marten",
+      "Moose",
+      "Lynx",
+      "Coyote",
+      "Badger"
+    ],
+    "Cedar Lake": [
+      "Beaver",
+      "River Otter",
+      "Mink",
+      "Raccoon",
+      "Muskrat",
+      "White-tailed Deer",
+      "Snapping Turtle",
+      "Great Blue Heron",
+      "Bald Eagle",
+      "Osprey",
+      "Loon",
+      "Fisher"
+    ],
+    "Red Canyon": [
+      "Bighorn Sheep",
+      "Pronghorn",
+      "Mountain Lion",
+      "Kit Fox",
+      "Jackrabbit",
+      "Desert Tortoise",
+      "Gila Monster",
+      "Ringtail",
+      "Javelina",
+      "Golden Eagle",
+      "Roadrunner",
+      "Coati"
+    ]
+  }
+}
