@@ -210,6 +210,50 @@ class Service:
             self._guard(lambda: self.course.reset_theme(student_id))
             return self._state(student_id)
 
+    def course_view(self, student_id: str) -> Dict[str, Any]:
+        """The student's whole course at a glance: topics, finished work, ideas, and what's next."""
+        self._check_id(student_id)
+        with self._lock(student_id):
+            course = self.course
+            profile = course.store.profile(student_id)
+            engine = course.engine(student_id)
+            record, _ = engine.open(student_id)
+            project = engine.project
+            catalog = course.catalog
+            done_topics = {c.get("topic") for c in profile.get("completed") or [] if c.get("topic") != "revision"}
+            if record.complete and project.topic != "revision":
+                done_topics.add(project.topic)
+            topics = []
+            for t in catalog.topics:
+                if t.id in done_topics:
+                    status = "done"
+                elif project.topic == t.id and not record.complete:
+                    status = "current"
+                else:
+                    status = "upcoming"
+                topics.append({"id": t.id, "title": t.title, "status": status,
+                               "concepts": [catalog.name(c) for c in t.concepts]})
+            stages = {c: int(s) for c, s in (profile.get("concepts") or {}).items()}
+            for cid, st in record.concepts.items():
+                stages[cid] = max(stages.get(cid, 0), int(st.stage))
+            reviews = []
+            for c in profile.get("completed") or []:
+                if c.get("topic") == "revision" and c.get("revision_concept"):
+                    reviews.append(catalog.name(c["revision_concept"]))
+            diag = profile.get("diagnostic") or {}
+            return {
+                "studentId": student_id,
+                "now": {"project": project.title, "isReview": project.topic == "revision", "complete": record.complete},
+                "topics": topics,
+                "reviewsDone": reviews,
+                "concepts": [{"id": c, "name": n, "stage": stages.get(c, 0), "stageName": STAGE_NAMES[min(3, stages.get(c, 0))]}
+                             for c, n in catalog.concepts.items()],
+                "quest": {"status": course.diagnostic_status(student_id),
+                          "seeded": [catalog.name(c) for c, v in (diag.get("seeded") or {}).items() if v > 0]},
+                "nextStep": (profile.get("next_step") or {}).get("reason") if record.complete else None,
+                "stageNames": [STAGE_NAMES[i] for i in range(MAX_STAGE + 1)],
+            }
+
     # Readiness quest ---------------------------------------------------------
     def quest_options(self) -> Dict[str, Any]:
         return self.course.diagnostic_options()

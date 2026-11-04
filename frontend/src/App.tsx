@@ -18,6 +18,7 @@ import {Markdown} from './ui/markdown';
 import PathStrip from './ui/PathStrip';
 import QuestApp from './quest/QuestApp';
 import TeacherApp from './teacher/TeacherApp';
+import CoursePage from './ui/CoursePage';
 import NextStepPanel from './ui/NextStepPanel';
 import QuizPanel, {quizReady, SubmitQuiz, type QuizAnswers} from './ui/QuizPanel';
 import Results from './ui/Results';
@@ -59,6 +60,7 @@ export default function App({client: injected}: {client?: ApiClient}) {
   const [stepBusy, setStepBusy] = useState(false);
   const [stepError, setStepError] = useState<string | null>(null);
   const [practiceShown, setPracticeShown] = useState(false);
+  const [showCourse, setShowCourse] = useState(false);
   const [themeOpen, setThemeOpen] = useState(false);
   const [themeBusy, setThemeBusy] = useState(false);
   const [themeError, setThemeError] = useState<string | null>(null);
@@ -203,11 +205,13 @@ export default function App({client: injected}: {client?: ApiClient}) {
           <Typography component="h1" variant="h5" sx={{flex: 1, display: 'flex', gap: 1.5, alignItems: 'baseline', flexWrap: 'wrap'}}>
             CodeAI <Typography component="span" sx={{opacity: 0.85, fontWeight: 400}}>{state.project.title}</Typography>
           </Typography>
+          <Button color="inherit" onClick={() => setShowCourse(v => !v)}>{showCourse ? 'My lesson' : 'My course'}</Button>
           {state.project.topic === 'data-logic' && <Button color="inherit" startIcon={<AutoAwesomeIcon />} onClick={() => { setThemeError(null); setThemeOpen(true); }}>Make it yours</Button>}
         </Container>
       </Box>
 
       <Container maxWidth="xl" sx={{py: 2}}>
+        {showCourse ? <CoursePage client={client} studentId={state.studentId} onBack={() => setShowCourse(false)} /> : <>
         <Box sx={{display: 'flex', flexDirection: {xs: 'column', lg: 'row'}, gap: 2, alignItems: {lg: 'center'}, justifyContent: 'space-between'}}>
           <PathStrip path={state.path} />
           {!state.complete && p && (
@@ -292,6 +296,7 @@ export default function App({client: injected}: {client?: ApiClient}) {
 
           </Box>
         )}
+        </>}
       </Container>
 
       {practiceShown && <PracticeDialog state={state} onClose={() => setPracticeShown(false)} />}

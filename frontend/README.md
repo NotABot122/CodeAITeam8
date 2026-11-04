@@ -29,6 +29,7 @@ Remove `--ai off` (and install `boto3`, set AWS creds) to get AI hints and the "
 - `src/ui/PathStrip` – compact level path; an assigned practice problem shows as a badge on its level
 - `src/ui/QuizPanel`, `src/ui/NextStepPanel` – review quizzes and the "what's next" screen (from `engine.course`)
 - `src/ui/CodeEditor` – textarea with line numbers (Tab = 4 spaces, Esc then Tab leaves the box, Ctrl/Cmd+Enter runs)
+- `src/ui/CoursePage` – "My course" (header button): every topic as done / you are here / up next, the six ideas with their stage, finished reviews, what the readiness quest set, and what comes next. Backed by `GET /api/students/<id>/course`.
 - `src/ui/Results` – grader messages, hint (labelled AI or teacher-written), stage changes
 - `src/ui/ConceptMeters` – Missing / Beginning / Meeting / Exceeding for all six concepts, in a sideways-scrolling row
 - `src/ui/Dialogs` – "A quick practice first" pop-up and the theme dialog

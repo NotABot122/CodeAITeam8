@@ -115,6 +115,25 @@ class WebApiTests(unittest.TestCase):
         with self.assertRaises(ApiError):
             self.svc.quest_next("STU-nope")
 
+    def test_course_view_tracks_topics_and_reviews(self):
+        sid = self.svc.new_student()["studentId"]
+        v = self.svc.course_view(sid)
+        self.assertEqual([t["status"] for t in v["topics"]], ["current", "upcoming"])
+        self.assertEqual(len(v["concepts"]), 6)
+        self.assertEqual(v["quest"]["status"], "none")
+        for _ in range(3):
+            self.svc.submit(sid, "print(1)")
+        for _ in range(8):
+            if self.svc.submit(sid, REF)["state"]["complete"]:
+                break
+        v = self.svc.course_view(sid)
+        self.assertEqual(v["topics"][0]["status"], "done")
+        self.assertTrue(v["nextStep"])
+        self.svc.start_next(sid, 0)  # the recommended review
+        v = self.svc.course_view(sid)
+        self.assertTrue(v["now"]["isReview"])
+        self.assertEqual(v["topics"][0]["status"], "done")
+
     def test_theme_needs_ai(self):
         sid = self.svc.new_student()["studentId"]
         with self.assertRaises(ApiError) as cm:
