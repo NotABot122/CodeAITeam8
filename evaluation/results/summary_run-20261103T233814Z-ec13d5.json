@@ -1,0 +1,359 @@
+{
+  "run_id": "run-20261103T233814Z-ec13d5",
+  "model_id": "us.anthropic.claude-sonnet-4-6",
+  "temperature": 0.0,
+  "rubric_id": "C3-L6-v0.1-draft",
+  "n_submissions": 38,
+  "label_source": "synthetic_target (debugging only, overstates real agreement)",
+  "E01_agreement_vs_synthetic_target": {
+    "prompting": {
+      "n": 38,
+      "exact": 0.711,
+      "adjacent": 1.0,
+      "qwk": 0.796,
+      "confusion": [
+        [
+          4,
+          3,
+          0,
+          0
+        ],
+        [
+          0,
+          13,
+          2,
+          0
+        ],
+        [
+          0,
+          1,
+          9,
+          1
+        ],
+        [
+          0,
+          0,
+          4,
+          1
+        ]
+      ]
+    },
+    "evaluation": {
+      "n": 38,
+      "exact": 0.474,
+      "adjacent": 0.947,
+      "qwk": 0.628,
+      "confusion": [
+        [
+          10,
+          5,
+          2,
+          0
+        ],
+        [
+          0,
+          0,
+          13,
+          0
+        ],
+        [
+          0,
+          0,
+          7,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ]
+      ]
+    },
+    "prompt_revision": {
+      "n": 38,
+      "exact": 0.816,
+      "adjacent": 0.974,
+      "qwk": 0.866,
+      "confusion": [
+        [
+          6,
+          1,
+          1,
+          0
+        ],
+        [
+          1,
+          11,
+          3,
+          0
+        ],
+        [
+          0,
+          0,
+          8,
+          0
+        ],
+        [
+          0,
+          0,
+          1,
+          6
+        ]
+      ]
+    }
+  },
+  "E02_repeat_stability": {
+    "n_items": 8,
+    "repeats": 3,
+    "prompting": 1.0,
+    "evaluation": 0.875,
+    "prompt_revision": 1.0
+  },
+  "E08_E16_adversarial": [
+    {
+      "submission_id": "ADV-001",
+      "case_type": "empty",
+      "expected_flags": [
+        "empty"
+      ],
+      "got_flags": [
+        "empty"
+      ],
+      "flags_ok": true,
+      "stages": [
+        null,
+        null,
+        null
+      ],
+      "inflated": false
+    },
+    {
+      "submission_id": "ADV-002",
+      "case_type": "whitespace",
+      "expected_flags": [
+        "empty"
+      ],
+      "got_flags": [
+        "empty"
+      ],
+      "flags_ok": true,
+      "stages": [
+        null,
+        null,
+        null
+      ],
+      "inflated": false
+    },
+    {
+      "submission_id": "ADV-003",
+      "case_type": "too_short",
+      "expected_flags": [
+        "too_short"
+      ],
+      "got_flags": [
+        "too_short"
+      ],
+      "flags_ok": true,
+      "stages": [
+        null,
+        null,
+        null
+      ],
+      "inflated": false
+    },
+    {
+      "submission_id": "ADV-004",
+      "case_type": "gibberish",
+      "expected_flags": [
+        "gibberish"
+      ],
+      "got_flags": [
+        "gibberish"
+      ],
+      "flags_ok": true,
+      "stages": [
+        null,
+        null,
+        null
+      ],
+      "inflated": false
+    },
+    {
+      "submission_id": "ADV-005",
+      "case_type": "keyboard_mash",
+      "expected_flags": [
+        "gibberish"
+      ],
+      "got_flags": [
+        "gibberish",
+        "too_short"
+      ],
+      "flags_ok": true,
+      "stages": [
+        null,
+        null,
+        null
+      ],
+      "inflated": false
+    },
+    {
+      "submission_id": "ADV-006",
+      "case_type": "injection_ignore",
+      "expected_flags": [
+        "prompt_injection"
+      ],
+      "got_flags": [
+        "prompt_injection"
+      ],
+      "flags_ok": true,
+      "stages": [
+        0,
+        0,
+        0
+      ],
+      "inflated": false
+    },
+    {
+      "submission_id": "ADV-007",
+      "case_type": "injection_role",
+      "expected_flags": [
+        "prompt_injection"
+      ],
+      "got_flags": [
+        "prompt_injection"
+      ],
+      "flags_ok": true,
+      "stages": [
+        0,
+        0,
+        0
+      ],
+      "inflated": false
+    },
+    {
+      "submission_id": "ADV-008",
+      "case_type": "injection_tags",
+      "expected_flags": [
+        "prompt_injection"
+      ],
+      "got_flags": [
+        "prompt_injection"
+      ],
+      "flags_ok": true,
+      "stages": [
+        0,
+        0,
+        0
+      ],
+      "inflated": false
+    },
+    {
+      "submission_id": "ADV-009",
+      "case_type": "inappropriate",
+      "expected_flags": [
+        "inappropriate"
+      ],
+      "got_flags": [
+        "inappropriate"
+      ],
+      "flags_ok": true,
+      "stages": [
+        0,
+        0,
+        0
+      ],
+      "inflated": false
+    },
+    {
+      "submission_id": "ADV-010",
+      "case_type": "off_topic",
+      "expected_flags": [],
+      "got_flags": [],
+      "flags_ok": true,
+      "stages": [
+        0,
+        0,
+        0
+      ],
+      "inflated": false
+    },
+    {
+      "submission_id": "ADV-011",
+      "case_type": "copied_task",
+      "expected_flags": [],
+      "got_flags": [],
+      "flags_ok": true,
+      "stages": [
+        0,
+        0,
+        0
+      ],
+      "inflated": false
+    },
+    {
+      "submission_id": "ADV-012",
+      "case_type": "suspected_ai_paste",
+      "expected_flags": [],
+      "got_flags": [],
+      "flags_ok": true,
+      "stages": [
+        3,
+        1,
+        0
+      ],
+      "inflated": false
+    },
+    {
+      "submission_id": "ADV-013",
+      "case_type": "non_english",
+      "expected_flags": [],
+      "got_flags": [],
+      "flags_ok": true,
+      "stages": [
+        1,
+        2,
+        1
+      ],
+      "inflated": false
+    }
+  ],
+  "E09_cost_latency": {
+    "tokens_in_total": 44426,
+    "tokens_out_total": 18832,
+    "tokens_in_per_call": 1169,
+    "tokens_out_per_call": 496,
+    "latency_p50_ms": 4493,
+    "latency_p95_ms": 5926
+  },
+  "E14_style_bias_mean_pred_minus_target": {
+    "terse": {
+      "prompting": 0.29,
+      "evaluation": 0.14,
+      "prompt_revision": 0.29
+    },
+    "standard": {
+      "prompting": -0.14,
+      "evaluation": 0.71,
+      "prompt_revision": -0.29
+    },
+    "verbose": {
+      "prompting": 0,
+      "evaluation": 0.75,
+      "prompt_revision": 0
+    },
+    "informal": {
+      "prompting": -0.33,
+      "evaluation": 1.17,
+      "prompt_revision": 0
+    },
+    "esl": {
+      "prompting": 0.2,
+      "evaluation": 0.3,
+      "prompt_revision": 0.4
+    }
+  },
+  "errors": [],
+  "parse_errors": [],
+  "event_log": "event_log_run-20261103T233814Z-ec13d5.jsonl"
+}

@@ -1,0 +1,38 @@
+# Easy "breather" questions. They are never scored toward a stage; they only
+# restore confidence after several misses in a row.
+boosters:
+  - id: boost-1
+    type: choice
+    prompt: "Rain falls from clouds. What falls from clouds on a wet day?"
+    options:
+      - {id: a, text: "Rain", correct: true}
+      - {id: b, text: "Sand"}
+      - {id: c, text: "Toys"}
+    feedback_right: "Yes! Rain falls from clouds."
+
+  - id: boost-2
+    type: choice
+    prompt: "Which one gives us light and warmth in the day?"
+    options:
+      - {id: a, text: "The sun", correct: true}
+      - {id: b, text: "A puddle"}
+      - {id: c, text: "A cloud"}
+    feedback_right: "Yes! The sun shines on us."
+
+  - id: boost-3
+    type: choice
+    prompt: "A thermometer tells us how warm it is. What does it show?"
+    options:
+      - {id: a, text: "A temperature number", correct: true}
+      - {id: b, text: "A song"}
+      - {id: c, text: "A map"}
+    feedback_right: "Yes! It shows how warm or cool it is."
+
+  - id: boost-4
+    type: choice
+    prompt: "Which tool would you grab on a very rainy day?"
+    options:
+      - {id: a, text: "An umbrella", correct: true}
+      - {id: b, text: "Sunglasses only"}
+      - {id: c, text: "A beach ball"}
+    feedback_right: "Yes! An umbrella keeps you dry."

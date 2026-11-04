@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "codeai-team8/evaluation/route_next/v0.1",
+  "title": "route_next (MCP tool contract, draft v0.1)",
+  "description": "The evaluation workstream only consumes this tool; routing logic is owned by teammates. The harness calls it with each policy to compare them (E06).",
+  "type": "object",
+  "required": ["input", "output"],
+  "properties": {
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["student_id", "lesson_id", "validation_results", "policy"],
+      "properties": {
+        "student_id": { "type": "string" },
+        "lesson_id": { "type": "string" },
+        "validation_results": { "type": "array", "description": "The results[] array returned by validate_submission." },
+        "policy": { "enum": ["stage_rules", "agent", "fixed_order", "random"] }
+      }
+    },
+    "output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["next_task_id", "reason", "policy", "fallback"],
+      "properties": {
+        "next_task_id": { "type": "string" },
+        "reason": { "type": "string" },
+        "policy": { "type": "string" },
+        "stance": { "enum": ["STANCE_REINFORCE", "STANCE_ADVANCE", "STANCE_BRIDGE", "STANCE_PROJECT_SYNTHESIS"], "description": "Optional; maps to the Stance Decider 2B output in PROJECT_SPEC.md." },
+        "fallback": { "type": "boolean" }
+      }
+    }
+  }
+}

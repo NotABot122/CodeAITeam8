@@ -1,0 +1,96 @@
+# Zone: Weather Log Detective (database_retrieval)
+# Author notes:
+#  - choice/spot/trace: mark exactly one option `correct: true`. Every wrong option needs a `misconception` tag.
+#  - order: list `cards` in the CORRECT order. The game shuffles them.
+#  - sort: each card names its correct `bucket`. A card may carry a `misconception` tag.
+#  - Each tier needs at least two items (a first question and a twin).
+concept: database_retrieval
+
+explain:
+  id: log-explain
+  nodes: [filter_rows]
+  prompt: "Tell Nimbus: how do you find only the days you need in a big weather log?"
+  key_ideas:
+    - {id: looks_in_log, level: 1, label: "looks through the log", words: ["look at the log", "look through", "look in", "read the log", "check the log", "search", "find the day", "find the page"]}
+    - {id: keeps_matches, level: 2, label: "keeps only the matching rows", words: ["only the", "just the", "match", "station", "date", "filter", "keep", "skip", "pick the", "rainy days"]}
+    - {id: plans_edges, level: 3, label: "sorts or plans for nothing found", words: ["sort", "in order", "newest", "oldest", "nothing", "none", "no days", "no match", "empty"]}
+
+items:
+  - id: log-1a
+    tier: 1
+    type: choice
+    nodes: [read_a_log]
+    prompt: "The log has one line for each day. Mon: sunny, 31. Tue: rainy, 22. Wed: sunny, 28. What was the weather on Tuesday?"
+    options:
+      - {id: a, text: "rainy", correct: true}
+      - {id: b, text: "22", misconception: reads_wrong_column, why: "22 is the temperature. The weather is the word."}
+      - {id: c, text: "sunny", misconception: reads_wrong_row, why: "Look at the line that starts with Tue."}
+      - {id: d, text: "31", misconception: reads_wrong_row, why: "Look at the line that starts with Tue."}
+    feedback_right: "Yes! Tue says rainy."
+
+  - id: log-1b
+    tier: 1
+    type: choice
+    nodes: [read_a_log]
+    prompt: "Pip reads the log. Mon: sunny, 31. Tue: rainy, 22. Wed: sunny, 28. How warm was it on Wednesday?"
+    options:
+      - {id: a, text: "28", correct: true}
+      - {id: b, text: "sunny", misconception: reads_wrong_column, why: "Sunny is the weather. The warm number is next to it."}
+      - {id: c, text: "31", misconception: reads_wrong_row, why: "31 is Monday. Look at the Wed line."}
+      - {id: d, text: "22", misconception: reads_wrong_row, why: "22 is Tuesday. Look at the Wed line."}
+    feedback_right: "Right! Wed was 28."
+
+  - id: log-2a
+    tier: 2
+    type: sort
+    nodes: [filter_rows]
+    prompt: "Pip wants Station A from Jan 1 to Jan 3. Drag each log line to Keep or Skip."
+    buckets:
+      - {id: keep, text: "Keep"}
+      - {id: skip, text: "Skip"}
+    cards:
+      - {id: c1, text: "Station A, Jan 1", bucket: keep}
+      - {id: c2, text: "Station B, Jan 2", bucket: skip, misconception: ignores_one_filter}
+      - {id: c3, text: "Station A, Jan 3", bucket: keep, misconception: forgets_end_date}
+      - {id: c4, text: "Station A, Jan 4", bucket: skip, misconception: ignores_one_filter}
+      - {id: c5, text: "Station A, Jan 2", bucket: keep}
+    feedback_right: "Yes! Jan 3 counts too."
+    feedback_wrong: "Check the end day. Jan 3 is part of the trip, and the station has to match."
+
+  - id: log-2b
+    tier: 2
+    type: choice
+    nodes: [filter_rows]
+    prompt: "Pip wants only the rainy days at Station B. Which rule finds them?"
+    options:
+      - {id: a, text: "Station is B and weather is rainy", correct: true}
+      - {id: b, text: "Station is B or weather is rainy", misconception: mixes_and_or, why: "Or keeps extra days. We need both things true."}
+      - {id: c, text: "Station is A and weather is rainy", misconception: ignores_one_filter, why: "The station has to be B."}
+      - {id: d, text: "Weather is rainy", misconception: ignores_one_filter, why: "That also keeps rainy days at other stations."}
+    feedback_right: "Yes! Both things must be true."
+
+  - id: log-3a
+    tier: 3
+    type: order
+    nodes: [sort_and_edges]
+    misconception: sorts_before_filtering
+    prompt: "Find Station A's coolest day this week. Drag the steps into the best order."
+    cards:
+      - {id: s1, text: "Open the log"}
+      - {id: s2, text: "Keep only Station A's lines for this week"}
+      - {id: s3, text: "Sort them from coolest to warmest"}
+      - {id: s4, text: "Read the first line"}
+    feedback_right: "Yes! Keep the right lines first, then sort."
+    feedback_wrong: "Try keeping the right lines before sorting them."
+
+  - id: log-3b
+    tier: 3
+    type: choice
+    nodes: [sort_and_edges]
+    prompt: "Pip asks for rainy days at Station C in July. The log has none. What should the answer be?"
+    options:
+      - {id: a, text: "An empty list: no days found", correct: true}
+      - {id: b, text: "An error that stops everything", misconception: empty_is_error, why: "Finding nothing is a real answer. It is not a mistake."}
+      - {id: c, text: "Every day in the log", misconception: ignores_filter, why: "Pip only asked for rainy days at Station C."}
+      - {id: d, text: "A made-up rainy day", misconception: invents_answer, why: "We never invent days. We show what the log has."}
+    feedback_right: "Yes! Nothing found is an empty list."

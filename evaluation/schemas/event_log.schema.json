@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "codeai-team8/evaluation/event_log/v0.2",
+  "title": "Evaluation event log row (one row per tool call, draft v0.2)",
+  "description": "Every evaluation item (E01-E16) reads from this log. Field names follow evaluation/README.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["timestamp", "run_id", "student_id", "lesson_id", "task_id", "tool", "input_hash", "model_id", "latency_ms", "filter_result", "fallback_triggered"],
+  "properties": {
+    "timestamp": { "type": "string", "format": "date-time" },
+    "run_id": { "type": "string", "description": "Groups rows from one harness run." },
+    "student_id": { "type": "string", "pattern": "^SIM-|^ADV-|^STU-", "description": "SIM- = simulated, ADV- = adversarial set, STU- = pseudonymous real student." },
+    "lesson_id": { "type": "string" },
+    "task_id": { "type": "string" },
+    "attempt_no": { "type": "integer", "minimum": 1 },
+    "tool": { "enum": ["validate_submission", "route_next"] },
+    "input_hash": { "type": "string", "description": "sha256 of the canonical input JSON; used for caching and repeat-scoring (E02)." },
+    "output": { "type": "object" },
+    "stages": { "type": "object", "additionalProperties": { "type": ["integer", "null"] }, "description": "v0.2: stage per sub-skill, keyed by sub-skill name. Replaces the fixed stage_* fields for new lessons; the v0.1 fields stay valid." },
+    "stage_prompting": { "type": ["integer", "null"] },
+    "stage_evaluation": { "type": ["integer", "null"] },
+    "stage_prompt_revision": { "type": ["integer", "null"] },
+    "model_id": { "type": "string" },
+    "temperature": { "type": "number" },
+    "tokens_in": { "type": "integer" },
+    "tokens_out": { "type": "integer" },
+    "cost_usd": { "type": ["number", "null"], "description": "v0.2: null when the model's price is not configured (harness/bedrock_client.py PRICES_PER_MTOK), which is how run_eval.py already writes it." },
+    "latency_ms": { "type": "integer" },
+    "filter_result": { "type": "array", "items": { "type": "string" } },
+    "fallback_triggered": { "type": "boolean" },
+    "error": { "type": ["string", "null"] }
+  }
+}

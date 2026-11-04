@@ -1,0 +1,88 @@
+# Zone: Repeat Rangers (loops)
+# rep-3b is a poly-hierarchy item: it feeds count_with_rule (loops) and also
+# gives credit to if_else_compare (conditionals) when answered right.
+concept: loops
+
+explain:
+  id: repeat-explain
+  nodes: [running_total]
+  prompt: "Tell Nimbus: how can a program add up the rain from many days?"
+  key_ideas:
+    - {id: repeats, level: 1, label: "does the same step again", words: ["again", "repeat", "over and over", "each day", "every day", "each one", "loop", "one by one"]}
+    - {id: keeps_total, level: 2, label: "keeps a total as it goes", words: ["total", "add", "count", "keep track", "running", "so far", "adds up", "adding"]}
+    - {id: handles_rules, level: 3, label: "remembers the biggest or counts only some", words: ["biggest", "highest", "most", "remember", "only if", "only the", "start at", "start with zero", "empty"]}
+
+items:
+  - id: rep-1a
+    tier: 1
+    type: choice
+    nodes: [repeat_steps]
+    prompt: "You have 4 rain buckets to check. Which instruction does the same job for every bucket?"
+    options:
+      - {id: a, text: "For each bucket, write down the rain", correct: true}
+      - {id: b, text: "If a bucket is full, write it down", misconception: confuses_if_with_repeat, why: "If checks one thing. We need the job done for all buckets."}
+      - {id: c, text: "Write down one bucket", misconception: does_it_once, why: "That only does one bucket."}
+      - {id: d, text: "Skip all the buckets", misconception: ignores_task, why: "We still need to write them down."}
+    feedback_right: "Yes! For each means every one."
+
+  - id: rep-1b
+    tier: 1
+    type: trace
+    nodes: [repeat_steps]
+    prompt: "The count starts at 0. Do this 3 times: add 1 to the count. What is the count at the end?"
+    options:
+      - {id: a, text: "3", correct: true}
+      - {id: b, text: "1", misconception: loop_runs_once, why: "The step runs 3 times, not once."}
+      - {id: c, text: "0", misconception: ignores_task, why: "The count goes up each time."}
+      - {id: d, text: "4", misconception: off_by_one, why: "Start at 0 and add 1 three times: 1, 2, 3."}
+    feedback_right: "Yes! 1, 2, 3."
+
+  - id: rep-2a
+    tier: 2
+    type: trace
+    nodes: [running_total]
+    prompt: "Rain on 3 days: 2, 5, 1. The total starts at 0. For each day, add its rain to the total. What is the total at the end?"
+    options:
+      - {id: a, text: "8", correct: true}
+      - {id: b, text: "1", misconception: keeps_last_only, why: "Keep adding to the same total. Do not swap it."}
+      - {id: c, text: "5", misconception: keeps_biggest, why: "A total adds every day."}
+      - {id: d, text: "2", misconception: keeps_first_only, why: "A total adds every day, not only the first."}
+    feedback_right: "Yes! 2 + 5 + 1 is 8."
+
+  - id: rep-2b
+    tier: 2
+    type: order
+    nodes: [running_total]
+    misconception: skips_start_value
+    prompt: "Add up the rain from 3 days. Drag the steps into the best order."
+    cards:
+      - {id: s1, text: "Set the total to 0"}
+      - {id: s2, text: "Look at the next day's rain"}
+      - {id: s3, text: "Add it to the total"}
+      - {id: s4, text: "When no days are left, say the total"}
+    feedback_right: "Yes! Start at 0, add each day, then say the total."
+    feedback_wrong: "Try starting the total at 0 before you add anything."
+
+  - id: rep-3a
+    tier: 3
+    type: trace
+    nodes: [find_biggest]
+    prompt: "The highest starts at 0. Days: 12, 30, 25. For each day, if it is higher than the highest, remember it. What is the highest at the end?"
+    options:
+      - {id: a, text: "30", correct: true}
+      - {id: b, text: "25", misconception: keeps_last_only, why: "Only swap when a day is higher. 25 is not higher than 30."}
+      - {id: c, text: "12", misconception: keeps_first_only, why: "Keep checking every day."}
+      - {id: d, text: "67", misconception: adds_instead, why: "We are not adding. We remember the biggest."}
+    feedback_right: "Yes! 30 is the highest."
+
+  - id: rep-3b
+    tier: 3
+    type: trace
+    nodes: [count_with_rule, if_else_compare]
+    prompt: "Count the heat wave days. A heat wave is 35 or more. Temperatures: 36, 30, 35, 41. The count starts at 0. For each day, if it is a heat wave, add 1. What is the count?"
+    options:
+      - {id: a, text: "3", correct: true}
+      - {id: b, text: "2", misconception: at_least_means_over, why: "35 or more includes 35, so it counts."}
+      - {id: c, text: "4", misconception: counts_every_day, why: "Only add 1 when the day is a heat wave."}
+      - {id: d, text: "1", misconception: counts_first_only, why: "Keep checking every day, not only the first."}
+    feedback_right: "Yes! 36, 35, and 41 are heat waves."

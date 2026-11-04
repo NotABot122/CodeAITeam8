@@ -3,3 +3,6 @@ __pycache__/
 .codeai-data/
 projects/*/dataset/*.db
 projects/*/dataset/.weather-*.db
+
+# Real students' answers never go in the repo
+evaluation/data/diag_benchmark/ratings.csv

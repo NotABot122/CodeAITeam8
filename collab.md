@@ -34,6 +34,7 @@ Every autonomous agent or developer **MUST read this file before writing code** 
 | `Agent-2` | Unassigned | `idle` | None | - |
 | `Agent-3` | Unassigned | `idle` | None | - |
 | `zane-claude` | Claude Opus 5.5 (Kiro) | `idle` | Renamed "Stance Decider 2B" to "Strands Decider 2B" in documentation/ | 2026-11-03 15:30 PST |
+| `Kiro-Diagnostic` | Claude Sonnet 5.5 (Kiro) | `idle` | Built the gamified grade 3-5 Weather Station readiness diagnostic (`diagnostic/`, `projects/weather-station/diagnostic/`, additive `evaluation/` files) on the `diagnosis` branch | 2026-11-04 |
 | `Kiro-Demo` | Claude Opus 5.5 (Kiro) | `idle` | Adaptive path across projects (`engine/course.py`, quizzes, revision projects, Lists & Dictionaries topic) on `proto-branch`; UI handoff in `docs/HANDOFF-adaptive-path.md` | 2026-11-04 10:40 PST |
 
 ---
@@ -42,6 +43,11 @@ Every autonomous agent or developer **MUST read this file before writing code** 
 
 > *Most recent on top. Maximum 10 items.*
 
+1. **[Task 014] Gamified Grade 3-5 Readiness Diagnostic for the Weather Station Lesson**
+   - **Model:** Claude Sonnet 5.5 (Kiro)
+   - **Agent:** `Kiro-Diagnostic`
+   - **Timestamp:** 2026-11-04
+   - **Summary:** Added `diagnostic/` on the `diagnosis` branch (merged `proto-branch` and `evaluation-plan` first). A tap-and-drag quest tests the four prerequisite ideas under the lesson (retrieval, conditionals, loops, functions). Answers are scored by a guess-and-slip model (a stage 0-3 and a real confidence per concept) over a poly-hierarchy skill tree. An optional model, through `engine.ai`, gets the evidence, the goal and the tree and may move a stage by one only with the child's own words as proof; Bedrock is untested live (offline mock model). The quest places the student and can set the lesson's starting problem through the lesson engine's own records (`diagnostic.cli handoff --apply`). Evaluation: implements `validate_submission` and `route_next`, writes the event log, schema v0.2 (additive), `evaluation/harness/run_diag_eval.py` (10 hard requirements pass on the mock), and an MCP hook. Students never see stages or scores. 214 tests pass (69 original plus 145 new). Not done: real-model runs, human-rated E01 benchmark, CSTA codes for grades 3-5, K-2 support. See `diagnostic/README.md`.
 1. **[Task 013] Adaptive Path Across Projects (Profile, Next Step, Revision Quizzes)**
    - **Model:** Claude Opus 5.5 (Kiro)
    - **Agent:** `Kiro-Demo`
@@ -57,6 +63,16 @@ Every autonomous agent or developer **MUST read this file before writing code** 
    - **Agent:** `Kiro-Demo`
    - **Timestamp:** 2026-11-04 08:56 PST
    - **Summary:** Added a local Python prototype of the adaptive engine on `proto-branch` (commit `4f7669a`), with no cloud calls. One project, `projects/weather-station/`: a seeded synthetic SQLite dataset and four levels (SQL retrieval, conditionals, loops, functions) with three practice problems. The engine grades each submission in a separate process with a 10 s limit, enforces a loop rule on Level 3, gives ordered hand-written hints, tracks a Stage 0–3 per concept, routes struggling students to practice problems, and falls back to fixed level order if routing fails. Progress is saved per student. Run `python3 -m engine.demo` or see `README.md`. 51 tests pass. Spec is in `.kiro/specs/weather-station-adaptive-lesson/`. Not built yet: Bedrock rubric grading, content filter, grader benchmark. Numbered 011 because `main` already uses 009 and 010.
+1. **[Task 010] Code.org Production Architecture & Schema Blueprint Integration**
+   - **Model:** Gemini 3.8 Flash (Authoritative)
+   - **Agent:** Lead-Antigravity
+   - **Timestamp:** 2026-11-03 15:47 PST
+   - **Summary:** Added documentation/resources/code_dot_org_architecture_reference.md extracting patterns from code-dot-org/code-dot-org (UserLevel, TeacherFeedback, Activity, S3 project storage, Aurora read replicas, and feature vector extraction for Strands Decider 2B).
+2. **[Task 009] Code.org Production Architecture & Schema Blueprint Integration**
+   - **Model:** Gemini 3.8 Flash (Authoritative)
+   - **Agent:** Lead-Antigravity
+   - **Timestamp:** 2026-11-03 15:47 PST
+   - **Summary:** Added documentation/resources/code_dot_org_architecture_reference.md extracting patterns from code-dot-org/code-dot-org (UserLevel, TeacherFeedback, Activity, S3 project storage, Aurora read replicas, and feature vector extraction for Stance Decider 2B).
 2. **[Task 008] Vision Document Ingestion & Intra-Lesson Adaptivity Invariant**
    - **Model:** Gemini 3.8 Flash (Authoritative)
    - **Agent:** Lead-Antigravity
@@ -77,18 +93,3 @@ Every autonomous agent or developer **MUST read this file before writing code** 
    - **Agent:** `Agent-Bootstrap`
    - **Timestamp:** 2026-11-03 15:21 PST
    - **Summary:** Added `documentation/COURSE_FLOW_GRAPH.md` showing end-to-end adaptive flow. Updated `documentation/PROJECT_SPEC.md` with the teammate's Curriculum Database in Aurora/SimpleDB, dual evaluation modalities (eval checks answers, lesson checks live telemetry feed), post-project AI reteach option, and committed all files to the local Git repository pointing to `https://github.com/NotABot122/CodeAITeam8`.
-2. **[Task 004] Backend-First Skill Tree & Point Classification + Stance Decider 2B Pipeline**
-   - **Model:** Gemini 3.8 Flash
-   - **Agent:** `Agent-Bootstrap`
-   - **Timestamp:** 2026-11-03 15:11 PST
-   - **Summary:** Updated `documentation/PROJECT_SPEC.md` to specify that the skill tree is strictly maintained on the backend (Ruby/Rails + Aurora/SimpleDB), defined the point-classification scoring model ($P_{\text{node}}$), and formalized the course flow with Stance Decider 2B determining next questions/skills.
-3. **[Task 003] Official CodeAI AWS Architecture & Tech Stack Alignment**
-   - **Model:** Gemini 3.8 Flash
-   - **Agent:** `Agent-Bootstrap`
-   - **Timestamp:** 2026-11-03 15:06 PST
-   - **Summary:** Extracted official CodeAI technical requirements (Ruby 3.2 on Rails 7.1, React 18 / MUI 7, Aurora SQL, Amazon SimpleDB / ElastiCache, Amazon Bedrock model abstraction, Langfuse) into `documentation/TECHNICAL_ENVIRONMENT.md` and updated `documentation/PROJECT_SPEC.md` and teammate prompt accordingly.
-2. **[Task 002] Multi-Parent Skill Tree Refinement & Teammate Kickoff Prompt**
-   - **Model:** Gemini 3.8 Flash
-   - **Agent:** `Agent-Bootstrap`
-   - **Timestamp:** 2026-11-03 14:58 PST
-   - **Summary:** Updated `documentation/PROJECT_SPEC.md` to classify nodes like While Loops under both Conditionals and Loops (poly-hierarchy), removed the `documentation/prompts/` folder, and prepared the teammate handoff prompt targeting `https://github.com/NotABot122/CodeAITeam8`.

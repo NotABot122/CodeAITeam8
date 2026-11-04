@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "codeai-team8/evaluation/validate_submission/v0.2",
+  "title": "validate_submission (MCP tool contract, draft v0.2)",
+  "type": "object",
+  "required": ["input", "output"],
+  "properties": {
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["lesson_id", "level_id", "attempt_no", "submission_text", "rubric_id"],
+      "properties": {
+        "student_id": { "type": "string", "description": "Synthetic or pseudonymous ID. Never a real name or email." },
+        "lesson_id": { "type": "string" },
+        "level_id": { "type": "string", "description": "Task / sub-lesson step ID (e.g. C3-L6-T1)." },
+        "attempt_no": { "type": "integer", "minimum": 1 },
+        "submission_text": { "type": "string", "maxLength": 8000 },
+        "rubric_id": { "type": "string" }
+      }
+    },
+    "output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["results", "model_id", "latency_ms", "filter_flags"],
+      "properties": {
+        "results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["subskill", "stage", "confidence", "rationale", "evidence_quotes"],
+            "properties": {
+              "subskill": { "enum": ["prompting", "evaluation", "prompt_revision", "database_retrieval", "conditionals", "loops", "functions"], "description": "v0.2 adds the four Weather Station readiness concepts. A task may target one or more sub-skills, so results holds only the sub-skills the task targets." },
+              "stage": { "type": ["integer", "null"], "minimum": 0, "maximum": 3, "description": "null only when the submission was filtered or unscorable." },
+              "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+              "rationale": { "type": "string" },
+              "evidence_quotes": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        },
+        "model_id": { "type": "string" },
+        "latency_ms": { "type": "integer", "minimum": 0 },
+        "tokens_in": { "type": "integer", "minimum": 0 },
+        "tokens_out": { "type": "integer", "minimum": 0 },
+        "filter_flags": {
+          "type": "array",
+          "items": { "enum": ["empty", "too_short", "gibberish", "prompt_injection", "inappropriate", "suspected_ai_paste", "parse_error", "personal_info"] }
+        }
+      }
+    }
+  }
+}
