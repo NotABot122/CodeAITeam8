@@ -2,9 +2,11 @@
 
 **From:** evaluation team (Kiro-Eval) · **For:** Pratheek-Claude (student UI, teacher view, `webapi/`) · **Date:** 2026-11-04 · **Base:** `main` @ `bcebda5`
 
-The backend already produces everything below; the student app and teacher view do not show it yet. Each item lists where the data lives, what to show, and how to check it. Items 1-5 are the teacher view, 6-7 the student app. Nothing here changes grading or routing.
+The backend already produces everything below; the student app and teacher view do not show it yet. Each item lists where the data lives, what to show, and how to check it. Items 1-5 are the teacher view, 6-9 the student app. Items 2, 8 and 9 are about **in-lesson help**, which is now **on by default** (`projects/catalog.yaml` `intervention.struggle_after: 3`): after 3 failed tries on a level, the engine inserts that concept's practice once and then returns the student to the level.
 
 Priority: **P0** for the demo, **P1** soon after.
+
+**Status (2026-11-04, zane-claude, branch `feat/ai-agents-diagnostic`):** items 6, 7, 8 and 9 are built (see collab.md Task 020). Items 1-5 (teacher view) are still open.
 
 ---
 
@@ -22,11 +24,12 @@ Priority: **P0** for the demo, **P1** soon after.
 - **Data:**
   - `profile["planned_practice"] = {"project": id, "problems": [practice ids]}`, written by `Course.apply_diagnostic` for every gap the check is confident about.
   - Event log (`.codeai-data/logs/events.jsonl`) rows with `"event": "intervention"` and `reason` = `struggle_practice` (practice inserted after repeated failures on a level) or `diagnostic_mismatch` (the check rated the concept above 0, the student struggled, the stage was reset to 0).
-  - In-lesson help is off by default; turn it on with `intervention.struggle_after: 3` in `projects/catalog.yaml`.
+  - In-lesson help is on by default (`intervention.struggle_after: 3` in `projects/catalog.yaml`; `null` turns it off).
 - **Gap:** the teacher API returns none of this.
 - **Backend (small):** add `plannedPractice` (titles, done/not done) and `interventions` (`[{problemId, practiceId, reason, at}]`, read from the event log for this student) to `Teacher.student()`. Add a count of `diagnostic_mismatch` per concept to `Teacher.overview()`.
 - **Show:** in the student detail, "Planned practice" and "Extra help given" lists. In the class overview, a column or badge "Readiness check overrated" per concept. This is the most useful signal for a teacher: where the check overrates students.
-- **Done when:** with `struggle_after: 3`, a student who fails Level 1 three times shows one "Extra help given" entry; if Level 1's concept had a seeded stage, the overview counts one mismatch for that concept.
+- Also: `needsHelp` in the overview counts tries on the *current* step. With in-lesson help on, a stuck student moves to practice and the count restarts, so the overview can miss them. Count failed tries on the level the student will return to (`ProgressRecord.return_to`) as well.
+- **Done when:** a student who fails Level 1 three times shows one "Extra help given" entry; if Level 1's concept had a seeded stage, the overview counts one mismatch for that concept.
 
 ### 3. Translate route reasons into plain words (P0)
 
@@ -76,6 +79,22 @@ Priority: **P0** for the demo, **P1** soon after.
 - **Done when:** the button is disabled when `hintsSeen == hintCount`, and the hint counter in the teacher view goes up.
 
 ---
+
+### 8. In-lesson help: keep the level visible on the path while the student practices (P0)
+
+- **Data:** while the inserted practice is open, the progress record has `return_to = "level-1"` (the level to go back to). `GET /api/students/<id>` builds `path` with `_status_of()` in `webapi/service.py`, which reports that level as `todo`.
+- **Gap:** `PathStrip` draws `todo` as a locked circle, so the level the student was just working on looks locked.
+- **Backend (small):** in `_status_of`, return `"paused"` when `problem_id == record.return_to`.
+- **Show:** a paused level as in progress (current color, no lock, a small "back after practice" caption). The practice pill already sits after its level via `afterLevelId`.
+- **Done when:** after 3 failed tries on Level 1, the path shows Level 1 as paused and the practice as current; after the practice passes, Level 1 is current again.
+
+### 9. In-lesson help: say why, and where the student goes next (P0)
+
+- **Data:** the failed-submit outcome carries the notice "Let's warm up with a short practice problem, then come back to this level." and the new state's `problem` is the practice. The routing log reason is `struggle_practice`.
+- **Gap:** the app shows that notice *and* `PracticeDialog`, whose text ("Pass it and you'll head straight back to the main path") is written for practice after a passed level.
+- **Show:** one message, not two. When the practice was inserted after repeated tries, the dialog says something like "This one's tricky, so let's practice the idea first: <practice title>. Then you'll come back to <level title>." Keep the student's level work: the workspace is one file for every problem, so after the practice the editor shows the practice code, not their last try on the level (checked: `state.code` on return is the last submitted file). Save a draft per problem (for example in `localStorage`, keyed by student and problem id) and restore it when the student returns to the level.
+- **Backend (small):** add `inserted: "after_level" | "struggle" | "planned"` to the problem payload (from the last routing reason), so the UI does not have to guess.
+- **Done when:** the student sees one dialog naming the level they will return to, and the editor shows their last try on that level when they return.
 
 ## Not needed in the UI
 

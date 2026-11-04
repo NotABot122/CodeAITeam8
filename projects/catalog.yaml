@@ -37,9 +37,9 @@ diagnostic:
 
 # In-lesson intervention: after this many failed attempts on one level, insert that concept's practice
 # once, then return to the level. If the diagnostic had given the concept a stage above 0, the stage is
-# lowered to 0 and a diagnostic_mismatch event is logged. null = off (today's behaviour).
+# lowered to 0 and a diagnostic_mismatch event is logged. null turns it off.
 intervention:
-  struggle_after: null
+  struggle_after: 3
 
 # How a finished project is judged, per concept, from its problems' attempts and hints.
 # Change these after feedback; no code changes needed.
@@ -51,3 +51,43 @@ thresholds:
     min_attempts: 4
     min_hints: 2
     practice_counts: true      # being sent to a practice problem counts as struggling
+
+# Lesson pathways the Strands Decider 2B (engine/decider.py) picks from after the readiness check.
+# The rules decide which pathways a student can get (`requires`: the stage the readiness check must be
+# confident about, per concept; `needs_gap`: at least one concept the check is confident is a gap).
+# The model only picks among those, and the rules' own pick is used whenever the model is off or its
+# answer can't be used. Steps run in order. `project: revision` means the review project for the student's
+# weakest concept. `start` is the first problem; `readiness` means the readiness check's placement.
+pathways:
+  - id: review-first
+    stance: STANCE_REINFORCE
+    title: Build the basics first
+    summary: Start with a short review of the idea that needs the most work. Then build the Weather Station project one level at a time.
+    needs_gap: true
+    steps:
+      - {project: revision}
+      - {project: weather-station, start: level-1}
+      - {project: weather-collections}
+  - id: step-by-step
+    stance: STANCE_ADVANCE
+    title: Step by step
+    summary: Build the Weather Station project from where the readiness check placed you, with extra practice before the parts that need it. Then move on to lists and dictionaries.
+    steps:
+      - {project: weather-station, start: readiness}
+      - {project: weather-collections}
+  - id: connect-ideas
+    stance: STANCE_BRIDGE
+    title: Connect the ideas
+    summary: You already read data and make decisions well, so you start at Level 3, where loops and if statements work together on every record. Then move on to lists and dictionaries.
+    requires: {database_retrieval: 2, conditionals: 2, loops: 1}
+    steps:
+      - {project: weather-station, start: level-3}
+      - {project: weather-collections}
+  - id: full-project
+    stance: STANCE_PROJECT_SYNTHESIS
+    title: Jump to the full project
+    summary: You start at Level 4 and build the whole weather report, writing the helper functions it needs yourself. Then move on to lists and dictionaries.
+    requires: {database_retrieval: 2, conditionals: 2, loops: 2, functions: 1}
+    steps:
+      - {project: weather-station, start: level-4}
+      - {project: weather-collections}

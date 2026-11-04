@@ -233,8 +233,9 @@ def run(n_students: int, seed: int) -> dict:
             if not cond.startswith("no_diagnostic"):
                 shutil.copytree(quest_root, root)
             course = Course(root, grader=grader)
-            if cond.endswith("intervention") or cond == "oracle":
-                course.catalog.intervention["struggle_after"] = STRUGGLE_AFTER
+            # In-lesson help is on by default in catalog.yaml; pin it per condition so the comparison is fair.
+            course.catalog.intervention["struggle_after"] = (
+                STRUGGLE_AFTER if (cond.endswith("intervention") or cond == "oracle") else None)
             row = {"student": st.sim_id, "condition": cond, "true": latent,
                    "band": "low" if statistics.mean(latent.values()) < 1 else ("high" if statistics.mean(latent.values()) >= 2 else "middle")}
             if cond.startswith("no_diagnostic"):

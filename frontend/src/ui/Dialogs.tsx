@@ -11,12 +11,23 @@ export function PracticeDialog({state, onClose}: {state: StudentState; onClose: 
   return (
     <Dialog open onClose={onClose} aria-labelledby="practice-title" maxWidth="xs" fullWidth>
       <DialogTitle id="practice-title" sx={{display: 'flex', gap: 1, alignItems: 'center'}}>
-        <FitnessCenterIcon color="secondary" /> A quick practice first
+        <FitnessCenterIcon color="secondary" /> {p.inserted === 'struggle' ? "Let's practice the idea first" : 'A quick practice first'}
       </DialogTitle>
       <DialogContent>
-        <Typography>
-          Let's strengthen {names || 'this idea'} with a short task: <strong>{p.title}</strong>. Pass it and you'll head straight back to the main path.
-        </Typography>
+        {p.inserted === 'struggle' ? (
+          <Typography>
+            This one's tricky, so let's practice {names || 'the idea'} first: <strong>{p.title}</strong>.
+            Then you'll come back to <strong>{p.returnTo?.title ?? 'your level'}</strong>, and your code there will be waiting for you.
+          </Typography>
+        ) : p.inserted === 'planned' ? (
+          <Typography>
+            Your readiness check showed {names || 'this idea'} is worth a quick warm-up: <strong>{p.title}</strong>. Pass it and you'll move on to your next level.
+          </Typography>
+        ) : (
+          <Typography>
+            Let's strengthen {names || 'this idea'} with a short task: <strong>{p.title}</strong>. Pass it and you'll head straight back to the main path.
+          </Typography>
+        )}
       </DialogContent>
       <DialogActions><Button variant="contained" autoFocus onClick={onClose}>Let's go</Button></DialogActions>
     </Dialog>

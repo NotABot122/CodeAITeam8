@@ -73,7 +73,7 @@
     "diagnostic": {
       "n": 40,
       "completed": 1.0,
-      "submissions": 5.72,
+      "submissions": 5.67,
       "failed_on_levels": 1.35,
       "gaps": 21,
       "gaps_practiced_first": 0.524,
@@ -81,62 +81,62 @@
       "struggle_practice": 0,
       "diagnostic_mismatch": 0,
       "start_counts": {
-        "level-1": 37,
-        "practice-db-count": 3
+        "level-1": 35,
+        "practice-db-count": 5
       },
       "by_band": {
         "low": {
           "n": 6,
           "completed": 1.0,
-          "failed_on_levels": 2.33,
+          "failed_on_levels": 2.5,
           "submissions": 7.83
         },
         "middle": {
           "n": 15,
           "completed": 1.0,
           "failed_on_levels": 1.8,
-          "submissions": 6.2
+          "submissions": 6.13
         },
         "high": {
           "n": 19,
           "completed": 1.0,
-          "failed_on_levels": 0.68,
-          "submissions": 4.68
+          "failed_on_levels": 0.63,
+          "submissions": 4.63
         }
       }
     },
     "diagnostic_intervention": {
       "n": 40,
       "completed": 1.0,
-      "submissions": 5.75,
+      "submissions": 5.67,
       "failed_on_levels": 1.35,
       "gaps": 21,
       "gaps_practiced_first": 0.524,
       "practice_unneeded": 0,
-      "struggle_practice": 1,
+      "struggle_practice": 0,
       "diagnostic_mismatch": 0,
       "start_counts": {
-        "level-1": 37,
-        "practice-db-count": 3
+        "level-1": 35,
+        "practice-db-count": 5
       },
       "by_band": {
         "low": {
           "n": 6,
           "completed": 1.0,
-          "failed_on_levels": 2.33,
-          "submissions": 8
+          "failed_on_levels": 2.5,
+          "submissions": 7.83
         },
         "middle": {
           "n": 15,
           "completed": 1.0,
           "failed_on_levels": 1.8,
-          "submissions": 6.2
+          "submissions": 6.13
         },
         "high": {
           "n": 19,
           "completed": 1.0,
-          "failed_on_levels": 0.68,
-          "submissions": 4.68
+          "failed_on_levels": 0.63,
+          "submissions": 4.63
         }
       }
     },
@@ -177,31 +177,31 @@
     },
     "diagnostic_accuracy": {
       "n": 160,
-      "exact": 0.844,
-      "within_one": 0.956,
-      "gap_found": 0.714
+      "exact": 0.8,
+      "within_one": 0.994,
+      "gap_found": 0.81
     },
-    "lesson_start_stage_zero": 0.225,
-    "stages_used_share": 0.425
+    "lesson_start_stage_zero": 0.275,
+    "stages_used_share": 0.444
   },
   "checks": [
     {
       "id": "same_student",
       "requirement": "The student app opens the student who took the diagnostic.",
       "passed": true,
-      "detail": "diagnostic id fa9c6bcc\u2026 vs student app rule ^([0-9a-f]{32}|STU-[0-9a-f]{16,32})$"
+      "detail": "diagnostic id c40ae307\u2026 vs student app rule ^([0-9a-f]{32}|STU-[0-9a-f]{16,32})$"
     },
     {
       "id": "stages_carried",
       "requirement": "What the diagnostic found (stage per concept) reaches the lesson.",
       "passed": true,
-      "detail": "diagnostic {'database_retrieval': 3, 'conditionals': 2, 'loops': 2, 'functions': 0}; confident and used {'database_retrieval': 3, 'loops': 2, 'functions': 0}; lesson starts with {'database_retrieval': 3, 'conditionals': 0, 'loops': 2, 'functions': 0}"
+      "detail": "diagnostic {'database_retrieval': 3, 'conditionals': 1, 'loops': 2, 'functions': 0}; confident and used {'database_retrieval': 3, 'functions': 0}; lesson starts with {'database_retrieval': 3, 'conditionals': 0, 'loops': 0, 'functions': 0}"
     },
     {
       "id": "practice_carried",
       "requirement": "Every gap the diagnostic found is planned in the lesson, not only the first one.",
       "passed": false,
-      "detail": "2 of 40 students: 2 practice problem(s) the quest planned are not in the lesson plan (only gaps the diagnostic is confident about are planned)"
+      "detail": "6 of 40 students: 6 practice problem(s) the quest planned are not in the lesson plan (only gaps the diagnostic is confident about are planned)"
     },
     {
       "id": "message_matches",
@@ -327,31 +327,36 @@
       },
       "band": "low",
       "diag_stages": {
-        "database_retrieval": 3,
-        "conditionals": 3,
+        "database_retrieval": 1,
+        "conditionals": 0,
         "loops": 1,
         "functions": 1
       },
       "diag_next": "level-1",
-      "diag_practice_ahead": [],
+      "diag_practice_ahead": [
+        "practice-temp-band"
+      ],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
       "stages_used": 1,
       "stages_found": 4,
-      "planned_practice": [],
+      "planned_practice": [
+        "practice-temp-band"
+      ],
       "lesson_start_stages": {
         "database_retrieval": 0,
-        "conditionals": 3,
+        "conditionals": 0,
         "loops": 0,
         "functions": 0
       },
       "completed": true,
-      "submissions": 8,
+      "submissions": 9,
       "failed_on_levels": 4,
       "failed_total": 4,
       "path": [
         "level-1",
         "level-1",
+        "practice-temp-band",
         "level-2",
         "level-2",
         "level-3",
@@ -364,11 +369,13 @@
         "conditionals",
         "database_retrieval"
       ],
-      "gaps_practiced_first": [],
+      "gaps_practiced_first": [
+        "conditionals"
+      ],
       "practice_unneeded": 0,
       "final_engine_stages": {
         "database_retrieval": 1,
-        "conditionals": 3,
+        "conditionals": 2,
         "loops": 1,
         "functions": 1
       },
@@ -386,31 +393,36 @@
       },
       "band": "low",
       "diag_stages": {
-        "database_retrieval": 3,
-        "conditionals": 3,
+        "database_retrieval": 1,
+        "conditionals": 0,
         "loops": 1,
         "functions": 1
       },
       "diag_next": "level-1",
-      "diag_practice_ahead": [],
+      "diag_practice_ahead": [
+        "practice-temp-band"
+      ],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
       "stages_used": 1,
       "stages_found": 4,
-      "planned_practice": [],
+      "planned_practice": [
+        "practice-temp-band"
+      ],
       "lesson_start_stages": {
         "database_retrieval": 0,
-        "conditionals": 3,
+        "conditionals": 0,
         "loops": 0,
         "functions": 0
       },
       "completed": true,
-      "submissions": 8,
+      "submissions": 9,
       "failed_on_levels": 4,
       "failed_total": 4,
       "path": [
         "level-1",
         "level-1",
+        "practice-temp-band",
         "level-2",
         "level-2",
         "level-3",
@@ -423,11 +435,13 @@
         "conditionals",
         "database_retrieval"
       ],
-      "gaps_practiced_first": [],
+      "gaps_practiced_first": [
+        "conditionals"
+      ],
       "practice_unneeded": 0,
       "final_engine_stages": {
         "database_retrieval": 1,
-        "conditionals": 3,
+        "conditionals": 2,
         "loops": 1,
         "functions": 1
       },
@@ -445,13 +459,15 @@
       },
       "band": "low",
       "diag_stages": {
-        "database_retrieval": 3,
-        "conditionals": 3,
+        "database_retrieval": 1,
+        "conditionals": 0,
         "loops": 1,
         "functions": 1
       },
       "diag_next": "level-1",
-      "diag_practice_ahead": [],
+      "diag_practice_ahead": [
+        "practice-temp-band"
+      ],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
       "lesson_start_stages": {
@@ -579,12 +595,12 @@
       "diag_practice_ahead": [],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 1,
+      "stages_used": 2,
       "stages_found": 4,
       "planned_practice": [],
       "lesson_start_stages": {
         "database_retrieval": 3,
-        "conditionals": 0,
+        "conditionals": 2,
         "loops": 0,
         "functions": 0
       },
@@ -604,7 +620,7 @@
       "practice_unneeded": 0,
       "final_engine_stages": {
         "database_retrieval": 3,
-        "conditionals": 1,
+        "conditionals": 3,
         "loops": 1,
         "functions": 1
       },
@@ -631,12 +647,12 @@
       "diag_practice_ahead": [],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 1,
+      "stages_used": 2,
       "stages_found": 4,
       "planned_practice": [],
       "lesson_start_stages": {
         "database_retrieval": 3,
-        "conditionals": 0,
+        "conditionals": 2,
         "loops": 0,
         "functions": 0
       },
@@ -656,7 +672,7 @@
       "practice_unneeded": 0,
       "final_engine_stages": {
         "database_retrieval": 3,
-        "conditionals": 1,
+        "conditionals": 3,
         "loops": 1,
         "functions": 1
       },
@@ -810,58 +826,55 @@
       },
       "band": "low",
       "diag_stages": {
-        "database_retrieval": 2,
-        "conditionals": 1,
+        "database_retrieval": 0,
+        "conditionals": 2,
         "loops": 0,
         "functions": 1
       },
-      "diag_next": "level-1",
+      "diag_next": "practice-db-count",
       "diag_practice_ahead": [
         "practice-rainy-days"
       ],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 1,
+      "stages_used": 2,
       "stages_found": 4,
       "planned_practice": [
-        "practice-rainy-days"
+        "practice-db-count"
       ],
       "lesson_start_stages": {
         "database_retrieval": 0,
-        "conditionals": 0,
+        "conditionals": 2,
         "loops": 0,
         "functions": 0
       },
       "completed": true,
-      "submissions": 11,
-      "failed_on_levels": 5,
-      "failed_total": 5,
+      "submissions": 8,
+      "failed_on_levels": 3,
+      "failed_total": 4,
       "path": [
-        "level-1",
-        "level-1",
-        "level-1",
-        "level-1",
+        "practice-db-count",
         "practice-db-count",
         "level-2",
-        "practice-rainy-days",
+        "level-3",
         "level-3",
         "level-3",
         "level-4",
         "level-4"
       ],
-      "first_problem": "level-1",
+      "first_problem": "practice-db-count",
       "true_gaps": [
         "database_retrieval",
         "loops"
       ],
       "gaps_practiced_first": [
-        "loops"
+        "database_retrieval"
       ],
       "practice_unneeded": 0,
       "final_engine_stages": {
         "database_retrieval": 1,
-        "conditionals": 1,
-        "loops": 2,
+        "conditionals": 3,
+        "loops": 1,
         "functions": 1
       },
       "mismatch_events": 0,
@@ -878,63 +891,59 @@
       },
       "band": "low",
       "diag_stages": {
-        "database_retrieval": 2,
-        "conditionals": 1,
+        "database_retrieval": 0,
+        "conditionals": 2,
         "loops": 0,
         "functions": 1
       },
-      "diag_next": "level-1",
+      "diag_next": "practice-db-count",
       "diag_practice_ahead": [
         "practice-rainy-days"
       ],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 1,
+      "stages_used": 2,
       "stages_found": 4,
       "planned_practice": [
-        "practice-rainy-days"
+        "practice-db-count"
       ],
       "lesson_start_stages": {
         "database_retrieval": 0,
-        "conditionals": 0,
+        "conditionals": 2,
         "loops": 0,
         "functions": 0
       },
       "completed": true,
-      "submissions": 12,
-      "failed_on_levels": 5,
-      "failed_total": 6,
+      "submissions": 8,
+      "failed_on_levels": 3,
+      "failed_total": 4,
       "path": [
-        "level-1",
-        "level-1",
-        "level-1",
         "practice-db-count",
         "practice-db-count",
-        "level-1",
         "level-2",
-        "practice-rainy-days",
+        "level-3",
         "level-3",
         "level-3",
         "level-4",
         "level-4"
       ],
-      "first_problem": "level-1",
+      "first_problem": "practice-db-count",
       "true_gaps": [
         "database_retrieval",
         "loops"
       ],
       "gaps_practiced_first": [
-        "loops"
+        "database_retrieval"
       ],
       "practice_unneeded": 0,
       "final_engine_stages": {
         "database_retrieval": 1,
-        "conditionals": 1,
-        "loops": 2,
+        "conditionals": 3,
+        "loops": 1,
         "functions": 1
       },
       "mismatch_events": 0,
-      "struggle_events": 1
+      "struggle_events": 0
     },
     {
       "student": "SIM-003",
@@ -947,12 +956,12 @@
       },
       "band": "low",
       "diag_stages": {
-        "database_retrieval": 2,
-        "conditionals": 1,
+        "database_retrieval": 0,
+        "conditionals": 2,
         "loops": 0,
         "functions": 1
       },
-      "diag_next": "level-1",
+      "diag_next": "practice-db-count",
       "diag_practice_ahead": [
         "practice-rainy-days"
       ],
@@ -1083,14 +1092,14 @@
       "diag_practice_ahead": [],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 3,
+      "stages_used": 1,
       "stages_found": 4,
       "planned_practice": [],
       "lesson_start_stages": {
         "database_retrieval": 0,
         "conditionals": 3,
-        "loops": 2,
-        "functions": 2
+        "loops": 0,
+        "functions": 0
       },
       "completed": true,
       "submissions": 4,
@@ -1109,8 +1118,8 @@
       "final_engine_stages": {
         "database_retrieval": 1,
         "conditionals": 3,
-        "loops": 3,
-        "functions": 3
+        "loops": 1,
+        "functions": 1
       },
       "mismatch_events": 0,
       "struggle_events": 0
@@ -1135,14 +1144,14 @@
       "diag_practice_ahead": [],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 3,
+      "stages_used": 1,
       "stages_found": 4,
       "planned_practice": [],
       "lesson_start_stages": {
         "database_retrieval": 0,
         "conditionals": 3,
-        "loops": 2,
-        "functions": 2
+        "loops": 0,
+        "functions": 0
       },
       "completed": true,
       "submissions": 4,
@@ -1161,8 +1170,8 @@
       "final_engine_stages": {
         "database_retrieval": 1,
         "conditionals": 3,
-        "loops": 3,
-        "functions": 3
+        "loops": 1,
+        "functions": 1
       },
       "mismatch_events": 0,
       "struggle_events": 0
@@ -1528,35 +1537,36 @@
       },
       "band": "low",
       "diag_stages": {
-        "database_retrieval": 0,
+        "database_retrieval": 1,
         "conditionals": 0,
-        "loops": 3,
+        "loops": 1,
         "functions": 0
       },
-      "diag_next": "practice-db-count",
+      "diag_next": "level-1",
       "diag_practice_ahead": [
         "practice-temp-band"
       ],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 4,
+      "stages_used": 2,
       "stages_found": 4,
       "planned_practice": [
-        "practice-db-count",
         "practice-temp-band"
       ],
       "lesson_start_stages": {
         "database_retrieval": 0,
         "conditionals": 0,
-        "loops": 3,
+        "loops": 0,
         "functions": 0
       },
       "completed": true,
-      "submissions": 7,
-      "failed_on_levels": 2,
-      "failed_total": 2,
+      "submissions": 9,
+      "failed_on_levels": 4,
+      "failed_total": 4,
       "path": [
-        "practice-db-count",
+        "level-1",
+        "level-1",
+        "level-1",
         "practice-temp-band",
         "level-2",
         "level-2",
@@ -1564,21 +1574,20 @@
         "level-4",
         "level-4"
       ],
-      "first_problem": "practice-db-count",
+      "first_problem": "level-1",
       "true_gaps": [
         "conditionals",
         "database_retrieval",
         "functions"
       ],
       "gaps_practiced_first": [
-        "conditionals",
-        "database_retrieval"
+        "conditionals"
       ],
       "practice_unneeded": 0,
       "final_engine_stages": {
         "database_retrieval": 1,
         "conditionals": 2,
-        "loops": 3,
+        "loops": 1,
         "functions": 1
       },
       "mismatch_events": 0,
@@ -1595,35 +1604,36 @@
       },
       "band": "low",
       "diag_stages": {
-        "database_retrieval": 0,
+        "database_retrieval": 1,
         "conditionals": 0,
-        "loops": 3,
+        "loops": 1,
         "functions": 0
       },
-      "diag_next": "practice-db-count",
+      "diag_next": "level-1",
       "diag_practice_ahead": [
         "practice-temp-band"
       ],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 4,
+      "stages_used": 2,
       "stages_found": 4,
       "planned_practice": [
-        "practice-db-count",
         "practice-temp-band"
       ],
       "lesson_start_stages": {
         "database_retrieval": 0,
         "conditionals": 0,
-        "loops": 3,
+        "loops": 0,
         "functions": 0
       },
       "completed": true,
-      "submissions": 7,
-      "failed_on_levels": 2,
-      "failed_total": 2,
+      "submissions": 9,
+      "failed_on_levels": 4,
+      "failed_total": 4,
       "path": [
-        "practice-db-count",
+        "level-1",
+        "level-1",
+        "level-1",
         "practice-temp-band",
         "level-2",
         "level-2",
@@ -1631,21 +1641,20 @@
         "level-4",
         "level-4"
       ],
-      "first_problem": "practice-db-count",
+      "first_problem": "level-1",
       "true_gaps": [
         "conditionals",
         "database_retrieval",
         "functions"
       ],
       "gaps_practiced_first": [
-        "conditionals",
-        "database_retrieval"
+        "conditionals"
       ],
       "practice_unneeded": 0,
       "final_engine_stages": {
         "database_retrieval": 1,
         "conditionals": 2,
-        "loops": 3,
+        "loops": 1,
         "functions": 1
       },
       "mismatch_events": 0,
@@ -1662,12 +1671,12 @@
       },
       "band": "low",
       "diag_stages": {
-        "database_retrieval": 0,
+        "database_retrieval": 1,
         "conditionals": 0,
-        "loops": 3,
+        "loops": 1,
         "functions": 0
       },
-      "diag_next": "practice-db-count",
+      "diag_next": "level-1",
       "diag_practice_ahead": [
         "practice-temp-band"
       ],
@@ -1791,7 +1800,7 @@
       "diag_stages": {
         "database_retrieval": 3,
         "conditionals": 2,
-        "loops": 3,
+        "loops": 2,
         "functions": 3
       },
       "diag_next": "level-1",
@@ -1803,8 +1812,8 @@
       "planned_practice": [],
       "lesson_start_stages": {
         "database_retrieval": 3,
-        "conditionals": 0,
-        "loops": 3,
+        "conditionals": 2,
+        "loops": 0,
         "functions": 3
       },
       "completed": true,
@@ -1823,8 +1832,8 @@
       "practice_unneeded": 0,
       "final_engine_stages": {
         "database_retrieval": 3,
-        "conditionals": 1,
-        "loops": 3,
+        "conditionals": 3,
+        "loops": 1,
         "functions": 3
       },
       "mismatch_events": 0,
@@ -1843,7 +1852,7 @@
       "diag_stages": {
         "database_retrieval": 3,
         "conditionals": 2,
-        "loops": 3,
+        "loops": 2,
         "functions": 3
       },
       "diag_next": "level-1",
@@ -1855,8 +1864,8 @@
       "planned_practice": [],
       "lesson_start_stages": {
         "database_retrieval": 3,
-        "conditionals": 0,
-        "loops": 3,
+        "conditionals": 2,
+        "loops": 0,
         "functions": 3
       },
       "completed": true,
@@ -1875,8 +1884,8 @@
       "practice_unneeded": 0,
       "final_engine_stages": {
         "database_retrieval": 3,
-        "conditionals": 1,
-        "loops": 3,
+        "conditionals": 3,
+        "loops": 1,
         "functions": 3
       },
       "mismatch_events": 0,
@@ -1895,7 +1904,7 @@
       "diag_stages": {
         "database_retrieval": 3,
         "conditionals": 2,
-        "loops": 3,
+        "loops": 2,
         "functions": 3
       },
       "diag_next": "level-1",
@@ -2029,7 +2038,7 @@
       "band": "middle",
       "diag_stages": {
         "database_retrieval": 0,
-        "conditionals": 2,
+        "conditionals": 1,
         "loops": 2,
         "functions": 0
       },
@@ -2090,7 +2099,7 @@
       "band": "middle",
       "diag_stages": {
         "database_retrieval": 0,
-        "conditionals": 2,
+        "conditionals": 1,
         "loops": 2,
         "functions": 0
       },
@@ -2151,7 +2160,7 @@
       "band": "middle",
       "diag_stages": {
         "database_retrieval": 0,
-        "conditionals": 2,
+        "conditionals": 1,
         "loops": 2,
         "functions": 0
       },
@@ -2512,7 +2521,7 @@
       "diag_stages": {
         "database_retrieval": 2,
         "conditionals": 0,
-        "loops": 2,
+        "loops": 1,
         "functions": 1
       },
       "diag_next": "level-1",
@@ -2521,11 +2530,11 @@
       ],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 0,
+      "stages_used": 1,
       "stages_found": 4,
       "planned_practice": [],
       "lesson_start_stages": {
-        "database_retrieval": 0,
+        "database_retrieval": 2,
         "conditionals": 0,
         "loops": 0,
         "functions": 0
@@ -2552,7 +2561,7 @@
       "gaps_practiced_first": [],
       "practice_unneeded": 0,
       "final_engine_stages": {
-        "database_retrieval": 1,
+        "database_retrieval": 3,
         "conditionals": 1,
         "loops": 1,
         "functions": 0
@@ -2573,7 +2582,7 @@
       "diag_stages": {
         "database_retrieval": 2,
         "conditionals": 0,
-        "loops": 2,
+        "loops": 1,
         "functions": 1
       },
       "diag_next": "level-1",
@@ -2582,11 +2591,11 @@
       ],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 0,
+      "stages_used": 1,
       "stages_found": 4,
       "planned_practice": [],
       "lesson_start_stages": {
-        "database_retrieval": 0,
+        "database_retrieval": 2,
         "conditionals": 0,
         "loops": 0,
         "functions": 0
@@ -2613,7 +2622,7 @@
       "gaps_practiced_first": [],
       "practice_unneeded": 0,
       "final_engine_stages": {
-        "database_retrieval": 1,
+        "database_retrieval": 3,
         "conditionals": 1,
         "loops": 1,
         "functions": 0
@@ -2634,7 +2643,7 @@
       "diag_stages": {
         "database_retrieval": 2,
         "conditionals": 0,
-        "loops": 2,
+        "loops": 1,
         "functions": 1
       },
       "diag_next": "level-1",
@@ -2761,43 +2770,44 @@
       },
       "band": "high",
       "diag_stages": {
-        "database_retrieval": 1,
+        "database_retrieval": 0,
         "conditionals": 3,
-        "loops": 2,
+        "loops": 3,
         "functions": 2
       },
-      "diag_next": "level-1",
+      "diag_next": "practice-db-count",
       "diag_practice_ahead": [],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 1,
+      "stages_used": 3,
       "stages_found": 4,
-      "planned_practice": [],
+      "planned_practice": [
+        "practice-db-count"
+      ],
       "lesson_start_stages": {
         "database_retrieval": 0,
         "conditionals": 3,
-        "loops": 0,
+        "loops": 3,
         "functions": 0
       },
       "completed": true,
-      "submissions": 5,
-      "failed_on_levels": 1,
-      "failed_total": 1,
+      "submissions": 4,
+      "failed_on_levels": 0,
+      "failed_total": 0,
       "path": [
-        "level-1",
-        "level-1",
+        "practice-db-count",
         "level-2",
         "level-3",
         "level-4"
       ],
-      "first_problem": "level-1",
+      "first_problem": "practice-db-count",
       "true_gaps": [],
       "gaps_practiced_first": [],
       "practice_unneeded": 0,
       "final_engine_stages": {
         "database_retrieval": 1,
         "conditionals": 3,
-        "loops": 1,
+        "loops": 3,
         "functions": 1
       },
       "mismatch_events": 0,
@@ -2814,43 +2824,44 @@
       },
       "band": "high",
       "diag_stages": {
-        "database_retrieval": 1,
+        "database_retrieval": 0,
         "conditionals": 3,
-        "loops": 2,
+        "loops": 3,
         "functions": 2
       },
-      "diag_next": "level-1",
+      "diag_next": "practice-db-count",
       "diag_practice_ahead": [],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 1,
+      "stages_used": 3,
       "stages_found": 4,
-      "planned_practice": [],
+      "planned_practice": [
+        "practice-db-count"
+      ],
       "lesson_start_stages": {
         "database_retrieval": 0,
         "conditionals": 3,
-        "loops": 0,
+        "loops": 3,
         "functions": 0
       },
       "completed": true,
-      "submissions": 5,
-      "failed_on_levels": 1,
-      "failed_total": 1,
+      "submissions": 4,
+      "failed_on_levels": 0,
+      "failed_total": 0,
       "path": [
-        "level-1",
-        "level-1",
+        "practice-db-count",
         "level-2",
         "level-3",
         "level-4"
       ],
-      "first_problem": "level-1",
+      "first_problem": "practice-db-count",
       "true_gaps": [],
       "gaps_practiced_first": [],
       "practice_unneeded": 0,
       "final_engine_stages": {
         "database_retrieval": 1,
         "conditionals": 3,
-        "loops": 1,
+        "loops": 3,
         "functions": 1
       },
       "mismatch_events": 0,
@@ -2867,12 +2878,12 @@
       },
       "band": "high",
       "diag_stages": {
-        "database_retrieval": 1,
+        "database_retrieval": 0,
         "conditionals": 3,
-        "loops": 2,
+        "loops": 3,
         "functions": 2
       },
-      "diag_next": "level-1",
+      "diag_next": "practice-db-count",
       "diag_practice_ahead": [],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
@@ -3006,7 +3017,7 @@
       ],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 2,
+      "stages_used": 3,
       "stages_found": 4,
       "planned_practice": [
         "practice-temp-band"
@@ -3015,7 +3026,7 @@
         "database_retrieval": 0,
         "conditionals": 0,
         "loops": 2,
-        "functions": 0
+        "functions": 2
       },
       "completed": true,
       "submissions": 10,
@@ -3045,7 +3056,7 @@
         "database_retrieval": 1,
         "conditionals": 2,
         "loops": 3,
-        "functions": 1
+        "functions": 2
       },
       "mismatch_events": 0,
       "struggle_events": 0
@@ -3072,7 +3083,7 @@
       ],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 2,
+      "stages_used": 3,
       "stages_found": 4,
       "planned_practice": [
         "practice-temp-band"
@@ -3081,7 +3092,7 @@
         "database_retrieval": 0,
         "conditionals": 0,
         "loops": 2,
-        "functions": 0
+        "functions": 2
       },
       "completed": true,
       "submissions": 10,
@@ -3111,7 +3122,7 @@
         "database_retrieval": 1,
         "conditionals": 2,
         "loops": 3,
-        "functions": 1
+        "functions": 2
       },
       "mismatch_events": 0,
       "struggle_events": 0
@@ -3256,21 +3267,21 @@
       "diag_stages": {
         "database_retrieval": 2,
         "conditionals": 3,
-        "loops": 3,
+        "loops": 2,
         "functions": 3
       },
       "diag_next": "level-1",
       "diag_practice_ahead": [],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 2,
+      "stages_used": 3,
       "stages_found": 4,
       "planned_practice": [],
       "lesson_start_stages": {
-        "database_retrieval": 0,
+        "database_retrieval": 2,
         "conditionals": 3,
-        "loops": 3,
-        "functions": 0
+        "loops": 0,
+        "functions": 3
       },
       "completed": true,
       "submissions": 4,
@@ -3287,10 +3298,10 @@
       "gaps_practiced_first": [],
       "practice_unneeded": 0,
       "final_engine_stages": {
-        "database_retrieval": 1,
+        "database_retrieval": 3,
         "conditionals": 3,
-        "loops": 3,
-        "functions": 1
+        "loops": 1,
+        "functions": 3
       },
       "mismatch_events": 0,
       "struggle_events": 0
@@ -3308,21 +3319,21 @@
       "diag_stages": {
         "database_retrieval": 2,
         "conditionals": 3,
-        "loops": 3,
+        "loops": 2,
         "functions": 3
       },
       "diag_next": "level-1",
       "diag_practice_ahead": [],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 2,
+      "stages_used": 3,
       "stages_found": 4,
       "planned_practice": [],
       "lesson_start_stages": {
-        "database_retrieval": 0,
+        "database_retrieval": 2,
         "conditionals": 3,
-        "loops": 3,
-        "functions": 0
+        "loops": 0,
+        "functions": 3
       },
       "completed": true,
       "submissions": 4,
@@ -3339,10 +3350,10 @@
       "gaps_practiced_first": [],
       "practice_unneeded": 0,
       "final_engine_stages": {
-        "database_retrieval": 1,
+        "database_retrieval": 3,
         "conditionals": 3,
-        "loops": 3,
-        "functions": 1
+        "loops": 1,
+        "functions": 3
       },
       "mismatch_events": 0,
       "struggle_events": 0
@@ -3360,7 +3371,7 @@
       "diag_stages": {
         "database_retrieval": 2,
         "conditionals": 3,
-        "loops": 3,
+        "loops": 2,
         "functions": 3
       },
       "diag_next": "level-1",
@@ -3484,14 +3495,14 @@
       "diag_practice_ahead": [],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 1,
+      "stages_used": 2,
       "stages_found": 4,
       "planned_practice": [],
       "lesson_start_stages": {
-        "database_retrieval": 0,
+        "database_retrieval": 3,
         "conditionals": 0,
-        "loops": 2,
-        "functions": 0
+        "loops": 0,
+        "functions": 2
       },
       "completed": true,
       "submissions": 5,
@@ -3509,10 +3520,10 @@
       "gaps_practiced_first": [],
       "practice_unneeded": 0,
       "final_engine_stages": {
-        "database_retrieval": 1,
+        "database_retrieval": 3,
         "conditionals": 1,
-        "loops": 2,
-        "functions": 1
+        "loops": 1,
+        "functions": 3
       },
       "mismatch_events": 0,
       "struggle_events": 0
@@ -3537,14 +3548,14 @@
       "diag_practice_ahead": [],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 1,
+      "stages_used": 2,
       "stages_found": 4,
       "planned_practice": [],
       "lesson_start_stages": {
-        "database_retrieval": 0,
+        "database_retrieval": 3,
         "conditionals": 0,
-        "loops": 2,
-        "functions": 0
+        "loops": 0,
+        "functions": 2
       },
       "completed": true,
       "submissions": 5,
@@ -3562,10 +3573,10 @@
       "gaps_practiced_first": [],
       "practice_unneeded": 0,
       "final_engine_stages": {
-        "database_retrieval": 1,
+        "database_retrieval": 3,
         "conditionals": 1,
-        "loops": 2,
-        "functions": 1
+        "loops": 1,
+        "functions": 3
       },
       "mismatch_events": 0,
       "struggle_events": 0
@@ -3702,7 +3713,7 @@
       "band": "middle",
       "diag_stages": {
         "database_retrieval": 2,
-        "conditionals": 2,
+        "conditionals": 1,
         "loops": 2,
         "functions": 3
       },
@@ -3756,7 +3767,7 @@
       "band": "middle",
       "diag_stages": {
         "database_retrieval": 2,
-        "conditionals": 2,
+        "conditionals": 1,
         "loops": 2,
         "functions": 3
       },
@@ -3810,7 +3821,7 @@
       "band": "middle",
       "diag_stages": {
         "database_retrieval": 2,
-        "conditionals": 2,
+        "conditionals": 1,
         "loops": 2,
         "functions": 3
       },
@@ -3931,20 +3942,20 @@
         "database_retrieval": 3,
         "conditionals": 2,
         "loops": 2,
-        "functions": 2
+        "functions": 1
       },
       "diag_next": "level-1",
       "diag_practice_ahead": [],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 2,
+      "stages_used": 1,
       "stages_found": 4,
       "planned_practice": [],
       "lesson_start_stages": {
         "database_retrieval": 3,
         "conditionals": 0,
         "loops": 0,
-        "functions": 2
+        "functions": 0
       },
       "completed": true,
       "submissions": 5,
@@ -3965,7 +3976,7 @@
         "database_retrieval": 3,
         "conditionals": 1,
         "loops": 1,
-        "functions": 3
+        "functions": 1
       },
       "mismatch_events": 0,
       "struggle_events": 0
@@ -3984,20 +3995,20 @@
         "database_retrieval": 3,
         "conditionals": 2,
         "loops": 2,
-        "functions": 2
+        "functions": 1
       },
       "diag_next": "level-1",
       "diag_practice_ahead": [],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 2,
+      "stages_used": 1,
       "stages_found": 4,
       "planned_practice": [],
       "lesson_start_stages": {
         "database_retrieval": 3,
         "conditionals": 0,
         "loops": 0,
-        "functions": 2
+        "functions": 0
       },
       "completed": true,
       "submissions": 5,
@@ -4018,7 +4029,7 @@
         "database_retrieval": 3,
         "conditionals": 1,
         "loops": 1,
-        "functions": 3
+        "functions": 1
       },
       "mismatch_events": 0,
       "struggle_events": 0
@@ -4037,7 +4048,7 @@
         "database_retrieval": 3,
         "conditionals": 2,
         "loops": 2,
-        "functions": 2
+        "functions": 1
       },
       "diag_next": "level-1",
       "diag_practice_ahead": [],
@@ -4154,7 +4165,7 @@
       "diag_stages": {
         "database_retrieval": 3,
         "conditionals": 3,
-        "loops": 1,
+        "loops": 2,
         "functions": 1
       },
       "diag_next": "level-1",
@@ -4207,7 +4218,7 @@
       "diag_stages": {
         "database_retrieval": 3,
         "conditionals": 3,
-        "loops": 1,
+        "loops": 2,
         "functions": 1
       },
       "diag_next": "level-1",
@@ -4260,7 +4271,7 @@
       "diag_stages": {
         "database_retrieval": 3,
         "conditionals": 3,
-        "loops": 1,
+        "loops": 2,
         "functions": 1
       },
       "diag_next": "level-1",
@@ -4382,21 +4393,23 @@
       "diag_stages": {
         "database_retrieval": 2,
         "conditionals": 3,
-        "loops": 1,
-        "functions": 2
+        "loops": 0,
+        "functions": 3
       },
       "diag_next": "level-1",
-      "diag_practice_ahead": [],
+      "diag_practice_ahead": [
+        "practice-rainy-days"
+      ],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 2,
+      "stages_used": 3,
       "stages_found": 4,
       "planned_practice": [],
       "lesson_start_stages": {
         "database_retrieval": 2,
         "conditionals": 3,
         "loops": 0,
-        "functions": 0
+        "functions": 3
       },
       "completed": true,
       "submissions": 7,
@@ -4419,7 +4432,7 @@
         "database_retrieval": 2,
         "conditionals": 3,
         "loops": 1,
-        "functions": 1
+        "functions": 3
       },
       "mismatch_events": 0,
       "struggle_events": 0
@@ -4437,21 +4450,23 @@
       "diag_stages": {
         "database_retrieval": 2,
         "conditionals": 3,
-        "loops": 1,
-        "functions": 2
+        "loops": 0,
+        "functions": 3
       },
       "diag_next": "level-1",
-      "diag_practice_ahead": [],
+      "diag_practice_ahead": [
+        "practice-rainy-days"
+      ],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 2,
+      "stages_used": 3,
       "stages_found": 4,
       "planned_practice": [],
       "lesson_start_stages": {
         "database_retrieval": 2,
         "conditionals": 3,
         "loops": 0,
-        "functions": 0
+        "functions": 3
       },
       "completed": true,
       "submissions": 7,
@@ -4474,7 +4489,7 @@
         "database_retrieval": 2,
         "conditionals": 3,
         "loops": 1,
-        "functions": 1
+        "functions": 3
       },
       "mismatch_events": 0,
       "struggle_events": 0
@@ -4492,11 +4507,13 @@
       "diag_stages": {
         "database_retrieval": 2,
         "conditionals": 3,
-        "loops": 1,
-        "functions": 2
+        "loops": 0,
+        "functions": 3
       },
       "diag_next": "level-1",
-      "diag_practice_ahead": [],
+      "diag_practice_ahead": [
+        "practice-rainy-days"
+      ],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
       "lesson_start_stages": {
@@ -5060,14 +5077,14 @@
       "diag_practice_ahead": [],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 1,
+      "stages_used": 2,
       "stages_found": 4,
       "planned_practice": [],
       "lesson_start_stages": {
         "database_retrieval": 0,
         "conditionals": 2,
         "loops": 0,
-        "functions": 0
+        "functions": 2
       },
       "completed": true,
       "submissions": 4,
@@ -5087,7 +5104,7 @@
         "database_retrieval": 1,
         "conditionals": 3,
         "loops": 1,
-        "functions": 1
+        "functions": 3
       },
       "mismatch_events": 0,
       "struggle_events": 0
@@ -5112,14 +5129,14 @@
       "diag_practice_ahead": [],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 1,
+      "stages_used": 2,
       "stages_found": 4,
       "planned_practice": [],
       "lesson_start_stages": {
         "database_retrieval": 0,
         "conditionals": 2,
         "loops": 0,
-        "functions": 0
+        "functions": 2
       },
       "completed": true,
       "submissions": 4,
@@ -5139,7 +5156,7 @@
         "database_retrieval": 1,
         "conditionals": 3,
         "loops": 1,
-        "functions": 1
+        "functions": 3
       },
       "mismatch_events": 0,
       "struggle_events": 0
@@ -5281,14 +5298,14 @@
       "diag_practice_ahead": [],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 2,
+      "stages_used": 1,
       "stages_found": 4,
       "planned_practice": [],
       "lesson_start_stages": {
         "database_retrieval": 0,
         "conditionals": 0,
         "loops": 3,
-        "functions": 2
+        "functions": 0
       },
       "completed": true,
       "submissions": 5,
@@ -5309,7 +5326,7 @@
         "database_retrieval": 1,
         "conditionals": 1,
         "loops": 3,
-        "functions": 2
+        "functions": 1
       },
       "mismatch_events": 0,
       "struggle_events": 0
@@ -5334,14 +5351,14 @@
       "diag_practice_ahead": [],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 2,
+      "stages_used": 1,
       "stages_found": 4,
       "planned_practice": [],
       "lesson_start_stages": {
         "database_retrieval": 0,
         "conditionals": 0,
         "loops": 3,
-        "functions": 2
+        "functions": 0
       },
       "completed": true,
       "submissions": 5,
@@ -5362,7 +5379,7 @@
         "database_retrieval": 1,
         "conditionals": 1,
         "loops": 3,
-        "functions": 2
+        "functions": 1
       },
       "mismatch_events": 0,
       "struggle_events": 0
@@ -5498,11 +5515,13 @@
       "diag_stages": {
         "database_retrieval": 2,
         "conditionals": 2,
-        "loops": 1,
+        "loops": 0,
         "functions": 1
       },
       "diag_next": "level-1",
-      "diag_practice_ahead": [],
+      "diag_practice_ahead": [
+        "practice-rainy-days"
+      ],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
       "stages_used": 1,
@@ -5551,11 +5570,13 @@
       "diag_stages": {
         "database_retrieval": 2,
         "conditionals": 2,
-        "loops": 1,
+        "loops": 0,
         "functions": 1
       },
       "diag_next": "level-1",
-      "diag_practice_ahead": [],
+      "diag_practice_ahead": [
+        "practice-rainy-days"
+      ],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
       "stages_used": 1,
@@ -5604,11 +5625,13 @@
       "diag_stages": {
         "database_retrieval": 2,
         "conditionals": 2,
-        "loops": 1,
+        "loops": 0,
         "functions": 1
       },
       "diag_next": "level-1",
-      "diag_practice_ahead": [],
+      "diag_practice_ahead": [
+        "practice-rainy-days"
+      ],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
       "lesson_start_stages": {
@@ -5952,19 +5975,19 @@
       "band": "middle",
       "diag_stages": {
         "database_retrieval": 2,
-        "conditionals": 1,
-        "loops": 1,
+        "conditionals": 2,
+        "loops": 2,
         "functions": 1
       },
       "diag_next": "level-1",
       "diag_practice_ahead": [],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 1,
+      "stages_used": 0,
       "stages_found": 4,
       "planned_practice": [],
       "lesson_start_stages": {
-        "database_retrieval": 2,
+        "database_retrieval": 0,
         "conditionals": 0,
         "loops": 0,
         "functions": 0
@@ -5986,7 +6009,7 @@
       "gaps_practiced_first": [],
       "practice_unneeded": 0,
       "final_engine_stages": {
-        "database_retrieval": 3,
+        "database_retrieval": 1,
         "conditionals": 1,
         "loops": 1,
         "functions": 1
@@ -6006,19 +6029,19 @@
       "band": "middle",
       "diag_stages": {
         "database_retrieval": 2,
-        "conditionals": 1,
-        "loops": 1,
+        "conditionals": 2,
+        "loops": 2,
         "functions": 1
       },
       "diag_next": "level-1",
       "diag_practice_ahead": [],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 1,
+      "stages_used": 0,
       "stages_found": 4,
       "planned_practice": [],
       "lesson_start_stages": {
-        "database_retrieval": 2,
+        "database_retrieval": 0,
         "conditionals": 0,
         "loops": 0,
         "functions": 0
@@ -6040,7 +6063,7 @@
       "gaps_practiced_first": [],
       "practice_unneeded": 0,
       "final_engine_stages": {
-        "database_retrieval": 3,
+        "database_retrieval": 1,
         "conditionals": 1,
         "loops": 1,
         "functions": 1
@@ -6060,8 +6083,8 @@
       "band": "middle",
       "diag_stages": {
         "database_retrieval": 2,
-        "conditionals": 1,
-        "loops": 1,
+        "conditionals": 2,
+        "loops": 2,
         "functions": 1
       },
       "diag_next": "level-1",
@@ -6184,9 +6207,9 @@
       },
       "band": "middle",
       "diag_stages": {
-        "database_retrieval": 1,
+        "database_retrieval": 2,
         "conditionals": 0,
-        "loops": 2,
+        "loops": 3,
         "functions": 1
       },
       "diag_next": "level-1",
@@ -6195,7 +6218,7 @@
       ],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 1,
+      "stages_used": 2,
       "stages_found": 4,
       "planned_practice": [
         "practice-temp-band"
@@ -6203,7 +6226,7 @@
       "lesson_start_stages": {
         "database_retrieval": 0,
         "conditionals": 0,
-        "loops": 0,
+        "loops": 3,
         "functions": 0
       },
       "completed": true,
@@ -6232,7 +6255,7 @@
       "final_engine_stages": {
         "database_retrieval": 1,
         "conditionals": 2,
-        "loops": 1,
+        "loops": 3,
         "functions": 1
       },
       "mismatch_events": 0,
@@ -6249,9 +6272,9 @@
       },
       "band": "middle",
       "diag_stages": {
-        "database_retrieval": 1,
+        "database_retrieval": 2,
         "conditionals": 0,
-        "loops": 2,
+        "loops": 3,
         "functions": 1
       },
       "diag_next": "level-1",
@@ -6260,7 +6283,7 @@
       ],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 1,
+      "stages_used": 2,
       "stages_found": 4,
       "planned_practice": [
         "practice-temp-band"
@@ -6268,7 +6291,7 @@
       "lesson_start_stages": {
         "database_retrieval": 0,
         "conditionals": 0,
-        "loops": 0,
+        "loops": 3,
         "functions": 0
       },
       "completed": true,
@@ -6297,7 +6320,7 @@
       "final_engine_stages": {
         "database_retrieval": 1,
         "conditionals": 2,
-        "loops": 1,
+        "loops": 3,
         "functions": 1
       },
       "mismatch_events": 0,
@@ -6314,9 +6337,9 @@
       },
       "band": "middle",
       "diag_stages": {
-        "database_retrieval": 1,
+        "database_retrieval": 2,
         "conditionals": 0,
-        "loops": 2,
+        "loops": 3,
         "functions": 1
       },
       "diag_next": "level-1",
@@ -6440,8 +6463,8 @@
       },
       "band": "high",
       "diag_stages": {
-        "database_retrieval": 2,
-        "conditionals": 2,
+        "database_retrieval": 3,
+        "conditionals": 3,
         "loops": 3,
         "functions": 3
       },
@@ -6449,14 +6472,14 @@
       "diag_practice_ahead": [],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 1,
+      "stages_used": 4,
       "stages_found": 4,
       "planned_practice": [],
       "lesson_start_stages": {
-        "database_retrieval": 0,
-        "conditionals": 0,
+        "database_retrieval": 3,
+        "conditionals": 3,
         "loops": 3,
-        "functions": 0
+        "functions": 3
       },
       "completed": true,
       "submissions": 4,
@@ -6473,10 +6496,10 @@
       "gaps_practiced_first": [],
       "practice_unneeded": 0,
       "final_engine_stages": {
-        "database_retrieval": 1,
-        "conditionals": 1,
+        "database_retrieval": 3,
+        "conditionals": 3,
         "loops": 3,
-        "functions": 1
+        "functions": 3
       },
       "mismatch_events": 0,
       "struggle_events": 0
@@ -6492,8 +6515,8 @@
       },
       "band": "high",
       "diag_stages": {
-        "database_retrieval": 2,
-        "conditionals": 2,
+        "database_retrieval": 3,
+        "conditionals": 3,
         "loops": 3,
         "functions": 3
       },
@@ -6501,14 +6524,14 @@
       "diag_practice_ahead": [],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 1,
+      "stages_used": 4,
       "stages_found": 4,
       "planned_practice": [],
       "lesson_start_stages": {
-        "database_retrieval": 0,
-        "conditionals": 0,
+        "database_retrieval": 3,
+        "conditionals": 3,
         "loops": 3,
-        "functions": 0
+        "functions": 3
       },
       "completed": true,
       "submissions": 4,
@@ -6525,10 +6548,10 @@
       "gaps_practiced_first": [],
       "practice_unneeded": 0,
       "final_engine_stages": {
-        "database_retrieval": 1,
-        "conditionals": 1,
+        "database_retrieval": 3,
+        "conditionals": 3,
         "loops": 3,
-        "functions": 1
+        "functions": 3
       },
       "mismatch_events": 0,
       "struggle_events": 0
@@ -6544,8 +6567,8 @@
       },
       "band": "high",
       "diag_stages": {
-        "database_retrieval": 2,
-        "conditionals": 2,
+        "database_retrieval": 3,
+        "conditionals": 3,
         "loops": 3,
         "functions": 3
       },
@@ -6941,21 +6964,18 @@
       "band": "low",
       "diag_stages": {
         "database_retrieval": 0,
-        "conditionals": 0,
+        "conditionals": 1,
         "loops": 1,
         "functions": 1
       },
       "diag_next": "practice-db-count",
-      "diag_practice_ahead": [
-        "practice-temp-band"
-      ],
+      "diag_practice_ahead": [],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 2,
+      "stages_used": 1,
       "stages_found": 4,
       "planned_practice": [
-        "practice-db-count",
-        "practice-temp-band"
+        "practice-db-count"
       ],
       "lesson_start_stages": {
         "database_retrieval": 0,
@@ -6964,14 +6984,13 @@
         "functions": 0
       },
       "completed": true,
-      "submissions": 7,
-      "failed_on_levels": 0,
+      "submissions": 6,
+      "failed_on_levels": 2,
       "failed_total": 2,
       "path": [
         "practice-db-count",
-        "practice-temp-band",
-        "practice-temp-band",
-        "practice-temp-band",
+        "level-2",
+        "level-2",
         "level-2",
         "level-3",
         "level-4"
@@ -6982,13 +7001,12 @@
         "database_retrieval"
       ],
       "gaps_practiced_first": [
-        "conditionals",
         "database_retrieval"
       ],
       "practice_unneeded": 0,
       "final_engine_stages": {
         "database_retrieval": 1,
-        "conditionals": 2,
+        "conditionals": 1,
         "loops": 1,
         "functions": 1
       },
@@ -7007,21 +7025,18 @@
       "band": "low",
       "diag_stages": {
         "database_retrieval": 0,
-        "conditionals": 0,
+        "conditionals": 1,
         "loops": 1,
         "functions": 1
       },
       "diag_next": "practice-db-count",
-      "diag_practice_ahead": [
-        "practice-temp-band"
-      ],
+      "diag_practice_ahead": [],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 2,
+      "stages_used": 1,
       "stages_found": 4,
       "planned_practice": [
-        "practice-db-count",
-        "practice-temp-band"
+        "practice-db-count"
       ],
       "lesson_start_stages": {
         "database_retrieval": 0,
@@ -7030,14 +7045,13 @@
         "functions": 0
       },
       "completed": true,
-      "submissions": 7,
-      "failed_on_levels": 0,
+      "submissions": 6,
+      "failed_on_levels": 2,
       "failed_total": 2,
       "path": [
         "practice-db-count",
-        "practice-temp-band",
-        "practice-temp-band",
-        "practice-temp-band",
+        "level-2",
+        "level-2",
         "level-2",
         "level-3",
         "level-4"
@@ -7048,13 +7062,12 @@
         "database_retrieval"
       ],
       "gaps_practiced_first": [
-        "conditionals",
         "database_retrieval"
       ],
       "practice_unneeded": 0,
       "final_engine_stages": {
         "database_retrieval": 1,
-        "conditionals": 2,
+        "conditionals": 1,
         "loops": 1,
         "functions": 1
       },
@@ -7073,14 +7086,12 @@
       "band": "low",
       "diag_stages": {
         "database_retrieval": 0,
-        "conditionals": 0,
+        "conditionals": 1,
         "loops": 1,
         "functions": 1
       },
       "diag_next": "practice-db-count",
-      "diag_practice_ahead": [
-        "practice-temp-band"
-      ],
+      "diag_practice_ahead": [],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
       "lesson_start_stages": {
@@ -7211,13 +7222,13 @@
       "diag_practice_ahead": [],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 1,
+      "stages_used": 0,
       "stages_found": 4,
       "planned_practice": [],
       "lesson_start_stages": {
         "database_retrieval": 0,
         "conditionals": 0,
-        "loops": 3,
+        "loops": 0,
         "functions": 0
       },
       "completed": true,
@@ -7239,7 +7250,7 @@
       "final_engine_stages": {
         "database_retrieval": 1,
         "conditionals": 1,
-        "loops": 3,
+        "loops": 1,
         "functions": 1
       },
       "mismatch_events": 0,
@@ -7265,13 +7276,13 @@
       "diag_practice_ahead": [],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 1,
+      "stages_used": 0,
       "stages_found": 4,
       "planned_practice": [],
       "lesson_start_stages": {
         "database_retrieval": 0,
         "conditionals": 0,
-        "loops": 3,
+        "loops": 0,
         "functions": 0
       },
       "completed": true,
@@ -7293,7 +7304,7 @@
       "final_engine_stages": {
         "database_retrieval": 1,
         "conditionals": 1,
-        "loops": 3,
+        "loops": 1,
         "functions": 1
       },
       "mismatch_events": 0,
@@ -7882,20 +7893,20 @@
       "band": "high",
       "diag_stages": {
         "database_retrieval": 3,
-        "conditionals": 2,
-        "loops": 2,
+        "conditionals": 1,
+        "loops": 1,
         "functions": 1
       },
       "diag_next": "level-1",
       "diag_practice_ahead": [],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 2,
+      "stages_used": 1,
       "stages_found": 4,
       "planned_practice": [],
       "lesson_start_stages": {
         "database_retrieval": 3,
-        "conditionals": 2,
+        "conditionals": 0,
         "loops": 0,
         "functions": 0
       },
@@ -7915,7 +7926,7 @@
       "practice_unneeded": 0,
       "final_engine_stages": {
         "database_retrieval": 3,
-        "conditionals": 3,
+        "conditionals": 1,
         "loops": 1,
         "functions": 1
       },
@@ -7934,20 +7945,20 @@
       "band": "high",
       "diag_stages": {
         "database_retrieval": 3,
-        "conditionals": 2,
-        "loops": 2,
+        "conditionals": 1,
+        "loops": 1,
         "functions": 1
       },
       "diag_next": "level-1",
       "diag_practice_ahead": [],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 2,
+      "stages_used": 1,
       "stages_found": 4,
       "planned_practice": [],
       "lesson_start_stages": {
         "database_retrieval": 3,
-        "conditionals": 2,
+        "conditionals": 0,
         "loops": 0,
         "functions": 0
       },
@@ -7967,7 +7978,7 @@
       "practice_unneeded": 0,
       "final_engine_stages": {
         "database_retrieval": 3,
-        "conditionals": 3,
+        "conditionals": 1,
         "loops": 1,
         "functions": 1
       },
@@ -7986,8 +7997,8 @@
       "band": "high",
       "diag_stages": {
         "database_retrieval": 3,
-        "conditionals": 2,
-        "loops": 2,
+        "conditionals": 1,
+        "loops": 1,
         "functions": 1
       },
       "diag_next": "level-1",
@@ -8114,55 +8125,61 @@
       },
       "band": "low",
       "diag_stages": {
-        "database_retrieval": 2,
+        "database_retrieval": 0,
         "conditionals": 0,
-        "loops": 1,
-        "functions": 1
+        "loops": 0,
+        "functions": 0
       },
-      "diag_next": "level-1",
+      "diag_next": "practice-db-count",
       "diag_practice_ahead": [
-        "practice-temp-band"
+        "practice-temp-band",
+        "practice-rainy-days"
       ],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 2,
+      "stages_used": 3,
       "stages_found": 4,
       "planned_practice": [
-        "practice-temp-band"
+        "practice-db-count",
+        "practice-temp-band",
+        "practice-rainy-days"
       ],
       "lesson_start_stages": {
-        "database_retrieval": 2,
+        "database_retrieval": 0,
         "conditionals": 0,
         "loops": 0,
         "functions": 0
       },
       "completed": true,
-      "submissions": 7,
-      "failed_on_levels": 2,
+      "submissions": 8,
+      "failed_on_levels": 1,
       "failed_total": 2,
       "path": [
-        "level-1",
+        "practice-db-count",
         "practice-temp-band",
         "level-2",
-        "level-3",
+        "practice-rainy-days",
+        "practice-rainy-days",
         "level-3",
         "level-3",
         "level-4"
       ],
-      "first_problem": "level-1",
+      "first_problem": "practice-db-count",
       "true_gaps": [
         "conditionals",
         "database_retrieval",
         "loops"
       ],
       "gaps_practiced_first": [
-        "conditionals"
+        "conditionals",
+        "database_retrieval",
+        "loops"
       ],
       "practice_unneeded": 0,
       "final_engine_stages": {
-        "database_retrieval": 3,
+        "database_retrieval": 1,
         "conditionals": 2,
-        "loops": 1,
+        "loops": 2,
         "functions": 1
       },
       "mismatch_events": 0,
@@ -8179,55 +8196,61 @@
       },
       "band": "low",
       "diag_stages": {
-        "database_retrieval": 2,
+        "database_retrieval": 0,
         "conditionals": 0,
-        "loops": 1,
-        "functions": 1
+        "loops": 0,
+        "functions": 0
       },
-      "diag_next": "level-1",
+      "diag_next": "practice-db-count",
       "diag_practice_ahead": [
-        "practice-temp-band"
+        "practice-temp-band",
+        "practice-rainy-days"
       ],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 2,
+      "stages_used": 3,
       "stages_found": 4,
       "planned_practice": [
-        "practice-temp-band"
+        "practice-db-count",
+        "practice-temp-band",
+        "practice-rainy-days"
       ],
       "lesson_start_stages": {
-        "database_retrieval": 2,
+        "database_retrieval": 0,
         "conditionals": 0,
         "loops": 0,
         "functions": 0
       },
       "completed": true,
-      "submissions": 7,
-      "failed_on_levels": 2,
+      "submissions": 8,
+      "failed_on_levels": 1,
       "failed_total": 2,
       "path": [
-        "level-1",
+        "practice-db-count",
         "practice-temp-band",
         "level-2",
-        "level-3",
+        "practice-rainy-days",
+        "practice-rainy-days",
         "level-3",
         "level-3",
         "level-4"
       ],
-      "first_problem": "level-1",
+      "first_problem": "practice-db-count",
       "true_gaps": [
         "conditionals",
         "database_retrieval",
         "loops"
       ],
       "gaps_practiced_first": [
-        "conditionals"
+        "conditionals",
+        "database_retrieval",
+        "loops"
       ],
       "practice_unneeded": 0,
       "final_engine_stages": {
-        "database_retrieval": 3,
+        "database_retrieval": 1,
         "conditionals": 2,
-        "loops": 1,
+        "loops": 2,
         "functions": 1
       },
       "mismatch_events": 0,
@@ -8244,14 +8267,15 @@
       },
       "band": "low",
       "diag_stages": {
-        "database_retrieval": 2,
+        "database_retrieval": 0,
         "conditionals": 0,
-        "loops": 1,
-        "functions": 1
+        "loops": 0,
+        "functions": 0
       },
-      "diag_next": "level-1",
+      "diag_next": "practice-db-count",
       "diag_practice_ahead": [
-        "practice-temp-band"
+        "practice-temp-band",
+        "practice-rainy-days"
       ],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
@@ -8374,7 +8398,7 @@
       "band": "high",
       "diag_stages": {
         "database_retrieval": 3,
-        "conditionals": 3,
+        "conditionals": 2,
         "loops": 2,
         "functions": 3
       },
@@ -8382,12 +8406,12 @@
       "diag_practice_ahead": [],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 4,
+      "stages_used": 3,
       "stages_found": 4,
       "planned_practice": [],
       "lesson_start_stages": {
         "database_retrieval": 3,
-        "conditionals": 3,
+        "conditionals": 0,
         "loops": 2,
         "functions": 3
       },
@@ -8407,7 +8431,7 @@
       "practice_unneeded": 0,
       "final_engine_stages": {
         "database_retrieval": 3,
-        "conditionals": 3,
+        "conditionals": 1,
         "loops": 3,
         "functions": 3
       },
@@ -8426,7 +8450,7 @@
       "band": "high",
       "diag_stages": {
         "database_retrieval": 3,
-        "conditionals": 3,
+        "conditionals": 2,
         "loops": 2,
         "functions": 3
       },
@@ -8434,12 +8458,12 @@
       "diag_practice_ahead": [],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 4,
+      "stages_used": 3,
       "stages_found": 4,
       "planned_practice": [],
       "lesson_start_stages": {
         "database_retrieval": 3,
-        "conditionals": 3,
+        "conditionals": 0,
         "loops": 2,
         "functions": 3
       },
@@ -8459,7 +8483,7 @@
       "practice_unneeded": 0,
       "final_engine_stages": {
         "database_retrieval": 3,
-        "conditionals": 3,
+        "conditionals": 1,
         "loops": 3,
         "functions": 3
       },
@@ -8478,7 +8502,7 @@
       "band": "high",
       "diag_stages": {
         "database_retrieval": 3,
-        "conditionals": 3,
+        "conditionals": 2,
         "loops": 2,
         "functions": 3
       },
@@ -8594,7 +8618,7 @@
       "diag_stages": {
         "database_retrieval": 2,
         "conditionals": 2,
-        "loops": 2,
+        "loops": 3,
         "functions": 2
       },
       "diag_next": "level-1",
@@ -8646,7 +8670,7 @@
       "diag_stages": {
         "database_retrieval": 2,
         "conditionals": 2,
-        "loops": 2,
+        "loops": 3,
         "functions": 2
       },
       "diag_next": "level-1",
@@ -8698,7 +8722,7 @@
       "diag_stages": {
         "database_retrieval": 2,
         "conditionals": 2,
-        "loops": 2,
+        "loops": 3,
         "functions": 2
       },
       "diag_next": "level-1",
@@ -8828,23 +8852,20 @@
       "next_stop_concept": "database_retrieval",
       "stages_used": 1,
       "stages_found": 4,
-      "planned_practice": [
-        "practice-rainy-days"
-      ],
+      "planned_practice": [],
       "lesson_start_stages": {
         "database_retrieval": 0,
         "conditionals": 0,
         "loops": 0,
-        "functions": 0
+        "functions": 2
       },
       "completed": true,
-      "submissions": 5,
+      "submissions": 4,
       "failed_on_levels": 0,
       "failed_total": 0,
       "path": [
         "level-1",
         "level-2",
-        "practice-rainy-days",
         "level-3",
         "level-4"
       ],
@@ -8852,15 +8873,13 @@
       "true_gaps": [
         "loops"
       ],
-      "gaps_practiced_first": [
-        "loops"
-      ],
+      "gaps_practiced_first": [],
       "practice_unneeded": 0,
       "final_engine_stages": {
         "database_retrieval": 1,
         "conditionals": 1,
-        "loops": 2,
-        "functions": 1
+        "loops": 1,
+        "functions": 3
       },
       "mismatch_events": 0,
       "struggle_events": 0
@@ -8889,23 +8908,20 @@
       "next_stop_concept": "database_retrieval",
       "stages_used": 1,
       "stages_found": 4,
-      "planned_practice": [
-        "practice-rainy-days"
-      ],
+      "planned_practice": [],
       "lesson_start_stages": {
         "database_retrieval": 0,
         "conditionals": 0,
         "loops": 0,
-        "functions": 0
+        "functions": 2
       },
       "completed": true,
-      "submissions": 5,
+      "submissions": 4,
       "failed_on_levels": 0,
       "failed_total": 0,
       "path": [
         "level-1",
         "level-2",
-        "practice-rainy-days",
         "level-3",
         "level-4"
       ],
@@ -8913,15 +8929,13 @@
       "true_gaps": [
         "loops"
       ],
-      "gaps_practiced_first": [
-        "loops"
-      ],
+      "gaps_practiced_first": [],
       "practice_unneeded": 0,
       "final_engine_stages": {
         "database_retrieval": 1,
         "conditionals": 1,
-        "loops": 2,
-        "functions": 1
+        "loops": 1,
+        "functions": 3
       },
       "mismatch_events": 0,
       "struggle_events": 0
@@ -9063,10 +9077,10 @@
       },
       "band": "middle",
       "diag_stages": {
-        "database_retrieval": 1,
+        "database_retrieval": 2,
         "conditionals": 1,
         "loops": 1,
-        "functions": 2
+        "functions": 1
       },
       "diag_next": "level-1",
       "diag_practice_ahead": [],
@@ -9117,10 +9131,10 @@
       },
       "band": "middle",
       "diag_stages": {
-        "database_retrieval": 1,
+        "database_retrieval": 2,
         "conditionals": 1,
         "loops": 1,
-        "functions": 2
+        "functions": 1
       },
       "diag_next": "level-1",
       "diag_practice_ahead": [],
@@ -9171,10 +9185,10 @@
       },
       "band": "middle",
       "diag_stages": {
-        "database_retrieval": 1,
+        "database_retrieval": 2,
         "conditionals": 1,
         "loops": 1,
-        "functions": 2
+        "functions": 1
       },
       "diag_next": "level-1",
       "diag_practice_ahead": [],
@@ -9295,17 +9309,17 @@
         "database_retrieval": 2,
         "conditionals": 2,
         "loops": 2,
-        "functions": 1
+        "functions": 2
       },
       "diag_next": "level-1",
       "diag_practice_ahead": [],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 1,
+      "stages_used": 0,
       "stages_found": 4,
       "planned_practice": [],
       "lesson_start_stages": {
-        "database_retrieval": 2,
+        "database_retrieval": 0,
         "conditionals": 0,
         "loops": 0,
         "functions": 0
@@ -9327,7 +9341,7 @@
       "gaps_practiced_first": [],
       "practice_unneeded": 0,
       "final_engine_stages": {
-        "database_retrieval": 3,
+        "database_retrieval": 1,
         "conditionals": 1,
         "loops": 1,
         "functions": 1
@@ -9349,17 +9363,17 @@
         "database_retrieval": 2,
         "conditionals": 2,
         "loops": 2,
-        "functions": 1
+        "functions": 2
       },
       "diag_next": "level-1",
       "diag_practice_ahead": [],
       "next_stop_zone": "Data Lookup",
       "next_stop_concept": "database_retrieval",
-      "stages_used": 1,
+      "stages_used": 0,
       "stages_found": 4,
       "planned_practice": [],
       "lesson_start_stages": {
-        "database_retrieval": 2,
+        "database_retrieval": 0,
         "conditionals": 0,
         "loops": 0,
         "functions": 0
@@ -9381,7 +9395,7 @@
       "gaps_practiced_first": [],
       "practice_unneeded": 0,
       "final_engine_stages": {
-        "database_retrieval": 3,
+        "database_retrieval": 1,
         "conditionals": 1,
         "loops": 1,
         "functions": 1
@@ -9403,7 +9417,7 @@
         "database_retrieval": 2,
         "conditionals": 2,
         "loops": 2,
-        "functions": 1
+        "functions": 2
       },
       "diag_next": "level-1",
       "diag_practice_ahead": [],

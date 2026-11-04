@@ -39,4 +39,4 @@ Failed attempts on levels for students who start low: no diagnostic 4, diagnosti
 
 ## In-lesson help (new)
 
-`projects/catalog.yaml` `intervention.struggle_after` (off by default): after that many failed attempts on a level, the engine inserts the concept's practice once and returns to the level. If the diagnostic had rated the concept above 0, that rating is dropped and a `diagnostic_mismatch` event is logged, which gives live evidence of where the diagnostic overrates students.
+`projects/catalog.yaml` `intervention.struggle_after` (on by default, 3; `null` turns it off): after that many failed attempts on a level, the engine inserts the concept's practice once and returns to the level. If the diagnostic had rated the concept above 0, that rating is dropped and a `diagnostic_mismatch` event is logged, which gives live evidence of where the diagnostic overrates students.

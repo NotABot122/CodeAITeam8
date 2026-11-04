@@ -1,6 +1,7 @@
 // Shapes returned by webapi/ (a thin JSON layer over engine.session). Keep in sync with webapi/service.py.
 export type Stage = 0 | 1 | 2 | 3;
-export type NodeStatus = 'done' | 'current' | 'todo';
+/** paused: the level the student left for an inserted practice; they come back to it next. */
+export type NodeStatus = 'done' | 'current' | 'paused' | 'todo';
 
 export interface PathNode {
   id: string;
@@ -53,6 +54,10 @@ export interface ProblemView {
   attempts: number;
   /** The functions this problem's answer should use. [] means it needs none; null means no bank was written. */
   functions: FunctionInfo[] | null;
+  /** Why this practice problem is here: after a passed level, after repeated tries, or planned by the readiness check. */
+  inserted: 'after_level' | 'struggle' | 'planned' | null;
+  /** The level the student goes back to after this practice (only for 'struggle'). */
+  returnTo: {id: string; title: string} | null;
 }
 
 export interface FunctionInfo {
@@ -60,6 +65,19 @@ export interface FunctionInfo {
   summary: string;
   example: string | null;
 }
+
+/** The lesson pathway the Strands Decider 2B picked after the readiness check (student view: no stances or scores). */
+export interface PathwayView {
+  id: string;
+  title: string;
+  summary: string;
+  message: string;
+  decidedBy: 'ai' | 'rules';
+  grade: number | null;
+  standards: {id: string; skill: string}[];
+  steps: {title: string; status: 'done' | 'current' | 'todo'}[];
+}
+export interface PathwayResult {pathway: PathwayView; state: StudentState}
 
 export interface StudentState {
   studentId: string;
@@ -75,13 +93,16 @@ export interface StudentState {
   nextStep: NextStep | null;
   themed: boolean;
   aiAvailable: boolean;
+  pathway: PathwayView | null;
   streakLength: number;
   maxStage: number;
   stageNames: string[];
 }
 
 export type SubmitStatus =
-  | 'passed' | 'failed' | 'timeout' | 'syntax_error' | 'import_error' | 'ungraded';
+  | 'passed' | 'failed' | 'timeout' | 'syntax_error' | 'import_error' | 'ungraded'
+  // From POST /hint (a hint on request, not a submission):
+  | 'hint' | 'no_hints' | 'complete';
 
 export interface StageChange {
   concept: string;
