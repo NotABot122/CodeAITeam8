@@ -7,6 +7,9 @@ Routes (JSON):
     POST /api/students                      -> new student + state
     GET  /api/students/<id>                 -> state
     POST /api/students/<id>/submit          {"code": "..."} -> {outcome, state}
+    POST /api/students/<id>/answer          {"answers": {"q1": 1, "q3": "text"}} -> {outcome, state}
+    GET  /api/students/<id>/next            -> {nextStep}
+    POST /api/students/<id>/next            {"option": 0, "theme": "..."} -> {message, built, state}
     POST /api/students/<id>/theme           {"request": "pokemon"} -> {built, message, state}
     POST /api/students/<id>/theme/reset     -> state
 Anything else is served from frontend/dist if it has been built.
@@ -36,6 +39,9 @@ ROUTES = [
     ("POST", re.compile(r"^/api/students$"), lambda s, m, b: s.new_student()),
     ("GET", re.compile(rf"^/api/students/{ID}$"), lambda s, m, b: s.state(m[1])),
     ("POST", re.compile(rf"^/api/students/{ID}/submit$"), lambda s, m, b: s.submit(m[1], b.get("code"))),
+    ("POST", re.compile(rf"^/api/students/{ID}/answer$"), lambda s, m, b: s.answer(m[1], b.get("answers"))),
+    ("GET", re.compile(rf"^/api/students/{ID}/next$"), lambda s, m, b: {"nextStep": s.next_step(m[1])}),
+    ("POST", re.compile(rf"^/api/students/{ID}/next$"), lambda s, m, b: s.start_next(m[1], b.get("option"), b.get("theme"))),
     ("POST", re.compile(rf"^/api/students/{ID}/theme$"), lambda s, m, b: s.build_theme(m[1], b.get("request"))),
     ("POST", re.compile(rf"^/api/students/{ID}/theme/reset$"), lambda s, m, b: s.reset_theme(m[1])),
 ]
@@ -76,13 +82,18 @@ def make_handler(service: Service):
 
         def _api(self, method: str, path: str):
             try:
+                wrong_method = False
                 for verb, pattern, fn in ROUTES:
                     match = pattern.match(path)
-                    if match:
-                        if verb != method:
-                            raise ApiError(405, "method_not_allowed", "Wrong method.")
-                        body = self._body() if method == "POST" else {}
-                        return self._send(200, fn(service, match, body))
+                    if not match:
+                        continue
+                    if verb != method:
+                        wrong_method = True
+                        continue
+                    body = self._body() if method == "POST" else {}
+                    return self._send(200, fn(service, match, body))
+                if wrong_method:
+                    raise ApiError(405, "method_not_allowed", "Wrong method.")
                 raise ApiError(404, "not_found", "No such endpoint.")
             except ApiError as err:
                 self._send(err.status, {"error": {"code": err.code, "message": err.message}})

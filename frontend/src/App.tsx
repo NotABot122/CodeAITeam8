@@ -11,6 +11,8 @@ import CodeEditor from './ui/CodeEditor';
 import {PracticeDialog, ThemeDialog} from './ui/Dialogs';
 import {Markdown} from './ui/markdown';
 import PathStrip from './ui/PathStrip';
+import NextStepPanel from './ui/NextStepPanel';
+import QuizPanel, {quizReady, SubmitQuiz, type QuizAnswers} from './ui/QuizPanel';
 import Results from './ui/Results';
 
 const KEY = 'codeai.studentId';
@@ -30,6 +32,9 @@ export default function App({client: injected}: {client?: ApiClient}) {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [running, setRunning] = useState(false);
+  const [answers, setAnswers] = useState<QuizAnswers>({});
+  const [stepBusy, setStepBusy] = useState(false);
+  const [stepError, setStepError] = useState<string | null>(null);
   const [practiceShown, setPracticeShown] = useState(false);
   const [themeOpen, setThemeOpen] = useState(false);
   const [themeBusy, setThemeBusy] = useState(false);
@@ -63,15 +68,24 @@ export default function App({client: injected}: {client?: ApiClient}) {
     setRunning(true); setError(null);
     try {
       const prevId = state.problem?.id;
-      const res = await client.submit(state.studentId, code);
+      const res = state.problem?.format === 'quiz' ? await client.answer(state.studentId, answers) : await client.submit(state.studentId, code);
       setOutcome(res.outcome);
       // Keep what they typed unless a new problem loaded (then the starter code replaces it).
       const moved = res.state.problem?.id !== prevId;
       adopt(res.state, !moved);
-      if (moved && res.outcome.passed) setOutcome(res.outcome);
+      if (moved) setAnswers({});
       if (res.state.problem?.kind === 'practice' && moved) setPracticeShown(true);
       requestAnimationFrame(() => resultsRef.current?.scrollIntoView({block: 'nearest', behavior: 'smooth'}));
     } catch (e) { setError(msg(e)); } finally { setRunning(false); }
+  };
+
+  const pick = async (index: number, theme?: string) => {
+    if (!state) return;
+    setStepBusy(true); setStepError(null);
+    try {
+      const res = await client.startNext(state.studentId, index, theme);
+      if (res.built) { adopt(res.state); setOutcome(null); setAnswers({}); } else setStepError(res.message);
+    } catch (e) { setStepError(msg(e)); } finally { setStepBusy(false); }
   };
 
   const build = async (request: string) => {
@@ -100,7 +114,8 @@ export default function App({client: injected}: {client?: ApiClient}) {
   if (!state) return <Box sx={{display: 'grid', placeItems: 'center', minHeight: '60vh'}}><CircularProgress aria-label="Loading" /></Box>;
 
   const p = state.problem;
-  const themed = state.project.id !== 'weather-station';
+  const themed = state.themed;
+  const quiz = p?.format === 'quiz' && p.questions ? p : null;
   return (
     <Box sx={{minHeight: '100vh', bgcolor: 'background.default'}}>
       <Box component="header" sx={{bgcolor: 'primary.main', color: 'primary.contrastText'}}>
@@ -108,7 +123,7 @@ export default function App({client: injected}: {client?: ApiClient}) {
           <Typography component="h1" variant="h5" sx={{flex: 1, display: 'flex', gap: 1.5, alignItems: 'baseline', flexWrap: 'wrap'}}>
             CodeAI <Typography component="span" sx={{opacity: 0.85, fontWeight: 400}}>{state.project.title}</Typography>
           </Typography>
-          <Button color="inherit" startIcon={<AutoAwesomeIcon />} onClick={() => { setThemeError(null); setThemeOpen(true); }}>Make it yours</Button>
+          {state.project.topic === 'data-logic' && <Button color="inherit" startIcon={<AutoAwesomeIcon />} onClick={() => { setThemeError(null); setThemeOpen(true); }}>Make it yours</Button>}
         </Container>
       </Box>
 
@@ -125,15 +140,7 @@ export default function App({client: injected}: {client?: ApiClient}) {
         {state.notices.map((n, i) => <Alert key={i} severity="info" sx={{my: 1}}>{n}</Alert>)}
 
         {state.complete || !p ? (
-          <Paper variant="outlined" sx={{p: 4, mt: 2, textAlign: 'center'}}>
-            <Typography variant="h4" component="h2">You finished {state.project.title}!</Typography>
-            <Typography sx={{my: 2}}>Here's where you ended up on each idea.</Typography>
-            <Box sx={{maxWidth: 420, mx: 'auto', textAlign: 'left'}}><ConceptMeters state={state} highlight={[]} /></Box>
-            <Box sx={{display: 'flex', gap: 1, justifyContent: 'center', mt: 3}}>
-              <Button variant="outlined" onClick={() => setThemeOpen(true)}>Try it in your own theme</Button>
-              <Button variant="contained" onClick={restart}>Start over as a new student</Button>
-            </Box>
-          </Paper>
+          <NextStepPanel state={state} busy={stepBusy} error={stepError} onPick={pick} onRestart={restart} />
         ) : (
           <Box sx={{display: 'grid', gap: 2, mt: 1, gridTemplateColumns: {xs: '1fr', md: 'minmax(0,5fr) minmax(0,6fr)', xl: 'minmax(0,5fr) minmax(0,7fr)'}, alignItems: 'stretch'}}>
             <Paper variant="outlined" component="section" aria-label="Instructions" sx={{p: 2.5, borderRadius: '12px', height: {md: 'calc(100vh - 210px)'}, minHeight: {md: 480}, overflow: 'auto'}}>
@@ -142,7 +149,19 @@ export default function App({client: injected}: {client?: ApiClient}) {
             </Paper>
 
             <Box sx={{display: 'flex', flexDirection: 'column', gap: 1.5, height: {md: 'calc(100vh - 210px)'}, minHeight: {md: 480}, overflowY: {md: 'auto'}}}>
-              <CodeEditor value={code} onChange={setCode} onRun={run} disabled={running} />
+              {quiz ? (
+                <Box sx={{flex: '1 0 auto'}}>
+                  <QuizPanel questions={quiz.questions!} answers={answers} onChange={setAnswers} results={outcome?.questionResults ?? []} disabled={running} />
+                </Box>
+              ) : (
+                <CodeEditor value={code} onChange={setCode} onRun={run} disabled={running} />
+              )}
+              {quiz ? (
+                <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
+                  <SubmitQuiz onClick={run} busy={running} disabled={!quizReady(quiz.questions!, answers)} />
+                  <Typography variant="caption" color="text.secondary" sx={{ml: 'auto'}}>Attempts: {p!.attempts}</Typography>
+                </Box>
+              ) : (
               <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
                 <Button variant="contained" color="secondary" size="large" startIcon={running ? <CircularProgress size={18} color="inherit" /> : <PlayArrowIcon />} disabled={running} onClick={run}>
                   {running ? 'Checking…' : 'Run'}
@@ -150,6 +169,7 @@ export default function App({client: injected}: {client?: ApiClient}) {
                 <Typography variant="caption" color="text.secondary">Ctrl/⌘ + Enter</Typography>
                 <Typography variant="caption" color="text.secondary" sx={{ml: 'auto'}}>Attempts: {p.attempts}</Typography>
               </Box>
+              )}
               {error && <Alert severity="error">{error}</Alert>}
               <div ref={resultsRef}>{outcome && <Results outcome={outcome} />}</div>
             </Box>

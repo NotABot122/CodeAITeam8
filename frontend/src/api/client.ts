@@ -1,4 +1,4 @@
-import type {Health, StudentState, SubmitResult, ThemeResult} from './types';
+import type {Health, StartResult, StudentState, SubmitResult, ThemeResult} from './types';
 
 export class ApiError extends Error {
   constructor(message: string, readonly code: string, readonly status: number) {
@@ -11,6 +11,8 @@ export interface ApiClient {
   newStudent(): Promise<StudentState>;
   getState(id: string): Promise<StudentState>;
   submit(id: string, code: string): Promise<SubmitResult>;
+  answer(id: string, answers: Record<string, number | string>): Promise<SubmitResult>;
+  startNext(id: string, option: number, theme?: string): Promise<StartResult>;
   buildTheme(id: string, request: string): Promise<ThemeResult>;
   resetTheme(id: string): Promise<StudentState>;
 }
@@ -45,6 +47,8 @@ export function createHttpClient(base = ''): ApiClient {
     newStudent: () => call('POST', '/api/students'),
     getState: id => call('GET', s(id)),
     submit: (id, code) => call('POST', `${s(id)}/submit`, {code}),
+    answer: (id, answers) => call('POST', `${s(id)}/answer`, {answers}),
+    startNext: (id, option, theme) => call('POST', `${s(id)}/next`, {option, theme}),
     buildTheme: (id, request) => call('POST', `${s(id)}/theme`, {request}),
     resetTheme: id => call('POST', `${s(id)}/theme/reset`, {}),
   };

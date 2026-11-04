@@ -31,10 +31,10 @@ Every autonomous agent or developer **MUST read this file before writing code** 
 | Agent ID | Current Model | Status (`idle` / `working`) | Current Task / Focus Area | Started At (Timestamp) |
 |---|---|---|---|---|
 | `Agent-Bootstrap` | Gemini 3.8 Flash | `idle` | Integrated curriculum database references, added post-project AI reteach loop, created COURSE_FLOW_GRAPH.md, initialized git repository and committed all files | 2026-11-03 15:21 PST |
-| `Pratheek-Claude` | Claude Sonnet 5.5 | `idle` | Built the student UI in `frontend/` against the `proto-branch` engine (Weather Station) plus `webapi/` JSON server | 2026-11-04 10:20 PST |
+| `Pratheek-Claude` | Claude Sonnet 5.5 | `idle` | Wrapped the student UI and `webapi/` around `engine.course` (next step, review quizzes, six concepts) | 2026-11-04 11:30 PST |
 | `Agent-3` | Unassigned | `idle` | None | - |
 | `zane-claude` | Claude Opus 5.5 (Kiro) | `idle` | Renamed "Stance Decider 2B" to "Strands Decider 2B" in documentation/ | 2026-11-03 15:30 PST |
-| `Kiro-Demo` | Claude Opus 5.5 (Kiro) | `idle` | Added student-chosen themes and Bedrock AI tutor hints to the demo (`engine/themes/`, `engine/ai.py`, `engine/hints.py`, `engine/safety.py`) on `proto-branch` | 2026-11-04 09:39 PST |
+| `Kiro-Demo` | Claude Opus 5.5 (Kiro) | `idle` | Adaptive path across projects (`engine/course.py`, quizzes, revision projects, Lists & Dictionaries topic) on `proto-branch`; UI handoff in `docs/HANDOFF-adaptive-path.md` | 2026-11-04 10:40 PST |
 
 ---
 
@@ -42,6 +42,16 @@ Every autonomous agent or developer **MUST read this file before writing code** 
 
 > *Most recent on top. Maximum 10 items.*
 
+1. **[Task 015] Student UI on the Adaptive Path (Course, Quizzes, Next Step)**
+   - **Model:** Claude Sonnet 5.5
+   - **Agent:** `Pratheek-Claude`
+   - **Timestamp:** 2026-11-04 11:30 PST
+   - **Summary:** `webapi/service.py` now goes through `engine.course.Course` as in `docs/HANDOFF-adaptive-path.md`; new routes `POST /answer`, `GET/POST /next`. The UI shows quiz steps (predict choices, explain text, explanations after wrong answers), a "what's next" screen with the recommended option first and a theme box for `new_theme`, and all six concepts (ones outside the project dimmed). Layout: concept meters sit beside the level path, and the editor fills the right side. Engine untouched. 95 Python tests, 7 vitest tests, typecheck and build pass; clicked through Weather Station, the next-step screen and a review quiz in a browser. Not done: rubric score doesn't affect stages (engine side), no demo mode without the API.
+2. **[Task 013] Adaptive Path Across Projects (Profile, Next Step, Revision Quizzes)**
+   - **Model:** Claude Opus 5.5 (Kiro)
+   - **Agent:** `Kiro-Demo`
+   - **Timestamp:** 2026-11-04 10:40 PST
+   - **Summary:** After each project, `engine/course.py` judges every concept as strong, steady, or struggled from attempts, hints, and practice problems. The thresholds are in `projects/catalog.yaml`. Struggled sends the student to a revision project for the weakest concept: a quiz with predict-the-output questions checked automatically, an explain answer scored by the Bedrock rubric, then a scaffolded coding task. All strong sends them to the topic with the lowest mastery. Steady offers a new theme or the next topic. A per-student profile carries concept stages across projects. New content: topic 2 `projects/weather-collections` (Lists & Dictionaries) and six `projects/revision-*`. The content check also runs every quiz snippet. CLI: `next`, `answer`. Demo: `python3 -m engine.path_demo [--offline]`. 87 tests pass. **@Pratheek:** UI handoff in `docs/HANDOFF-adaptive-path.md`. The current `webapi/service.py` still works unchanged (verified). Route it through `Course` for the new screens.
 1. **[Task 014] Student UI on the Weather Station Engine (CodeAI styling)**
    - **Model:** Claude Sonnet 5.5
    - **Agent:** `Pratheek-Claude`
@@ -82,13 +92,3 @@ Every autonomous agent or developer **MUST read this file before writing code** 
    - **Agent:** `Agent-Bootstrap`
    - **Timestamp:** 2026-11-03 15:11 PST
    - **Summary:** Updated `documentation/PROJECT_SPEC.md` to specify that the skill tree is strictly maintained on the backend (Ruby/Rails + Aurora/SimpleDB), defined the point-classification scoring model ($P_{\text{node}}$), and formalized the course flow with Stance Decider 2B determining next questions/skills.
-3. **[Task 003] Official CodeAI AWS Architecture & Tech Stack Alignment**
-   - **Model:** Gemini 3.8 Flash
-   - **Agent:** `Agent-Bootstrap`
-   - **Timestamp:** 2026-11-03 15:06 PST
-   - **Summary:** Extracted official CodeAI technical requirements (Ruby 3.2 on Rails 7.1, React 18 / MUI 7, Aurora SQL, Amazon SimpleDB / ElastiCache, Amazon Bedrock model abstraction, Langfuse) into `documentation/TECHNICAL_ENVIRONMENT.md` and updated `documentation/PROJECT_SPEC.md` and teammate prompt accordingly.
-2. **[Task 002] Multi-Parent Skill Tree Refinement & Teammate Kickoff Prompt**
-   - **Model:** Gemini 3.8 Flash
-   - **Agent:** `Agent-Bootstrap`
-   - **Timestamp:** 2026-11-03 14:58 PST
-   - **Summary:** Updated `documentation/PROJECT_SPEC.md` to classify nodes like While Loops under both Conditionals and Loops (poly-hierarchy), removed the `documentation/prompts/` folder, and prepared the teammate handoff prompt targeting `https://github.com/NotABot122/CodeAITeam8`.

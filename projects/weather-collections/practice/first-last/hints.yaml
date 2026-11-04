@@ -1,0 +1,2 @@
+- "Check for an empty list first: if not rows: return []."
+- "Append every row[\"date\"] to a list, call .sort(), then return [dates[0], dates[-1]]. Index -1 is the last item."

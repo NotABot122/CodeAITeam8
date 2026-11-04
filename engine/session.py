@@ -4,7 +4,7 @@ from __future__ import annotations
 import datetime as dt
 import uuid
 from dataclasses import dataclass, field
-from typing import Callable, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple
 
 from pathlib import Path
 
@@ -13,6 +13,8 @@ from .ai import ModelProvider
 from .events import EventLog
 from .feedback import messages_for, next_hint
 from .hints import AIHinter
+from .quiz import grade_quiz
+from .rubric import RubricGrader
 from .safety import ContentFilter
 from .progress import ProgressLoadError, ProgressRecord, ProgressStore
 from .project import Problem, Project
@@ -43,13 +45,16 @@ class SubmitOutcome:
     complete: bool = False
     notices: List[str] = field(default_factory=list)
     hint_source: Optional[str] = None     # "ai" or "authored"
+    question_results: List[dict] = field(default_factory=list)   # quiz problems only
+    next_step: Optional[dict] = None      # set by Course when a project is complete
 
 
 class Engine:
     def __init__(self, project: Project, store: ProgressStore, events: EventLog,
                  grader: Optional[g.Grader] = None, adaptive: bool = True,
                  router: Callable[..., Decision] = next_problem,
-                 hint_provider: Optional[ModelProvider] = None):
+                 hint_provider: Optional[ModelProvider] = None,
+                 initial_stages: Optional[Dict[str, int]] = None):
         self.project = project
         self.manifest = project.manifest
         self.store = store
@@ -57,7 +62,9 @@ class Engine:
         self.grader = grader or g.Grader()
         self.adaptive = adaptive
         self.router = router
+        self.initial_stages = dict(initial_stages or {})
         self.hinter = None
+        self.rubric_grader = RubricGrader(hint_provider) if hint_provider is not None else None
         if hint_provider is not None:
             reference = project.reference_path.read_text() if project.reference_path.exists() else ""
             self.hinter = AIHinter(hint_provider, ContentFilter(), reference_source=reference)
@@ -74,10 +81,13 @@ class Engine:
         return student_id
 
     def _fresh_record(self, student_id: str) -> ProgressRecord:
+        concepts = initial_states(self.manifest.concept_ids())
+        for cid, state in concepts.items():
+            state.stage = max(0, min(MAX_STAGE, int(self.initial_stages.get(cid, 0))))
         return ProgressRecord(
             student_id=student_id,
             project_id=self.project.id,
-            concepts=initial_states(self.manifest.concept_ids()),
+            concepts=concepts,
             current_problem=self.manifest.fallback_path[0],
         )
 
@@ -172,6 +182,9 @@ class Engine:
                                  complete=True, notices=notices)
 
         problem = self.project.problem(record.current_problem)
+        if problem.is_quiz:
+            return SubmitOutcome("quiz", False, [f"{problem.label}: this step is a quiz. Answer its questions "
+                                                 "instead of submitting code."], next_problem=problem, notices=notices)
         result = self.grader.grade(self.project, problem, submission_path)
         messages = messages_for(problem, result)
 
@@ -189,6 +202,33 @@ class Engine:
             return SubmitOutcome(result.status, False, messages, hint=hint, next_problem=problem, notices=notices,
                                  hint_source=source if hint else None)
 
+        return self._after_pass(record, problem, result.status, messages, notices)
+
+    def answer(self, student_id: str, answers: Dict[str, object]) -> SubmitOutcome:
+        """Grade the current quiz. answers maps question id to a choice index or written text."""
+        record, notices = self.open(student_id)
+        if record.complete:
+            return SubmitOutcome("complete", True, ["You've finished the project. Nice work!"],
+                                 complete=True, notices=notices)
+        problem = self.project.problem(record.current_problem)
+        if not problem.is_quiz:
+            return SubmitOutcome("not_quiz", False, [f"{problem.label}: this step needs code. Submit your file."],
+                                 next_problem=problem, notices=notices)
+        result = grade_quiz(problem.label, problem.questions, answers or {}, self.rubric_grader)
+        details = [r.to_dict() for r in result.results]
+        record.attempts[problem.id] = record.attempts.get(problem.id, 0) + 1
+        record.quiz_scores[problem.id] = {r.id: r.score for r in result.results if r.type == "explain"}
+        if not result.passed:
+            hint, record.hints_seen[problem.id] = next_hint(problem, record.hints_seen.get(problem.id, 0))
+            notices.extend(self._save(record))
+            return SubmitOutcome("failed", False, result.messages, hint=hint, next_problem=problem, notices=notices,
+                                 hint_source="authored" if hint else None, question_results=details)
+        outcome = self._after_pass(record, problem, "passed", result.messages, notices)
+        outcome.question_results = details
+        return outcome
+
+    def _after_pass(self, record: ProgressRecord, problem: Problem, status: str, messages: List[str],
+                    notices: List[str]) -> SubmitOutcome:
         changes = record_result(
             record.concepts, problem.concepts, problem.id,
             attempts=record.attempts[problem.id], hints_used=record.hints_seen.get(problem.id, 0),
@@ -199,7 +239,7 @@ class Engine:
         notices.extend(self._route(record))
         notices.extend(self._save(record))
         following = None if record.complete else self.project.problem(record.current_problem)
-        return SubmitOutcome(result.status, True, messages, stage_changes=changes,
+        return SubmitOutcome(status, True, messages, stage_changes=changes,
                              next_problem=following, complete=record.complete, notices=notices)
 
     def _ai_hint(self, record: ProgressRecord, problem: Problem, messages: List[str], submission_path,

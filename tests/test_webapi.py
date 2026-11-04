@@ -55,6 +55,31 @@ class WebApiTests(unittest.TestCase):
         self.assertIn(("practice", "current"), [(n["kind"], n["status"]) for n in state["path"]])
         self.assertEqual(state["path"][0]["status"], "done")
 
+    def test_finish_then_next_step_then_review_quiz(self):
+        sid = self.svc.new_student()["studentId"]
+        for _ in range(3):
+            self.svc.submit(sid, "print(1)")
+        for _ in range(8):
+            res = self.svc.submit(sid, REF)
+            if res["state"]["complete"]:
+                break
+        step = res["state"]["nextStep"]
+        self.assertEqual(step["options"][0]["kind"], "revision")
+        self.assertEqual(len(res["state"]["concepts"]), 6)
+        started = self.svc.start_next(sid, 0)["state"]
+        self.assertEqual(started["problem"]["format"], "quiz")
+        self.assertNotIn("answer", str(started["problem"]["questions"]).lower().replace("your answer", ""))
+        with self.assertRaises(ApiError):
+            self.svc.submit(sid, "print(1)")  # a quiz step takes answers, not code
+        out = self.svc.answer(sid, {q["id"]: 0 if q["type"] == "predict" else "because" for q in started["problem"]["questions"]})
+        self.assertIn("questionResults", out["outcome"])
+
+    def test_bad_option_is_a_clear_error(self):
+        sid = self.svc.new_student()["studentId"]
+        with self.assertRaises(ApiError) as cm:
+            self.svc.start_next(sid, 0)
+        self.assertEqual(cm.exception.status, 400)
+
     def test_theme_needs_ai(self):
         sid = self.svc.new_student()["studentId"]
         with self.assertRaises(ApiError) as cm:

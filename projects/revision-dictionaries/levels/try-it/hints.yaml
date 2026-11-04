@@ -1,0 +1,2 @@
+- "The station is row[\"station_id\"]. Use it as the key."
+- "counts[station] = counts.get(station, 0) + 1 adds one, starting from 0 the first time."

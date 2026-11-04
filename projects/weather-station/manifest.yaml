@@ -66,6 +66,7 @@ dataset:
   generator: dataset/generate.py
   database: dataset/weather.db
 parameters:
+  topic: data-logic
   # Value summarize must return for max_temp_c when it gets no readings.
   empty_max_temp_c: null
   # Station and date ranges with stored expected Level 4 reports.

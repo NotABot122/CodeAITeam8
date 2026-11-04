@@ -10,6 +10,7 @@ DEFAULT_STREAK_LENGTH = 3
 MIN_STREAK_LENGTH = 1
 MAX_STREAK_LENGTH = 10
 STAGES = (1, 2, 3)
+PROBLEM_FORMATS = ("code", "quiz")
 REQUIRED_FIELDS = ("title", "concepts", "levels", "stage_criteria", "fallback_path")
 DEFAULT_DATASET = {"generator": "dataset/generate.py", "database": "dataset/data.db"}
 
@@ -50,6 +51,7 @@ class LevelDef:
     concepts: List[str]
     advance_at_stage: Optional[int] = None
     loop_check: Optional[str] = None
+    format: str = "code"        # "code" (graded by checks.py) or "quiz" (questions.yaml)
 
 
 @dataclass(frozen=True)
@@ -222,6 +224,12 @@ def parse_manifest(text: str) -> Manifest:
             loop_check = item.get("loop_check")
             if loop_check is not None:
                 loop_check = _text(loop_check, f"{where}.loop_check", errors)
+            problem_format = item.get("format", "code") or "code"
+            if problem_format not in PROBLEM_FORMATS:
+                errors.append(f"{where}.format: expected one of {', '.join(PROBLEM_FORMATS)}, got {problem_format!r}")
+                problem_format = "code"
+            if problem_format == "quiz" and loop_check is not None:
+                errors.append(f"{where}: a quiz level can't have a loop_check")
             levels.append(LevelDef(
                 id=level_id,
                 number=number,
@@ -230,6 +238,7 @@ def parse_manifest(text: str) -> Manifest:
                 concepts=list(level_concepts),
                 advance_at_stage=_opt_int(item.get("advance_at_stage"), f"{where}.advance_at_stage", errors, low=1, high=3),
                 loop_check=loop_check,
+                format=problem_format,
             ))
 
     # Practice problems
@@ -332,6 +341,7 @@ def manifest_to_dict(manifest: Manifest) -> Dict[str, Any]:
                 "concepts": list(lvl.concepts),
                 "advance_at_stage": lvl.advance_at_stage,
                 "loop_check": lvl.loop_check,
+                "format": lvl.format,
             }
             for lvl in manifest.levels
         ],

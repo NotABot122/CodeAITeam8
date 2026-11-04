@@ -1,0 +1,34 @@
+- id: q1
+  type: predict
+  prompt: What does this code print?
+  code: |
+    def double(n):
+        return n * 2
+
+    def add_one(n):
+        return n + 1
+
+    print(add_one(double(5)))
+  choices: ["11", "12", "10"]
+  answer: 0
+  explanation: "double(5) runs first and returns 10. Then add_one(10) returns 11."
+- id: q2
+  type: predict
+  prompt: What does this code print?
+  code: |
+    def shout(word):
+        print(word.upper())
+
+    result = shout("hi")
+    print(result)
+  choices: ["HI\nNone", "HI\nHI", "hi\nNone"]
+  answer: 0
+  explanation: "shout prints HI, but it never returns anything, so result is None. print shows a value; return hands it back."
+- id: q3
+  type: explain
+  prompt: In your own words, why is it useful to split a program into small functions that call each other?
+  rubric:
+    0: No reason given, or the answer is off topic.
+    1: Gives a vague reason such as "it's neater" without explaining.
+    2: Gives a clear reason, such as each function being easier to test, fix, or reuse, or the program being easier to read.
+    3: Gives at least two clear reasons and an example, such as build_report reusing get_readings, classify_day, and summarize.

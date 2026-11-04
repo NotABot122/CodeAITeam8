@@ -60,7 +60,7 @@ def manifest_for(spec: ThemeSpec) -> Manifest:
         streak_length=1,
         practice_problems=practice,
         dataset={"generator": "dataset/generate.py", "database": "dataset/data.db"},
-        parameters={"theme": spec.to_dict(), "expected_report_args": STRUCTURE_ARGS(spec), "empty_max": None},
+        parameters={"topic": "data-logic", "theme": spec.to_dict(), "expected_report_args": STRUCTURE_ARGS(spec)},
     )
 
 

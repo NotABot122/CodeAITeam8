@@ -1,0 +1,36 @@
+- id: q1
+  type: predict
+  prompt: What does this code print?
+  code: |
+    temp = 36
+    if temp >= 20:
+        print("warm")
+    elif temp >= 35:
+        print("hot")
+    else:
+        print("cool")
+  choices: ["hot", "warm", "cool"]
+  answer: 1
+  explanation: "36 >= 20 is True, so the first branch runs and the elif is never checked. To get \"hot\", check >= 35 first."
+- id: q2
+  type: predict
+  prompt: What does this code print?
+  code: |
+    rain = 20.0
+    labels = []
+    if rain > 20.0:
+        labels.append("heavy")
+    if rain >= 20.0:
+        labels.append("counts")
+    print(labels)
+  choices: ["['heavy', 'counts']", "['counts']", "[]"]
+  answer: 1
+  explanation: "20.0 > 20.0 is False, so \"heavy\" isn't added. 20.0 >= 20.0 is True, so \"counts\" is."
+- id: q3
+  type: explain
+  prompt: In your own words, why does the order of if and elif checks matter? Use an example.
+  rubric:
+    0: No reason given, or the answer is off topic.
+    1: Says order matters but doesn't explain why.
+    2: Explains that Python runs only the first True branch, so a looser condition first can hide a stricter one.
+    3: Explains the first-True rule with a concrete example (such as 40 degrees matching both >= 20 and >= 35) and says to put the strictest check first.
