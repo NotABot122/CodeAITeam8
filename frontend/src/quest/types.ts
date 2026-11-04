@@ -12,6 +12,7 @@ export interface ItemStep {
   options?: {id: string; text: string}[];
   cards?: {id: string; text: string}[];
   buckets?: {id: string; text: string}[];
+  display?: 'rows' | 'belt' | 'chips';
   zone?: {id: string; name: string};
   intro?: string;
 }

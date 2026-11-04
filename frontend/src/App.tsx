@@ -1,7 +1,6 @@
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import CodeIcon from '@mui/icons-material/Code';
 import ExtensionIcon from '@mui/icons-material/Extension';
-import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import {Alert, Box, Button, CircularProgress, Container, Paper, ToggleButton, ToggleButtonGroup, Tooltip, Typography, useTheme} from '@mui/material';
 import {lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState} from 'react';
@@ -21,8 +20,10 @@ import QuestApp from './quest/QuestApp';
 import Landing from './landing/Landing';
 import PathwayScreen from './landing/PathwayScreen';
 import TeacherApp from './teacher/TeacherApp';
+import CoursePage from './ui/CoursePage';
 import NextStepPanel from './ui/NextStepPanel';
 import QuizPanel, {quizReady, SubmitQuiz, type QuizAnswers} from './ui/QuizPanel';
+import RubberDuck from './ui/RubberDuck';
 import Results, {HintCard} from './ui/Results';
 
 const KEY = 'codeai.studentId';
@@ -75,6 +76,7 @@ export default function App({client: injected}: {client?: ApiClient}) {
   const [stepBusy, setStepBusy] = useState(false);
   const [stepError, setStepError] = useState<string | null>(null);
   const [practiceShown, setPracticeShown] = useState(false);
+  const [showCourse, setShowCourse] = useState(false);
   // A hint the student asked for (not one that came with a failed run).
   const [asked, setAsked] = useState<{hint: string; source: Outcome['hintSource']} | null>(null);
   const [hintBusy, setHintBusy] = useState(false);
@@ -263,11 +265,13 @@ export default function App({client: injected}: {client?: ApiClient}) {
             CodeAI <Typography component="span" sx={{opacity: 0.85, fontWeight: 400}}>{state.project.title}</Typography>
             {state.pathway && <Typography component="span" variant="body2" sx={{opacity: 0.85}}>Pathway: {state.pathway.title}</Typography>}
           </Typography>
+          <Button color="inherit" onClick={() => setShowCourse(v => !v)}>{showCourse ? 'My lesson' : 'My course'}</Button>
           {state.project.topic === 'data-logic' && <Button color="inherit" startIcon={<AutoAwesomeIcon />} onClick={() => { setThemeError(null); setThemeOpen(true); }}>Make it yours</Button>}
         </Container>
       </Box>
 
       <Container maxWidth="xl" sx={{py: 2}}>
+        {showCourse ? <CoursePage client={client} studentId={state.studentId} onBack={() => setShowCourse(false)} /> : <>
         <Box sx={{display: 'flex', flexDirection: {xs: 'column', lg: 'row'}, gap: 2, alignItems: {lg: 'center'}, justifyContent: 'space-between'}}>
           <PathStrip path={state.path} />
           {!state.complete && p && (
@@ -355,6 +359,7 @@ export default function App({client: injected}: {client?: ApiClient}) {
 
           </Box>
         )}
+        </>}
       </Container>
 
       {practiceShown && <PracticeDialog state={state} onClose={() => setPracticeShown(false)} />}
@@ -371,7 +376,7 @@ function HintButton({left, total, busy, disabled, onClick}: {left: number; total
     <Tooltip title={none ? 'You have used every hint for this one.' : HINT_COST}>
       <span>
         <Button variant="outlined" size="large" disabled={disabled || busy || none} onClick={onClick}
-          startIcon={busy ? <CircularProgress size={18} color="inherit" /> : <LightbulbOutlinedIcon />}>
+          startIcon={busy ? <CircularProgress size={18} color="inherit" /> : <RubberDuck fontSize="small" title="Ask Ducky" />}>
           {none ? 'No hints left' : `Hint (${left} left)`}
         </Button>
       </span>

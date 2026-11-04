@@ -20,7 +20,7 @@ function Circle({node}: {node: PathNode}) {
         borderColor: done ? 'success.main' : current || paused ? 'primary.main' : 'divider',
         borderStyle: paused ? 'dashed' : 'solid',
         bgcolor: done ? 'success.main' : 'background.paper',
-        color: done ? 'background.paper' : current || paused ? 'primary.main' : 'text.disabled',
+        color: done ? 'background.paper' : current || paused ? 'primary.dark' : 'text.disabled',
         '@keyframes pulse': {'0%': {boxShadow: '0 0 0 0 rgba(76,66,207,.45)'}, '100%': {boxShadow: '0 0 0 12px rgba(76,66,207,0)'}},
         animation: current ? 'pulse 1.6s ease-out infinite' : 'none',
         '@media (prefers-reduced-motion: reduce)': {animation: 'none'},

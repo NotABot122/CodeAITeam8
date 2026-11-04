@@ -1,5 +1,5 @@
 import type {AnswerResult, QuestNext, QuestOptions, QuestStart} from '@/quest/types';
-import type {BlocksResult, Health, PathwayResult, StartResult, StudentState, SubmitResult, ThemeResult} from './types';
+import type {BlocksResult, CourseView, Health, PathwayResult, StartResult, StudentState, SubmitResult, ThemeResult} from './types';
 
 export class ApiError extends Error {
   constructor(message: string, readonly code: string, readonly status: number) {
@@ -16,6 +16,7 @@ export interface ApiClient {
   questAnswer(id: string, response: unknown, elapsedMs: number | null): Promise<AnswerResult>;
   questFinish(id: string): Promise<unknown>;
   getState(id: string): Promise<StudentState>;
+  getCourse(id: string): Promise<CourseView>;
   submit(id: string, code: string): Promise<SubmitResult>;
   /** After the readiness check: the Strands Decider 2B picks and starts a lesson pathway (once per student). */
   pathway(id: string, grade: number): Promise<PathwayResult>;
@@ -63,6 +64,7 @@ export function createHttpClient(base = ''): ApiClient {
     questAnswer: (id, response, elapsedMs) => call('POST', `/api/quest/${encodeURIComponent(id)}/answer`, {response, elapsedMs}),
     questFinish: id => call('POST', `/api/quest/${encodeURIComponent(id)}/finish`, {}),
     getState: id => call('GET', s(id)),
+    getCourse: id => call('GET', `${s(id)}/course`),
     submit: (id, code) => call('POST', `${s(id)}/submit`, {code}),
     pathway: (id, grade) => call('POST', `${s(id)}/pathway`, {grade}),
     hint: (id, code) => call('POST', `${s(id)}/hint`, {code}),

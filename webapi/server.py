@@ -11,6 +11,7 @@ Routes (JSON):
     POST /api/quest/<id>/answer             {"response", "elapsedMs"} -> feedback
     POST /api/quest/<id>/finish             -> end early (result is applied)
     GET  /api/students/<id>                 -> state
+    GET  /api/students/<id>/course          -> the whole course: topics, finished work, ideas, what's next
     POST /api/students/<id>/submit          {"code": "..."} -> {outcome, state}
     POST /api/students/<id>/pathway         {"grade": 9-12} -> {pathway, state} (Strands Decider 2B; once per student)
     POST /api/students/<id>/hint            {"code": "..."} -> {outcome, state} (next hint; not a submission)
@@ -55,6 +56,7 @@ ROUTES = [
     ("POST", re.compile(rf"^/api/quest/{ID}/answer$"), lambda s, m, b: s.quest_answer(m[1], b.get("response"), b.get("elapsedMs"))),
     ("POST", re.compile(rf"^/api/quest/{ID}/finish$"), lambda s, m, b: s.quest_finish(m[1])),
     ("GET", re.compile(rf"^/api/students/{ID}$"), lambda s, m, b: s.state(m[1])),
+    ("GET", re.compile(rf"^/api/students/{ID}/course$"), lambda s, m, b: s.course_view(m[1])),
     ("POST", re.compile(rf"^/api/students/{ID}/submit$"), lambda s, m, b: s.submit(m[1], b.get("code"))),
     ("POST", re.compile(rf"^/api/students/{ID}/pathway$"), lambda s, m, b: s.pathway(m[1], b.get("grade"))),
     ("POST", re.compile(rf"^/api/students/{ID}/hint$"), lambda s, m, b: s.hint(m[1], b.get("code"))),
