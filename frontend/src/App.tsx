@@ -113,7 +113,14 @@ export default function App({client: injected}: {client?: ApiClient}) {
       </Box>
 
       <Container maxWidth="xl" sx={{py: 2}}>
-        <PathStrip path={state.path} />
+        <Box sx={{display: 'flex', flexDirection: {xs: 'column', lg: 'row'}, gap: 2, alignItems: {lg: 'center'}, justifyContent: 'space-between'}}>
+          <PathStrip path={state.path} />
+          {!state.complete && p && (
+            <Box sx={{flex: 'none', width: {xs: '100%', lg: 'auto'}, minWidth: {lg: 520}}}>
+              <ConceptMeters state={state} highlight={p.concepts} row />
+            </Box>
+          )}
+        </Box>
         {state.onFallback && <Alert severity="info" sx={{my: 1}}>You're on the standard path for the rest of this project.</Alert>}
         {state.notices.map((n, i) => <Alert key={i} severity="info" sx={{my: 1}}>{n}</Alert>)}
 
@@ -128,13 +135,13 @@ export default function App({client: injected}: {client?: ApiClient}) {
             </Box>
           </Paper>
         ) : (
-          <Box sx={{display: 'grid', gap: 2, mt: 1, gridTemplateColumns: {xs: '1fr', md: 'minmax(0,5fr) minmax(0,6fr)', xl: 'minmax(0,5fr) minmax(0,6fr) 240px'}, alignItems: 'start'}}>
-            <Paper variant="outlined" component="section" aria-label="Instructions" sx={{p: 2.5, borderRadius: '12px', maxHeight: {md: 'calc(100vh - 220px)'}, overflow: 'auto'}}>
+          <Box sx={{display: 'grid', gap: 2, mt: 1, gridTemplateColumns: {xs: '1fr', md: 'minmax(0,5fr) minmax(0,6fr)', xl: 'minmax(0,5fr) minmax(0,7fr)'}, alignItems: 'stretch'}}>
+            <Paper variant="outlined" component="section" aria-label="Instructions" sx={{p: 2.5, borderRadius: '12px', height: {md: 'calc(100vh - 210px)'}, minHeight: {md: 480}, overflow: 'auto'}}>
               {p.kind === 'practice' && <Typography variant="overline" color="secondary" sx={{fontWeight: 700}}>Practice</Typography>}
               <Markdown source={p.instructions} />
             </Paper>
 
-            <Box sx={{display: 'grid', gap: 1.5}}>
+            <Box sx={{display: 'flex', flexDirection: 'column', gap: 1.5, height: {md: 'calc(100vh - 210px)'}, minHeight: {md: 480}, overflowY: {md: 'auto'}}}>
               <CodeEditor value={code} onChange={setCode} onRun={run} disabled={running} />
               <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
                 <Button variant="contained" color="secondary" size="large" startIcon={running ? <CircularProgress size={18} color="inherit" /> : <PlayArrowIcon />} disabled={running} onClick={run}>
@@ -147,9 +154,6 @@ export default function App({client: injected}: {client?: ApiClient}) {
               <div ref={resultsRef}>{outcome && <Results outcome={outcome} />}</div>
             </Box>
 
-            <Paper variant="outlined" sx={{p: 2, borderRadius: '12px', gridColumn: {md: '1 / -1', xl: 'auto'}}}>
-              <ConceptMeters state={state} highlight={p.concepts} />
-            </Paper>
           </Box>
         )}
       </Container>

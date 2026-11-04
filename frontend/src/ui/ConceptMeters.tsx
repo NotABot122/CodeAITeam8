@@ -4,13 +4,14 @@ import type {StudentState} from '@/api/types';
 
 const COLORS = ['#9a9ab0', '#e8a200', '#4c42cf', '#1a7f4b'];
 
-export default function ConceptMeters({state, highlight}: {state: StudentState; highlight: string[]}) {
+export default function ConceptMeters({state, highlight, row}: {state: StudentState; highlight: string[]; row?: boolean}) {
   return (
     <Box component="section" aria-label="What you're learning">
       <Typography variant="overline" sx={{color: 'text.secondary', fontWeight: 700}}>What you're learning</Typography>
+      <Box sx={row ? {display: 'grid', gridTemplateColumns: {xs: 'repeat(2, 1fr)', sm: 'repeat(4, 1fr)'}, gap: 1} : undefined}>
       {state.concepts.map(c => (
-        <Box key={c.id} sx={{mt: 1.25, p: 1, borderRadius: 1, bgcolor: highlight.includes(c.id) ? 'action.hover' : 'transparent'}}>
-          <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'baseline'}}>
+        <Box key={c.id} sx={{mt: row ? 0 : 1.25, p: 1, borderRadius: 1, bgcolor: highlight.includes(c.id) ? 'action.hover' : 'transparent'}}>
+          <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 1}}>
             <Typography variant="body2" sx={{fontWeight: 600}}>{c.name}</Typography>
             <Typography variant="caption" sx={{color: COLORS[c.stage], fontWeight: 700}}>{c.stageName}</Typography>
           </Box>
@@ -22,6 +23,7 @@ export default function ConceptMeters({state, highlight}: {state: StudentState; 
           </Box>
         </Box>
       ))}
+      </Box>
     </Box>
   );
 }

@@ -30,7 +30,7 @@ export default function CodeEditor({value, onChange, onRun, disabled}: Props) {
   };
 
   return (
-    <Box sx={{display: 'flex', border: 1, borderColor: 'divider', borderRadius: '8px', overflow: 'hidden', bgcolor: 'background.paper', minHeight: 320}}>
+    <Box sx={{display: 'flex', border: 1, borderColor: 'divider', borderRadius: '8px', overflow: 'hidden', bgcolor: 'background.paper', flex: '1 0 260px'}}>
       <Box ref={gutter} aria-hidden sx={{py: 1.5, px: 1, textAlign: 'right', color: 'text.disabled', bgcolor: 'action.hover', fontFamily: 'var(--code-font)', fontSize: 13, lineHeight: '20px', userSelect: 'none', overflow: 'hidden'}}>
         {Array.from({length: lines}, (_, i) => <div key={i}>{i + 1}</div>)}
       </Box>
