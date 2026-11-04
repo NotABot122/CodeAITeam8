@@ -56,7 +56,7 @@ class Catalog:
     topics: List[Topic]
     revision: Dict[str, str]
     thresholds: dict
-    diagnostic: dict = field(default_factory=lambda: {"min_confidence": 0.8, "use_borderline": False})
+    diagnostic: dict = field(default_factory=lambda: {"min_confidence": 0.8, "use_borderline": False, "min_correct_answers": 2})
 
     def topic(self, topic_id: str) -> Optional[Topic]:
         return next((t for t in self.topics if t.id == topic_id), None)
@@ -69,18 +69,26 @@ def load_catalog(projects_root: Path = PROJECTS_ROOT) -> Catalog:
     data = yaml.safe_load((Path(projects_root) / "catalog.yaml").read_text())
     topics = [Topic(t["id"], t["title"], t["project"], list(t["concepts"]), bool(t.get("themeable")))
               for t in data["topics"]]
-    diagnostic = {"min_confidence": 0.8, "use_borderline": False}
+    diagnostic = {"min_confidence": 0.8, "use_borderline": False, "min_correct_answers": 2}
     diagnostic.update(data.get("diagnostic") or {})
     return Catalog(dict(data["concepts"]), topics, dict(data.get("revision") or {}), dict(data["thresholds"]),
                    diagnostic)
 
 
-def seed_from_placement(placement: dict, rules: dict) -> Dict[str, dict]:
-    """Decide which diagnostic stages to use. Returns {concept: {"stage", "confidence", "used", "reason"}}."""
+def seed_from_placement(placement: dict, rules: dict, correct: Optional[Dict[str, int]] = None) -> Dict[str, dict]:
+    """Decide which diagnostic stages to use. Returns {concept: {"stage", "confidence", "used", "reason"}}.
+
+    `correct` is the number of correct answers per concept. A stage above 0 needs at least
+    rules["min_correct_answers"] of them: one lucky guess must not skip a student past practice.
+    """
     decisions = {}
+    need = int(rules.get("min_correct_answers", 0) or 0)
     for concept, p in (placement.get("concepts") or {}).items():
         stage, confidence, borderline = int(p.get("stage", 0)), float(p.get("confidence", 0.0)), bool(p.get("borderline"))
-        if confidence < float(rules["min_confidence"]):
+        got = None if correct is None else int(correct.get(concept, 0))
+        if stage > 0 and got is not None and got < need:
+            reason, used = f"stage {stage} rests on {got} correct answer(s); {need} are needed", False
+        elif confidence < float(rules["min_confidence"]):
             reason, used = f"confidence {confidence:.2f} is below {rules['min_confidence']}", False
         elif borderline and not rules.get("use_borderline"):
             reason, used = "borderline result", False
@@ -411,7 +419,11 @@ class Course:
         if profile.get("diagnostic", {}).get("applied"):
             return profile["diagnostic"]
 
-        decisions = seed_from_placement(state.placement, self.catalog.diagnostic)
+        correct: Dict[str, int] = {}
+        for r in state.results:
+            if r.passed:
+                correct[r.concept] = correct.get(r.concept, 0) + 1
+        decisions = seed_from_placement(state.placement, self.catalog.diagnostic, correct)
         concepts = dict(profile.get("concepts") or {})
         for concept, d in decisions.items():
             if d["used"]:

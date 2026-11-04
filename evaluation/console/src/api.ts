@@ -13,7 +13,7 @@ export interface OverviewItem {
   caveat: string;
 }
 
-export type TabId = 'overview' | 'validation' | 'fallback' | 'safety' | 'hints' | 'rating';
+export type TabId = 'overview' | 'diagnostic' | 'validation' | 'fallback' | 'safety' | 'hints' | 'rating';
 
 export interface Health {
   ai: boolean;
@@ -244,6 +244,39 @@ export interface RatingAgreement {
   between_raters: {raters: string[]; n: number; h2_exact: number} | null;
 }
 
+export type DiagCondition = 'no_diagnostic' | 'diagnostic_today' | 'diagnostic_proposed' | 'oracle';
+
+export interface DiagCondSummary {
+  n: number;
+  completed: number;
+  submissions: number;
+  failed_on_levels: number;
+  gaps: number;
+  gaps_practiced_first: number | null;
+  practice_unneeded: number;
+  start_counts: Record<string, number>;
+  by_band: Record<'low' | 'middle' | 'high', {n: number; completed: number; failed_on_levels: number; submissions: number}>;
+}
+
+export interface DiagCheck {
+  id: string;
+  requirement: string;
+  passed: boolean;
+  detail: string;
+}
+
+export interface DiagLesson {
+  students: number;
+  seed: number;
+  labels: Record<DiagCondition, string>;
+  checks: DiagCheck[];
+  summary: Record<DiagCondition, DiagCondSummary> & {
+    diagnostic_accuracy?: {n: number; exact: number; within_one: number; gap_found: number};
+    lesson_start_stage_zero?: number;
+    stages_used_share?: number | null;
+  };
+}
+
 export class ApiError extends Error {
   constructor(message: string, readonly status: number) {
     super(message);
@@ -277,7 +310,8 @@ export const api = {
   e07: () => call<E07>('GET', 'api/results/e07'),
   e08: () => call<E08>('GET', 'api/results/e08'),
   e12: () => call<E12>('GET', 'api/results/e12'),
-  run: (suite: 'e01' | 'e07') => call<{suite: string; seconds: number}>('POST', `api/run/${suite}`),
+  diag: () => call<DiagLesson>('GET', 'api/results/diag'),
+  run: (suite: 'e01' | 'e07' | 'diag') => call<{suite: string; seconds: number}>('POST', `api/run/${suite}`),
   validate: (level: string, code: string) => call<ValidateResult>('POST', 'api/live/validate', {level, code}),
   hint: (body: {level: string; code: string; attempt: number; gap?: string; agentcore: boolean}) =>
     call<HintResult>('POST', 'api/live/hint', body),

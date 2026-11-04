@@ -109,3 +109,20 @@ class ContentFilter:
             return FilterResult(False, category if isinstance(category, str) and category != "ok" else "other")
         except (ModelError, AttributeError, TypeError):
             return FilterResult(False, "filter_error")
+
+
+# Pasted AI output (shared by the readiness diagnostic and the evaluation grader) ----------------
+# A review signal, never a block: a teacher looks at it, the answer is still scored.
+AI_PASTE_STRONG = [r"\bas an ai\b", r"\bas a (large )?language model\b", r"\bcertainly!", r"\bi hope this helps\b",
+                   r"\bhere is (an|the) (improved|revised|refined) (prompt|version|answer)\b"]
+AI_PASTE_WEAK = [r"\bcomprehensive\b", r"\badhering to\b", r"\bsemantic(ally)?\b", r"\bwcag\b", r"\bdeviates\b",
+                 r"\bleverag(e|ing)\b", r"\bfurthermore\b", r"\brobust\b", r"\bseamless(ly)?\b",
+                 r"\bcss grid\b", r"\bhtml5\b", r"\bcss3\b"]
+
+
+def looks_like_ai_paste(text: str) -> bool:
+    """True when the text reads like a chatbot answer: one strong phrase, or three weak ones."""
+    low = (text or "").lower()
+    strong = sum(bool(re.search(p, low)) for p in AI_PASTE_STRONG)
+    weak = sum(bool(re.search(p, low)) for p in AI_PASTE_WEAK)
+    return strong >= 1 or weak >= 3

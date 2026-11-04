@@ -33,6 +33,7 @@ revision:
 diagnostic:
   min_confidence: 0.8          # the diagnostic's own probability that its stage is right
   use_borderline: false        # concepts the diagnostic marks "borderline" are not used
+  min_correct_answers: 2       # a stage above 0 needs this many correct answers on the concept (no lucky guesses)
 
 # How a finished project is judged, per concept, from its problems' attempts and hints.
 # Change these after feedback; no code changes needed.

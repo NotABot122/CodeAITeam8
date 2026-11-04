@@ -21,11 +21,12 @@ from typing import Optional
 
 from engine.progress import JsonProgressStore
 
-from .eval_log import STUDENT_PREFIX
 from .paths import PathLike
 from .state import DiagnosticState
 
-STUDENT_ID = re.compile(r"^STU-[0-9a-f]{16,32}$")
+# One student id across the diagnostic, the lesson engine and the student web API: 32 hex characters,
+# the same shape engine.session and webapi use. Older quests saved with "STU-" + hex still load.
+STUDENT_ID = re.compile(r"^(?:[0-9a-f]{32}|STU-[0-9a-f]{16,32})$")
 FILE_NAME = "diagnostic.json"
 
 
@@ -39,7 +40,7 @@ class InvalidStudentId(ValueError):
 
 def check_student_id(student_id: str) -> str:
     if not isinstance(student_id, str) or not STUDENT_ID.match(student_id):
-        raise InvalidStudentId("student ids look like STU- followed by letters and digits")
+        raise InvalidStudentId("student ids are 32 letters and digits (a-f, 0-9)")
     return student_id
 
 
@@ -53,7 +54,7 @@ class DiagnosticStore:
 
     def new_student(self) -> str:
         while True:
-            student_id = STUDENT_PREFIX + uuid.uuid4().hex[:16]
+            student_id = uuid.uuid4().hex
             if not self.registry.student_exists(student_id):
                 break
         self.registry.register_student(student_id)

@@ -204,6 +204,26 @@ def overview() -> dict:
             "evidence": "Measured on real AWS Bedrock calls.",
             "caveat": "Not tested under load yet.",
         })
+    dl = _load("diag_lesson_summary.json")
+    if dl:
+        sm, checks = dl["summary"], dl["checks"]
+        low = {c: sm[c]["by_band"].get("low", {}).get("failed_on_levels") for c in ("no_diagnostic", "diagnostic_today", "diagnostic_proposed")}
+        failing = [c for c in checks if not c["passed"]]
+        items.append({
+            "id": "diagnostic_handoff", "tab": "diagnostic",
+            "requirement": "Any student can take the diagnostic and start the lesson at their own level.",
+            "source": "Product goal; Vision: diagnostic placement (Exploratory)",
+            "status": "met" if not failing else ("partial" if len(failing) < len(checks) else "not_met"),
+            "metric": f"Gaps that get practice before their level: {pc(sm['diagnostic_today']['gaps_practiced_first'])} today, "
+                      f"{pc(sm['diagnostic_proposed']['gaps_practiced_first'])} with the proposed handoff. Low-level students "
+                      f"fail {low['no_diagnostic']} times without a diagnostic, {low['diagnostic_today']} today, "
+                      f"{low['diagnostic_proposed']} with the proposed handoff.",
+            "evidence": f"{dl['students']} simulated students through the real diagnostic, handoff and lesson.",
+            "caveat": f"{len(failing)} of {len(checks)} handoff checks fail, including: the student app cannot open a "
+                      "student who took the diagnostic." if failing else "",
+        })
+    order = {"not_met": 0, "partial": 1, "met": 2, "not_tested": 3}
+    items.sort(key=lambda i: order.get(i["status"], 9))  # problems first: that is what to talk about
     return {"items": items, "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")}
 
 
@@ -211,7 +231,8 @@ def overview() -> dict:
 
 def results(name: str) -> dict:
     files = {"e01": "E01_proto_validation_summary.json", "e07": "E07_proto_fallback_summary.json",
-             "e08": "E08_proto_safety_summary.json", "e12": "E12_proto_hint_summary.json"}
+             "e08": "E08_proto_safety_summary.json", "e12": "E12_proto_hint_summary.json",
+             "diag": "diag_lesson_summary.json"}
     if name not in files:
         raise ApiError(404, "Unknown result.")
     data = _load(files[name])
@@ -219,6 +240,8 @@ def results(name: str) -> dict:
         raise ApiError(404, f"{files[name]} not found. Run the suite first.")
     if name == "e12":
         data = dict(data, rows=[{k: v for k, v in r.items() if k not in ("messages",)} for r in data["rows"]])
+    if name == "diag":
+        data = {k: v for k, v in data.items() if k != "rows"}  # per-student rows are large; the page needs the summary
     return data
 
 
@@ -352,8 +375,13 @@ def run_suite(name: str) -> dict:
             from . import proto_validation_bench as m
         elif name == "e07":
             from . import proto_fallback_eval as m
+        elif name == "diag":
+            from . import diag_lesson_eval as m
+            t = time.time()
+            m.main(["--students", "40"])  # same size as the published run, so numbers stay comparable
+            return {"suite": name, "seconds": round(time.time() - t, 1), "result": results(name)}
         else:
-            raise ApiError(400, "Only the grading and failure tests can be re-run here. "
+            raise ApiError(400, "Only the grading, failure and diagnostic tests can be re-run here. "
                                 "The filter and hint tests call AI models; run them from the command line.")
         t = time.time()
         m.main([])
@@ -448,12 +476,12 @@ ROUTES = [
     ("GET", re.compile(r"^/api/health$"), lambda m, b: {"ai": _ai_ok(), "ai_reason": _ai_state["reason"],
                                                          "proto_root": str(pa.PROTO_ROOT)}),
     ("GET", re.compile(r"^/api/overview$"), lambda m, b: overview()),
-    ("GET", re.compile(r"^/api/results/(e01|e07|e08|e12)$"), lambda m, b: results(m[1])),
+    ("GET", re.compile(r"^/api/results/(e01|e07|e08|e12|diag)$"), lambda m, b: results(m[1])),
     ("GET", re.compile(r"^/api/presets$"), lambda m, b: presets()),
     ("POST", re.compile(r"^/api/live/validate$"), lambda m, b: live_validate(b)),
     ("POST", re.compile(r"^/api/live/hint$"), lambda m, b: live_hint(b)),
     ("POST", re.compile(r"^/api/live/filter$"), lambda m, b: live_filter(b)),
-    ("POST", re.compile(r"^/api/run/(e01|e07|e08|e12)$"), lambda m, b: run_suite(m[1])),
+    ("POST", re.compile(r"^/api/run/(e01|e07|e08|e12|diag)$"), lambda m, b: run_suite(m[1])),
     ("GET", re.compile(r"^/api/rating/items$"), lambda m, b: rating_items()),
     ("POST", re.compile(r"^/api/rating$"), lambda m, b: save_rating(b)),
     ("GET", re.compile(r"^/api/rating/agreement$"), lambda m, b: rating_agreement()),

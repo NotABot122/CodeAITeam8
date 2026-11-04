@@ -1,7 +1,7 @@
 """Event-log rows in the evaluation team's format (evaluation/schemas/event_log.schema.json).
 
 One row per tool call (`validate_submission`, `route_next`). Every evaluation item reads
-this log. Students appear only by their pseudonymous `STU-` id; the free-text goal is
+this log. Students appear only by their pseudonymous id, marked `STU-` here; the free-text goal is
 never written here.
 
 This is separate from engine.events.EventLog, which records lesson events with its own
@@ -20,6 +20,11 @@ from .paths import PathLike
 
 LOG_NAME = "eval_events.jsonl"
 STUDENT_PREFIX = "STU-"
+
+
+def log_student_id(student_id: str) -> str:
+    """The id as it appears in evaluation logs: real students are marked STU-, simulated ones keep SIM-/ADV-."""
+    return student_id if student_id.startswith(("STU-", "SIM-", "ADV-")) else STUDENT_PREFIX + student_id
 
 
 def canonical_hash(payload: Any) -> str:
@@ -47,7 +52,7 @@ class EvalEventLog:
         return {
             "timestamp": dt.datetime.now(dt.timezone.utc).isoformat(),
             "run_id": self.run_id,
-            "student_id": student_id,
+            "student_id": log_student_id(student_id),
             "lesson_id": lesson_id,
             "task_id": task_id,
             "tool": tool,
