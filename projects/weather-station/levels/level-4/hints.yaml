@@ -1,0 +1,3 @@
+- "build_report doesn't need any new logic. Each step is one of the functions you already wrote."
+- "Start with rows = get_readings(conn, station_id, start_date, end_date). Then make an empty list and, in a loop, append (row, classify_day(row)) for each row."
+- "The last line should be return summarize(readings). Call each function by name so the checker can see you used it."

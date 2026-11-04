@@ -1,0 +1,2 @@
+- "COUNT(*) returns a single row with a single number in it."
+- "conn.execute(sql, (station_id,)) needs the comma: (station_id,) is a tuple with one item. Then .fetchone()[0] gives the number."
