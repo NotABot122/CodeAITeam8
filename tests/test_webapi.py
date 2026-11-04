@@ -47,12 +47,24 @@ class WebApiTests(unittest.TestCase):
 
     def test_struggling_gets_practice_on_the_map(self):
         sid = self.svc.new_student()["studentId"]
+        for _ in range(2):
+            self.svc.submit(sid, "print(1)")
+        res = self.svc.submit(sid, "print(1)")  # third failed try on Level 1: in-lesson help inserts practice
+        state = res["state"]
+        self.assertEqual(state["problem"]["kind"], "practice")
+        self.assertIn(("practice", "current"), [(n["kind"], n["status"]) for n in state["path"]])
+        self.assertTrue(any("practice" in n.lower() for n in res["outcome"]["notices"]))
+        res = self.svc.submit(sid, REF)  # pass the practice: back to Level 1, which is not done yet
+        self.assertEqual(res["state"]["problem"]["id"], "level-1")
+
+    def test_struggling_without_in_lesson_help_gets_practice_after_the_level(self):
+        self.svc.course.catalog.intervention["struggle_after"] = None  # the older, after-the-level behaviour
+        sid = self.svc.new_student()["studentId"]
         for _ in range(3):
             self.svc.submit(sid, "print(1)")
         res = self.svc.submit(sid, REF)  # passes, but only on the 4th try
         state = res["state"]
         self.assertEqual(state["problem"]["kind"], "practice")
-        self.assertIn(("practice", "current"), [(n["kind"], n["status"]) for n in state["path"]])
         self.assertEqual(state["path"][0]["status"], "done")
 
     def test_finish_then_next_step_then_review_quiz(self):

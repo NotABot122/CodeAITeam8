@@ -178,6 +178,7 @@ class JourneyTests(TempDirMixin, unittest.TestCase):
 
     def test_struggling_student_gets_revision_with_questions(self):
         course = self.course(RubricOnly())
+        course.catalog.intervention["struggle_after"] = None  # this journey checks the after-the-level path
         sid = course.new_student()
         for source in (GET_UNSORTED_TUPLES, GET_EXCLUSIVE, GET_EXCLUSIVE, GET_GOOD):
             self.submit(course, sid, source)

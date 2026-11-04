@@ -37,9 +37,9 @@ diagnostic:
 
 # In-lesson intervention: after this many failed attempts on one level, insert that concept's practice
 # once, then return to the level. If the diagnostic had given the concept a stage above 0, the stage is
-# lowered to 0 and a diagnostic_mismatch event is logged. null = off (today's behaviour).
+# lowered to 0 and a diagnostic_mismatch event is logged. null turns it off.
 intervention:
-  struggle_after: null
+  struggle_after: 3
 
 # How a finished project is judged, per concept, from its problems' attempts and hints.
 # Change these after feedback; no code changes needed.

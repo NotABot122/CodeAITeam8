@@ -140,8 +140,8 @@ function Body({d}: {d: DiagLesson}) {
         </TableBody>
       </Table>
       <Caveat>
-        {d.students} simulated students; how fast they learn is our assumption, so compare the conditions rather than read the numbers as real. In-lesson help is a
-        switch in projects/catalog.yaml (intervention.struggle_after), off by default until the team agrees on it.
+        {d.students} simulated students; how fast they learn is our assumption, so compare the conditions rather than read the numbers as real. In-lesson help is
+        on by default (projects/catalog.yaml, intervention.struggle_after: 3); the conditions without it switch it off for comparison.
       </Caveat>
     </>
   );
