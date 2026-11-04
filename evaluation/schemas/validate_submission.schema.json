@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "codeai-team8/evaluation/validate_submission/v0.1",
-  "title": "validate_submission (MCP tool contract, draft v0.1)",
+  "$id": "codeai-team8/evaluation/validate_submission/v0.2",
+  "title": "validate_submission (MCP tool contract, draft v0.2)",
   "type": "object",
   "required": ["input", "output"],
   "properties": {
@@ -30,7 +30,7 @@
             "additionalProperties": false,
             "required": ["subskill", "stage", "confidence", "rationale", "evidence_quotes"],
             "properties": {
-              "subskill": { "enum": ["prompting", "evaluation", "prompt_revision"] },
+              "subskill": { "enum": ["prompting", "evaluation", "prompt_revision", "database_retrieval", "conditionals", "loops", "functions"], "description": "v0.2 adds the four Weather Station readiness concepts. A task may target one or more sub-skills, so results holds only the sub-skills the task targets." },
               "stage": { "type": ["integer", "null"], "minimum": 0, "maximum": 3, "description": "null only when the submission was filtered or unscorable." },
               "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
               "rationale": { "type": "string" },
@@ -44,7 +44,7 @@
         "tokens_out": { "type": "integer", "minimum": 0 },
         "filter_flags": {
           "type": "array",
-          "items": { "enum": ["empty", "too_short", "gibberish", "prompt_injection", "inappropriate", "suspected_ai_paste", "parse_error"] }
+          "items": { "enum": ["empty", "too_short", "gibberish", "prompt_injection", "inappropriate", "suspected_ai_paste", "parse_error", "personal_info"] }
         }
       }
     }

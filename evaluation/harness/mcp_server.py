@@ -23,8 +23,6 @@ import json
 import sys
 from pathlib import Path
 
-from .validator import validate_submission
-
 ROOT = Path(__file__).resolve().parents[1]
 PROTOCOL_VERSION = "2025-06-18"
 SERVER_INFO = {"name": "codeai-team8-evaluation", "version": "0.1.0"}
@@ -65,6 +63,15 @@ def _call(name: str, args: dict) -> dict:
         rubric = _RUBRICS.get(args["rubric_id"])
         if rubric is None:
             raise ValueError(f"unknown rubric_id; available: {sorted(_RUBRICS)}")
+        # Rubrics marked "provider": "diagnostic" are served by the Weather Station readiness
+        # diagnostic (diagnostic/). Imports are lazy so each path loads only what it needs
+        # (the Concept 3 reference grader needs boto3; the diagnostic runs without it).
+        if rubric.get("provider") == "diagnostic":
+            from diagnostic.tool_server import validate_submission_tool
+
+            return validate_submission_tool(args)
+        from .validator import validate_submission
+
         return validate_submission(args, rubric)
     raise ValueError(f"unknown tool: {name}")
 

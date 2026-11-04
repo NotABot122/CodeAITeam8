@@ -139,3 +139,24 @@ Budget is $500 on Bedrock in us-west-2. A full mock run (about 40 submissions, 1
 2. MCP over stdio, MCP over HTTP, or plain HTTP/JSON for the deployed services?
 3. Where does the event log live in production (S3 JSONL, Aurora table, or Langfuse traces)? The schema works for all three.
 4. Who provides the human-rated benchmark submissions for E01 / E10?
+
+## 4. Changes in contract v0.2 and the diagnostic runner
+
+Added by the Weather Station readiness diagnostic (`diagnostic/`). All changes are additive; v0.1 data still validates.
+
+| Schema | Change |
+|---|---|
+| `validate_submission` | `subskill` also allows `database_retrieval`, `conditionals`, `loops`, `functions`. `filter_flags` also allows `personal_info`. A task may target one sub-skill, so `results` holds only the sub-skills the task targets. |
+| `event_log` | Optional `stages` object (stage per sub-skill, any names). `cost_usd` may be `null`, which is how `run_eval.py` already writes it when no price is configured. |
+| `route_next` | Unchanged. |
+
+New files: `rubrics/weather_diag_rubric.json` (generated from the diagnostic's content by `python3 -m diagnostic.cli export-rubric`;
+`"provider": "diagnostic"` routes the MCP `validate_submission` tool to it), `harness/run_diag_eval.py`, `harness/diag_cases.py`,
+`data/diag_*`. `harness/mcp_server.py` now imports the Concept 3 reference grader lazily, so the server starts without `boto3`.
+
+```bash
+python3 -m evaluation.harness.run_diag_eval --provider mock      # offline; also: off, bedrock
+```
+
+Hard requirements are checked in every run (section 2.6, plus quest length, schema conformance, no scores shown to students, and fallback
+on model failure and on selector failure). Agreement with simulated children is a pipeline check, not E01.
