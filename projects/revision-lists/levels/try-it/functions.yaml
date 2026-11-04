@@ -1,0 +1,8 @@
+# Function bank for Try It: Temperatures Above.
+- call: my_list.append(item)
+  summary: |-
+    Adds one item to the end of a list, so items stay in the order you added them. It changes the list itself and gives back nothing.
+  example: |-
+    picked = []
+    picked.append(21.5)
+    # picked is now [21.5]

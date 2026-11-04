@@ -1,0 +1,15 @@
+# Function bank for Level 3: Group by Month.
+- call: my_list.append(item)
+  summary: |-
+    Adds one item to the end of a list. If the list is stored in a dictionary, you can append to it directly: groups[key].append(item).
+  example: |-
+    groups = {"A": []}
+    groups["A"].append("first")
+    # groups is now {"A": ["first"]}
+- call: my_list.sort()
+  summary: |-
+    Puts a list in order, smallest first. It changes the list itself and gives back nothing.
+  example: |-
+    letters = ["c", "a", "b"]
+    letters.sort()
+    # letters is now ["a", "b", "c"]

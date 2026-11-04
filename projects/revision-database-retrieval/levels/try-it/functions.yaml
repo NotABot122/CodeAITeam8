@@ -1,0 +1,21 @@
+# Function bank for Try It: Rainy Dates.
+- call: conn.execute(sql, values)
+  summary: |-
+    Runs one SQL query and gives back a cursor holding the result. Write ? for each value and pass the values as a tuple, in the same order as the ? marks.
+  example: |-
+    cursor = conn.execute(
+        "SELECT date FROM daily_readings WHERE station_id = ? AND temp_high_c >= ?",
+        ("ST-B", 30.0),
+    )
+- call: cursor.fetchall()
+  summary: |-
+    Gives back every row the query found, as a list of tuples. With one column in the SELECT, each row looks like ("2026-01-05",), so the value is row[0].
+  example: |-
+    rows = cursor.fetchall()
+    # [("2026-01-05",), ("2026-01-09",)]
+- call: my_list.append(item)
+  summary: |-
+    Adds one item to the end of a list. It changes the list itself and gives back nothing.
+  example: |-
+    found = []
+    found.append("2026-01-05")

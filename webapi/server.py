@@ -17,6 +17,7 @@ Routes (JSON):
     POST /api/students/<id>/next            {"option": 0, "theme": "..."} -> {message, built, state}
     POST /api/students/<id>/theme           {"request": "pokemon"} -> {built, message, state}
     POST /api/students/<id>/theme/reset     -> state
+    POST /api/blocks                        {"code": "..."} -> {ok, workspace, blockCount} or {ok: false, reason, message, line}
 Teacher routes (GET, need header X-Teacher-Token = $CODEAI_TEACHER_TOKEN; off if unset):
     /api/teacher/overview, /api/teacher/students/<id>, /api/teacher/content-check
 Anything else is served from frontend/dist if it has been built.
@@ -58,6 +59,7 @@ ROUTES = [
     ("POST", re.compile(rf"^/api/students/{ID}/next$"), lambda s, m, b: s.start_next(m[1], b.get("option"), b.get("theme"))),
     ("POST", re.compile(rf"^/api/students/{ID}/theme$"), lambda s, m, b: s.build_theme(m[1], b.get("request"))),
     ("POST", re.compile(rf"^/api/students/{ID}/theme/reset$"), lambda s, m, b: s.reset_theme(m[1])),
+    ("POST", re.compile(r"^/api/blocks$"), lambda s, m, b: s.to_blocks(b.get("code"))),
 ]
 
 

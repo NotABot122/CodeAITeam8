@@ -1,0 +1,36 @@
+# Function bank for Level 1. Only what the answer should use. Checked by `python -m engine.cli check-content`.
+- call: conn.execute(sql, values)
+  summary: |-
+    Runs one SQL query on the database and gives back a cursor that holds the matching rows.
+    Write a ? in the SQL for each value, then pass the values as a tuple in the same order. The database fills them in safely, so a strange station ID can't change your query.
+  example: |-
+    cursor = conn.execute(
+        "SELECT date, rain_mm FROM daily_readings WHERE station_id = ?",
+        ("ST-B",),
+    )
+- call: cursor.description
+  summary: |-
+    Describes the columns your query returned, one entry per column, in order.
+    Each entry is a tuple whose first item ([0]) is the column's name. It's not a function, so there are no brackets after it.
+  example: |-
+    names = [column[0] for column in cursor.description]
+    # ["date", "rain_mm"]
+- call: cursor.fetchall()
+  summary: |-
+    Gives back every row the query found, as a list. Each row is a tuple of values in column order, like ("2026-01-05", 3.2).
+    An empty list means nothing matched.
+  example: |-
+    rows = cursor.fetchall()
+- call: zip(names, values)
+  summary: |-
+    Pairs up two lists item by item: the first with the first, the second with the second, and so on.
+    Handy for matching each column name with its value.
+  example: |-
+    pairs = zip(["date", "rain_mm"], ("2026-01-05", 3.2))
+    # ("date", "2026-01-05"), ("rain_mm", 3.2)
+- call: dict(pairs)
+  summary: |-
+    Builds a dictionary from (key, value) pairs, such as the ones zip makes.
+  example: |-
+    day = dict(zip(["date", "rain_mm"], ("2026-01-05", 3.2)))
+    # {"date": "2026-01-05", "rain_mm": 3.2}
