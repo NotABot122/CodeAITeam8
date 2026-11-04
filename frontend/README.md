@@ -1,7 +1,7 @@
 # CodeAI student UI
 
 React 18 + TypeScript + MUI 7 + Vite. Styled after Code.org's CodeAI (purple brand, orange Run, Geist/Space Grotesk).
-It talks to the Weather Station engine from `proto-branch` through `webapi/` (a small JSON server in the repo root).
+It talks to the adaptive engine from `proto-branch` (including `engine.course`) through `webapi/` (a small JSON server in the repo root).
 
 ## Run it
 
@@ -21,10 +21,11 @@ Remove `--ai off` (and install `boto3`, set AWS creds) to get AI hints and the "
 ## What's here
 
 - `src/api/` – typed client and response shapes (mirror `webapi/service.py`)
-- `src/ui/PathStrip` – the level path; an assigned practice problem appears next to its level
+- `src/ui/PathStrip` – compact level path; an assigned practice problem shows as a badge on its level
+- `src/ui/QuizPanel`, `src/ui/NextStepPanel` – review quizzes and the "what's next" screen (from `engine.course`)
 - `src/ui/CodeEditor` – textarea with line numbers (Tab = 4 spaces, Esc then Tab leaves the box, Ctrl/Cmd+Enter runs)
 - `src/ui/Results` – grader messages, hint (labelled AI or teacher-written), stage changes
-- `src/ui/ConceptMeters` – Missing / Beginning / Meeting / Exceeding per concept
+- `src/ui/ConceptMeters` – Missing / Beginning / Meeting / Exceeding for all six concepts, in a sideways-scrolling row
 - `src/ui/Dialogs` – "A quick practice first" pop-up and the theme dialog
 - `src/ui/markdown` – tiny renderer for the instructions (React nodes only, no innerHTML)
 
