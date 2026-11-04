@@ -9,7 +9,7 @@ const tokenStore = {
   set: (v: string) => { try { sessionStorage.setItem(KEY, v); } catch { /* private mode */ } },
   clear: () => { try { sessionStorage.removeItem(KEY); } catch { /* private mode */ } },
 };
-const COLORS = ['#9a9ab0', '#e8a200', '#4c42cf', '#1a7f4b'];
+const COLORS = ['#9a9ab0', '#e8a200', '#d6456a', '#1a7f4b'];
 
 async function api<T>(path: string, token: string): Promise<T> {
   let res: Response;

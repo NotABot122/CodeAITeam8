@@ -36,8 +36,8 @@ const GHOST_SPOTS = [
 const hex = (x: number, y: number, r = R) =>
   Array.from({length: 6}, (_, k) => `${(x + r * Math.cos(((-90 + 60 * k) * Math.PI) / 180)).toFixed(1)},${(y + r * Math.sin(((-90 + 60 * k) * Math.PI) / 180)).toFixed(1)}`).join(' ');
 
-const FILL = ['#3a3688', '#ffb703', '#8f7bff', '#2fd27a']; // Missing, Beginning, Meeting, Exceeding
-const INK = ['#cfcbf5', '#1b1750', '#ffffff', '#0d3b22'];
+const FILL = ['#4a4026', '#ffd23f', '#ff6b8a', '#2fd27a']; // Missing, Beginning, Meeting, Exceeding
+const INK = ['#d8cfa8', '#2b2200', '#2b0a14', '#0d3b22'];
 
 function labelLines(name: string): string[] {
   const parts = name.split(' ');
@@ -62,7 +62,7 @@ export function SkillTreeBoard({concepts, onPick, picked}: {concepts: Concept[];
       aria-label="Skill tree: one hexagon for each idea"
       sx={{
         width: '100%', maxHeight: 'calc(100vh - 330px)', minHeight: 220, display: 'block', borderRadius: '16px',
-        background: 'radial-gradient(ellipse at 30% 40%, #2f2a82 0%, #1b1750 70%)',
+        background: 'radial-gradient(ellipse at 30% 40%, #4a3c12 0%, #17130a 72%)',
         '@keyframes pulse': {'0%': {opacity: 0.9, transform: 'scale(1)'}, '100%': {opacity: 0, transform: 'scale(1.35)'}},
         '@keyframes bob': {'0%,100%': {transform: 'translateY(0)'}, '50%': {transform: 'translateY(-4px)'}},
         '.pulse': {transformBox: 'fill-box', transformOrigin: 'center', animation: 'pulse 1.6s ease-out infinite'},
@@ -77,14 +77,14 @@ export function SkillTreeBoard({concepts, onPick, picked}: {concepts: Concept[];
 
       {GHOST_SPOTS.map((g, i) => (
         <g key={i} aria-hidden>
-          <polygon points={hex(g.x, g.y)} fill="none" stroke="#5b57a0" strokeWidth={2} strokeDasharray="6 6" />
-          <text x={g.x} y={g.y + 8} textAnchor="middle" fontSize={22} fill="#5b57a0" fontWeight={700}>?</text>
+          <polygon points={hex(g.x, g.y)} fill="none" stroke="#6d6137" strokeWidth={2} strokeDasharray="6 6" />
+          <text x={g.x} y={g.y + 8} textAnchor="middle" fontSize={22} fill="#6d6137" fontWeight={700}>?</text>
         </g>
       ))}
 
       {edges.map((e, i) => (
         <line key={i} x1={e.a.x} y1={e.a.y} x2={e.b.x} y2={e.b.y} strokeLinecap="round"
-          stroke={e.lit ? '#ffe28a' : '#4a4690'} strokeWidth={e.lit ? 7 : 5} filter={e.lit ? 'url(#glow)' : undefined} />
+          stroke={e.lit ? '#ffe28a' : '#5c5030'} strokeWidth={e.lit ? 7 : 5} filter={e.lit ? 'url(#glow)' : undefined} />
       ))}
 
       <g aria-hidden>
@@ -98,7 +98,7 @@ export function SkillTreeBoard({concepts, onPick, picked}: {concepts: Concept[];
         if (!c) return null;
         const isOpen = open(s);
         const locked = c.stage === 0 && !c.inProject && !isOpen;
-        const fill = c.stage === 0 ? (c.inProject ? '#f46800' : isOpen ? '#4c42cf' : FILL[0]) : FILL[c.stage];
+        const fill = c.stage === 0 ? (c.inProject ? '#f46800' : isOpen ? '#8a6d1f' : FILL[0]) : FILL[c.stage];
         const ink = c.stage === 0 ? (c.inProject || isOpen ? '#ffffff' : INK[0]) : INK[c.stage];
         const state = c.inProject ? 'you are here' : locked ? 'locked' : c.stage === 0 ? 'ready to start' : c.stageName;
         const lines = labelLines(c.name);
@@ -112,7 +112,7 @@ export function SkillTreeBoard({concepts, onPick, picked}: {concepts: Concept[];
           >
             {c.inProject && <polygon className="pulse" points={hex(s.x, s.y, R + 4)} fill="none" stroke="#ffd2b0" strokeWidth={5} />}
             {picked === s.id && <polygon points={hex(s.x, s.y, R + 9)} fill="none" stroke="#ffe28a" strokeWidth={3} strokeDasharray="5 4" />}
-            <polygon className="body" points={hex(s.x, s.y)} fill={fill} stroke={locked ? '#5b57a0' : '#ffffff'} strokeWidth={locked ? 2 : 4} strokeLinejoin="round" />
+            <polygon className="body" points={hex(s.x, s.y)} fill={fill} stroke={locked ? '#6d6137' : '#ffffff'} strokeWidth={locked ? 2 : 4} strokeLinejoin="round" />
             <text x={s.x} y={s.y - 12} textAnchor="middle" fontSize={24}>{locked ? '🔒' : s.icon}</text>
             {lines.map((l, i) => (
               <text key={i} x={s.x} y={s.y + 8 + i * 12} textAnchor="middle" fontSize={11} fontWeight={800} fill={ink}>{l}</text>

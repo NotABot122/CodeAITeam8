@@ -30,7 +30,7 @@ export default function Results({outcome}: {outcome: Outcome}) {
         <Box sx={{display: 'flex', gap: 1.25, p: 1.5, borderRadius: '10px', border: 1, borderColor: 'primary.main', bgcolor: 'action.hover'}}>
           <RubberDuck title="Ducky, your helper" />
           <Box>
-            <Typography variant="caption" sx={{fontWeight: 700, color: 'primary.main'}}>
+            <Typography variant="caption" sx={{fontWeight: 700, color: 'primary.dark'}}>
               {outcome.hintSource === 'ai' ? 'Hint from Ducky, your AI tutor' : 'Hint from Ducky'}
             </Typography>
             <Typography>{outcome.hint}</Typography>
