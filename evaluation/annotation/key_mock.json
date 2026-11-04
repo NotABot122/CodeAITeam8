@@ -1,0 +1,302 @@
+[
+  {
+    "item_id": "I001",
+    "submission_id": "SIM-028-A2",
+    "source": "mock",
+    "input_hash_fields": {
+      "student_id": "SIM-028",
+      "task_id": "C3-L6-T1",
+      "attempt_no": 2
+    }
+  },
+  {
+    "item_id": "I002",
+    "submission_id": "SIM-002-A2",
+    "source": "mock",
+    "input_hash_fields": {
+      "student_id": "SIM-002",
+      "task_id": "C3-L6-T1",
+      "attempt_no": 2
+    }
+  },
+  {
+    "item_id": "I003",
+    "submission_id": "SIM-066-A3",
+    "source": "mock",
+    "input_hash_fields": {
+      "student_id": "SIM-066",
+      "task_id": "C3-L6-T1",
+      "attempt_no": 3
+    }
+  },
+  {
+    "item_id": "I004",
+    "submission_id": "SIM-096-A1",
+    "source": "mock",
+    "input_hash_fields": {
+      "student_id": "SIM-096",
+      "task_id": "C3-L6-T1",
+      "attempt_no": 1
+    }
+  },
+  {
+    "item_id": "I005",
+    "submission_id": "SIM-065-A1",
+    "source": "mock",
+    "input_hash_fields": {
+      "student_id": "SIM-065",
+      "task_id": "C3-L6-T1",
+      "attempt_no": 1
+    }
+  },
+  {
+    "item_id": "I006",
+    "submission_id": "SIM-029-A1",
+    "source": "mock",
+    "input_hash_fields": {
+      "student_id": "SIM-029",
+      "task_id": "C3-L6-T1",
+      "attempt_no": 1
+    }
+  },
+  {
+    "item_id": "I007",
+    "submission_id": "SIM-042-A1",
+    "source": "mock",
+    "input_hash_fields": {
+      "student_id": "SIM-042",
+      "task_id": "C3-L6-T1",
+      "attempt_no": 1
+    }
+  },
+  {
+    "item_id": "I008",
+    "submission_id": "SIM-023-A3",
+    "source": "mock",
+    "input_hash_fields": {
+      "student_id": "SIM-023",
+      "task_id": "C3-L6-T1",
+      "attempt_no": 3
+    }
+  },
+  {
+    "item_id": "I009",
+    "submission_id": "SIM-066-A2",
+    "source": "mock",
+    "input_hash_fields": {
+      "student_id": "SIM-066",
+      "task_id": "C3-L6-T1",
+      "attempt_no": 2
+    }
+  },
+  {
+    "item_id": "I010",
+    "submission_id": "SIM-005-A2",
+    "source": "mock",
+    "input_hash_fields": {
+      "student_id": "SIM-005",
+      "task_id": "C3-L6-T1",
+      "attempt_no": 2
+    }
+  },
+  {
+    "item_id": "I011",
+    "submission_id": "SIM-032-A1",
+    "source": "mock",
+    "input_hash_fields": {
+      "student_id": "SIM-032",
+      "task_id": "C3-L6-T1",
+      "attempt_no": 1
+    }
+  },
+  {
+    "item_id": "I012",
+    "submission_id": "SIM-060-A1",
+    "source": "mock",
+    "input_hash_fields": {
+      "student_id": "SIM-060",
+      "task_id": "C3-L6-T1",
+      "attempt_no": 1
+    }
+  },
+  {
+    "item_id": "I013",
+    "submission_id": "SIM-044-A2",
+    "source": "mock",
+    "input_hash_fields": {
+      "student_id": "SIM-044",
+      "task_id": "C3-L6-T1",
+      "attempt_no": 2
+    }
+  },
+  {
+    "item_id": "I014",
+    "submission_id": "SIM-041-A1",
+    "source": "mock",
+    "input_hash_fields": {
+      "student_id": "SIM-041",
+      "task_id": "C3-L6-T1",
+      "attempt_no": 1
+    }
+  },
+  {
+    "item_id": "I015",
+    "submission_id": "SIM-074-A1",
+    "source": "mock",
+    "input_hash_fields": {
+      "student_id": "SIM-074",
+      "task_id": "C3-L6-T1",
+      "attempt_no": 1
+    }
+  },
+  {
+    "item_id": "I016",
+    "submission_id": "SIM-073-A1",
+    "source": "mock",
+    "input_hash_fields": {
+      "student_id": "SIM-073",
+      "task_id": "C3-L6-T1",
+      "attempt_no": 1
+    }
+  },
+  {
+    "item_id": "I017",
+    "submission_id": "SIM-076-A1",
+    "source": "mock",
+    "input_hash_fields": {
+      "student_id": "SIM-076",
+      "task_id": "C3-L6-T1",
+      "attempt_no": 1
+    }
+  },
+  {
+    "item_id": "I018",
+    "submission_id": "SIM-098-A3",
+    "source": "mock",
+    "input_hash_fields": {
+      "student_id": "SIM-098",
+      "task_id": "C3-L6-T1",
+      "attempt_no": 3
+    }
+  },
+  {
+    "item_id": "I019",
+    "submission_id": "SIM-078-A3",
+    "source": "mock",
+    "input_hash_fields": {
+      "student_id": "SIM-078",
+      "task_id": "C3-L6-T1",
+      "attempt_no": 3
+    }
+  },
+  {
+    "item_id": "I020",
+    "submission_id": "SIM-065-A2",
+    "source": "mock",
+    "input_hash_fields": {
+      "student_id": "SIM-065",
+      "task_id": "C3-L6-T1",
+      "attempt_no": 2
+    }
+  },
+  {
+    "item_id": "I021",
+    "submission_id": "SIM-043-A1",
+    "source": "mock",
+    "input_hash_fields": {
+      "student_id": "SIM-043",
+      "task_id": "C3-L6-T1",
+      "attempt_no": 1
+    }
+  },
+  {
+    "item_id": "I022",
+    "submission_id": "SIM-095-A3",
+    "source": "mock",
+    "input_hash_fields": {
+      "student_id": "SIM-095",
+      "task_id": "C3-L6-T1",
+      "attempt_no": 3
+    }
+  },
+  {
+    "item_id": "I023",
+    "submission_id": "SIM-005-A1",
+    "source": "mock",
+    "input_hash_fields": {
+      "student_id": "SIM-005",
+      "task_id": "C3-L6-T1",
+      "attempt_no": 1
+    }
+  },
+  {
+    "item_id": "I024",
+    "submission_id": "SIM-009-A1",
+    "source": "mock",
+    "input_hash_fields": {
+      "student_id": "SIM-009",
+      "task_id": "C3-L6-T1",
+      "attempt_no": 1
+    }
+  },
+  {
+    "item_id": "I025",
+    "submission_id": "SIM-047-A2",
+    "source": "mock",
+    "input_hash_fields": {
+      "student_id": "SIM-047",
+      "task_id": "C3-L6-T1",
+      "attempt_no": 2
+    }
+  },
+  {
+    "item_id": "I026",
+    "submission_id": "SIM-089-A1",
+    "source": "mock",
+    "input_hash_fields": {
+      "student_id": "SIM-089",
+      "task_id": "C3-L6-T1",
+      "attempt_no": 1
+    }
+  },
+  {
+    "item_id": "I027",
+    "submission_id": "SIM-083-A1",
+    "source": "mock",
+    "input_hash_fields": {
+      "student_id": "SIM-083",
+      "task_id": "C3-L6-T1",
+      "attempt_no": 1
+    }
+  },
+  {
+    "item_id": "I028",
+    "submission_id": "SIM-098-A2",
+    "source": "mock",
+    "input_hash_fields": {
+      "student_id": "SIM-098",
+      "task_id": "C3-L6-T1",
+      "attempt_no": 2
+    }
+  },
+  {
+    "item_id": "I029",
+    "submission_id": "SIM-053-A1",
+    "source": "mock",
+    "input_hash_fields": {
+      "student_id": "SIM-053",
+      "task_id": "C3-L6-T1",
+      "attempt_no": 1
+    }
+  },
+  {
+    "item_id": "I030",
+    "submission_id": "SIM-030-A1",
+    "source": "mock",
+    "input_hash_fields": {
+      "student_id": "SIM-030",
+      "task_id": "C3-L6-T1",
+      "attempt_no": 1
+    }
+  }
+]

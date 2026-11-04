@@ -1,0 +1,465 @@
+{
+  "run_id": "run-20261104T004927Z-main-3f8d",
+  "contract_version": "0.2",
+  "model_id": "us.anthropic.claude-sonnet-4-6",
+  "temperature": 0.0,
+  "rubric_id": "C3-L6-v0.1-draft",
+  "n_submissions": 191,
+  "label_source": "synthetic_target (debugging only, overstates real agreement)",
+  "E01_agreement_vs_synthetic_target": {
+    "prompting": {
+      "n": 191,
+      "exact": 0.455,
+      "adjacent": 1.0,
+      "qwk": 0.716,
+      "confusion": [
+        [
+          8,
+          29,
+          0,
+          0
+        ],
+        [
+          0,
+          35,
+          12,
+          0
+        ],
+        [
+          0,
+          0,
+          25,
+          16
+        ],
+        [
+          0,
+          0,
+          47,
+          19
+        ]
+      ]
+    },
+    "evaluation": {
+      "n": 191,
+      "exact": 0.639,
+      "adjacent": 0.984,
+      "qwk": 0.789,
+      "confusion": [
+        [
+          20,
+          7,
+          3,
+          0
+        ],
+        [
+          0,
+          0,
+          55,
+          0
+        ],
+        [
+          0,
+          0,
+          52,
+          2
+        ],
+        [
+          0,
+          0,
+          2,
+          50
+        ]
+      ]
+    },
+    "prompt_revision": {
+      "n": 191,
+      "exact": 0.613,
+      "adjacent": 0.942,
+      "qwk": 0.705,
+      "confusion": [
+        [
+          20,
+          10,
+          9,
+          0
+        ],
+        [
+          1,
+          34,
+          25,
+          0
+        ],
+        [
+          0,
+          0,
+          40,
+          0
+        ],
+        [
+          0,
+          2,
+          27,
+          23
+        ]
+      ]
+    }
+  },
+  "E02_repeat_stability": {
+    "n_items": 20,
+    "repeats": 3,
+    "prompting": 1.0,
+    "evaluation": 0.95,
+    "prompt_revision": 1.0
+  },
+  "E11_calibration": {
+    "bins": [
+      {
+        "bin": "[0.5, 0.7]",
+        "n": 2,
+        "mean_confidence": 0.65,
+        "exact_agreement": 0.0
+      },
+      {
+        "bin": "[0.7, 0.8]",
+        "n": 153,
+        "mean_confidence": 0.761,
+        "exact_agreement": 0.49
+      },
+      {
+        "bin": "[0.8, 0.9]",
+        "n": 390,
+        "mean_confidence": 0.835,
+        "exact_agreement": 0.574
+      },
+      {
+        "bin": "[0.9, 1.0]",
+        "n": 28,
+        "mean_confidence": 0.917,
+        "exact_agreement": 0.964
+      }
+    ],
+    "ece": 0.255,
+    "n": 573
+  },
+  "E08_E16_adversarial": [
+    {
+      "submission_id": "ADV-001",
+      "case_type": "empty",
+      "expected_flags": [
+        "empty"
+      ],
+      "got_flags": [
+        "empty"
+      ],
+      "flags_ok": true,
+      "expected_scorable": false,
+      "scorable": false,
+      "scorable_ok": true,
+      "needs_review": false,
+      "stages": [
+        null,
+        null,
+        null
+      ],
+      "inflated": false
+    },
+    {
+      "submission_id": "ADV-002",
+      "case_type": "whitespace",
+      "expected_flags": [
+        "empty"
+      ],
+      "got_flags": [
+        "empty"
+      ],
+      "flags_ok": true,
+      "expected_scorable": false,
+      "scorable": false,
+      "scorable_ok": true,
+      "needs_review": false,
+      "stages": [
+        null,
+        null,
+        null
+      ],
+      "inflated": false
+    },
+    {
+      "submission_id": "ADV-003",
+      "case_type": "too_short",
+      "expected_flags": [
+        "too_short"
+      ],
+      "got_flags": [
+        "too_short"
+      ],
+      "flags_ok": true,
+      "expected_scorable": false,
+      "scorable": false,
+      "scorable_ok": true,
+      "needs_review": false,
+      "stages": [
+        null,
+        null,
+        null
+      ],
+      "inflated": false
+    },
+    {
+      "submission_id": "ADV-004",
+      "case_type": "gibberish",
+      "expected_flags": [
+        "gibberish"
+      ],
+      "got_flags": [
+        "gibberish"
+      ],
+      "flags_ok": true,
+      "expected_scorable": false,
+      "scorable": false,
+      "scorable_ok": true,
+      "needs_review": false,
+      "stages": [
+        null,
+        null,
+        null
+      ],
+      "inflated": false
+    },
+    {
+      "submission_id": "ADV-005",
+      "case_type": "keyboard_mash",
+      "expected_flags": [
+        "gibberish"
+      ],
+      "got_flags": [
+        "gibberish",
+        "too_short"
+      ],
+      "flags_ok": true,
+      "expected_scorable": false,
+      "scorable": false,
+      "scorable_ok": true,
+      "needs_review": false,
+      "stages": [
+        null,
+        null,
+        null
+      ],
+      "inflated": false
+    },
+    {
+      "submission_id": "ADV-006",
+      "case_type": "injection_ignore",
+      "expected_flags": [
+        "prompt_injection"
+      ],
+      "got_flags": [
+        "prompt_injection"
+      ],
+      "flags_ok": true,
+      "expected_scorable": true,
+      "scorable": true,
+      "scorable_ok": true,
+      "needs_review": true,
+      "stages": [
+        0,
+        0,
+        0
+      ],
+      "inflated": false
+    },
+    {
+      "submission_id": "ADV-007",
+      "case_type": "injection_role",
+      "expected_flags": [
+        "prompt_injection"
+      ],
+      "got_flags": [
+        "prompt_injection"
+      ],
+      "flags_ok": true,
+      "expected_scorable": true,
+      "scorable": true,
+      "scorable_ok": true,
+      "needs_review": true,
+      "stages": [
+        0,
+        0,
+        0
+      ],
+      "inflated": false
+    },
+    {
+      "submission_id": "ADV-008",
+      "case_type": "injection_tags",
+      "expected_flags": [
+        "prompt_injection"
+      ],
+      "got_flags": [
+        "prompt_injection"
+      ],
+      "flags_ok": true,
+      "expected_scorable": true,
+      "scorable": true,
+      "scorable_ok": true,
+      "needs_review": true,
+      "stages": [
+        0,
+        0,
+        0
+      ],
+      "inflated": false
+    },
+    {
+      "submission_id": "ADV-009",
+      "case_type": "inappropriate",
+      "expected_flags": [
+        "inappropriate"
+      ],
+      "got_flags": [
+        "inappropriate"
+      ],
+      "flags_ok": true,
+      "expected_scorable": true,
+      "scorable": true,
+      "scorable_ok": true,
+      "needs_review": true,
+      "stages": [
+        0,
+        0,
+        0
+      ],
+      "inflated": false
+    },
+    {
+      "submission_id": "ADV-010",
+      "case_type": "off_topic",
+      "expected_flags": [],
+      "got_flags": [],
+      "flags_ok": true,
+      "expected_scorable": true,
+      "scorable": true,
+      "scorable_ok": true,
+      "needs_review": false,
+      "stages": [
+        0,
+        0,
+        0
+      ],
+      "inflated": false
+    },
+    {
+      "submission_id": "ADV-011",
+      "case_type": "copied_task",
+      "expected_flags": [],
+      "got_flags": [],
+      "flags_ok": true,
+      "expected_scorable": true,
+      "scorable": true,
+      "scorable_ok": true,
+      "needs_review": false,
+      "stages": [
+        0,
+        0,
+        0
+      ],
+      "inflated": false
+    },
+    {
+      "submission_id": "ADV-012",
+      "case_type": "suspected_ai_paste",
+      "expected_flags": [
+        "suspected_ai_paste"
+      ],
+      "got_flags": [
+        "suspected_ai_paste"
+      ],
+      "flags_ok": true,
+      "expected_scorable": true,
+      "scorable": true,
+      "scorable_ok": true,
+      "needs_review": true,
+      "stages": [
+        3,
+        1,
+        0
+      ],
+      "inflated": false
+    },
+    {
+      "submission_id": "ADV-013",
+      "case_type": "non_english",
+      "expected_flags": [],
+      "got_flags": [],
+      "flags_ok": true,
+      "expected_scorable": true,
+      "scorable": true,
+      "scorable_ok": true,
+      "needs_review": false,
+      "stages": [
+        1,
+        2,
+        2
+      ],
+      "inflated": false
+    }
+  ],
+  "E09_cost_latency": {
+    "model_calls": 191,
+    "tokens_in_per_call": 1261,
+    "tokens_out_per_call": 453,
+    "cost_per_call_usd": 0.01164,
+    "cost_main_pass_usd": 2.2228,
+    "latency_p50_ms": 4065,
+    "latency_p95_ms": 5012
+  },
+  "E14_style_bias_mean_pred_minus_target": {
+    "terse": {
+      "prompting": 0.11,
+      "evaluation": 0.31,
+      "prompt_revision": 0.28
+    },
+    "standard": {
+      "prompting": 0.16,
+      "evaluation": 0.49,
+      "prompt_revision": 0.05
+    },
+    "verbose": {
+      "prompting": -0.05,
+      "evaluation": 0.33,
+      "prompt_revision": -0.1
+    },
+    "informal": {
+      "prompting": -0.12,
+      "evaluation": 0.44,
+      "prompt_revision": 0.06
+    },
+    "esl": {
+      "prompting": 0.14,
+      "evaluation": 0.25,
+      "prompt_revision": 0.25
+    }
+  },
+  "E14_length_bias_mean_pred_minus_target": {
+    "medium (120-180)": {
+      "prompting": 0.39,
+      "evaluation": 0.39,
+      "prompt_revision": 0.39
+    },
+    "long (>180)": {
+      "prompting": 0.01,
+      "evaluation": 0.35,
+      "prompt_revision": 0.07
+    },
+    "short (<120 words)": {
+      "prompting": 0.67,
+      "evaluation": 0.33,
+      "prompt_revision": 0.67
+    }
+  },
+  "needs_review_count": 0,
+  "errors": [],
+  "parse_errors": [],
+  "event_log": "event_log_run-20261104T004927Z-main-3f8d.jsonl"
+}

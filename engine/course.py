@@ -56,6 +56,7 @@ class Catalog:
     topics: List[Topic]
     revision: Dict[str, str]
     thresholds: dict
+    diagnostic: dict = field(default_factory=lambda: {"min_confidence": 0.8, "use_borderline": False})
 
     def topic(self, topic_id: str) -> Optional[Topic]:
         return next((t for t in self.topics if t.id == topic_id), None)
@@ -68,7 +69,26 @@ def load_catalog(projects_root: Path = PROJECTS_ROOT) -> Catalog:
     data = yaml.safe_load((Path(projects_root) / "catalog.yaml").read_text())
     topics = [Topic(t["id"], t["title"], t["project"], list(t["concepts"]), bool(t.get("themeable")))
               for t in data["topics"]]
-    return Catalog(dict(data["concepts"]), topics, dict(data.get("revision") or {}), dict(data["thresholds"]))
+    diagnostic = {"min_confidence": 0.8, "use_borderline": False}
+    diagnostic.update(data.get("diagnostic") or {})
+    return Catalog(dict(data["concepts"]), topics, dict(data.get("revision") or {}), dict(data["thresholds"]),
+                   diagnostic)
+
+
+def seed_from_placement(placement: dict, rules: dict) -> Dict[str, dict]:
+    """Decide which diagnostic stages to use. Returns {concept: {"stage", "confidence", "used", "reason"}}."""
+    decisions = {}
+    for concept, p in (placement.get("concepts") or {}).items():
+        stage, confidence, borderline = int(p.get("stage", 0)), float(p.get("confidence", 0.0)), bool(p.get("borderline"))
+        if confidence < float(rules["min_confidence"]):
+            reason, used = f"confidence {confidence:.2f} is below {rules['min_confidence']}", False
+        elif borderline and not rules.get("use_borderline"):
+            reason, used = "borderline result", False
+        else:
+            reason, used = "confident result", True
+        decisions[concept] = {"stage": max(0, min(3, stage)), "confidence": round(confidence, 3),
+                              "used": used, "reason": reason}
+    return decisions
 
 
 # Judging a finished project ---------------------------------------------------------------
@@ -339,6 +359,112 @@ class Course:
         self.store.set_active_project(student_id, str(self.default_project().root))
         return self.state(student_id)
 
+    # Readiness diagnostic (diagnostic/) -------------------------------------------------------
+    # The quest creates the student. When it's finished, its confident stages seed the profile
+    # and its placement picks the first problem. Students who skip it use new_student().
+    def diagnostic(self):
+        if not hasattr(self, "_diagnostic"):
+            from diagnostic.engine import DiagnosticEngine
+            self._diagnostic = DiagnosticEngine.from_paths(project=self.default_project().root, data=self.data_dir,
+                                                           provider=self.provider, adaptive=self.adaptive)
+        return self._diagnostic
+
+    def diagnostic_options(self) -> dict:
+        return self.diagnostic().options()
+
+    def diagnostic_start(self, buddy: Optional[str] = None, goal: Optional[str] = None,
+                         goal_text: Optional[str] = None) -> dict:
+        """Create a student and start their quest. The response includes "student_id"."""
+        started = self.diagnostic().start(buddy, goal, goal_text)
+        profile = self.store.profile(started["student_id"])
+        profile.update(active_project=str(self.default_project().root), concepts={}, completed=[], next_step=None)
+        self.store.save_profile(started["student_id"], profile)
+        return started
+
+    def diagnostic_next(self, student_id: str) -> dict:
+        step = self.diagnostic().next(student_id)
+        if step.get("done"):
+            self.apply_diagnostic(student_id)
+        return step
+
+    def diagnostic_answer(self, student_id: str, response, elapsed_ms: Optional[int] = None) -> dict:
+        return self.diagnostic().answer(student_id, response, elapsed_ms)
+
+    def diagnostic_finish(self, student_id: str) -> dict:
+        """End the quest early or on time, then apply its result."""
+        result = self.diagnostic().finish(student_id)
+        self.apply_diagnostic(student_id)
+        return result
+
+    def apply_diagnostic(self, student_id: str) -> dict:
+        """Seed the profile with confident diagnostic stages and start the lesson at its placement.
+
+        Safe to call more than once. A lesson that has already started keeps its place; only the
+        profile (and so later projects) gets the seeded stages.
+        """
+        self._require(student_id)
+        from diagnostic.store import DiagnosticStore
+        state = DiagnosticStore(self.data_dir).load(student_id)
+        if state is None or not state.placement:
+            raise CourseError("The readiness quest isn't finished yet.")
+        profile = self.store.profile(student_id)
+        if profile.get("diagnostic", {}).get("applied"):
+            return profile["diagnostic"]
+
+        decisions = seed_from_placement(state.placement, self.catalog.diagnostic)
+        concepts = dict(profile.get("concepts") or {})
+        for concept, d in decisions.items():
+            if d["used"]:
+                concepts[concept] = max(int(concepts.get(concept, 0)), d["stage"])
+        profile["concepts"] = concepts
+
+        project = self.default_project()
+        start = state.placement.get("route", {}).get("next_task_id")
+        engine = self.engine(student_id, project)
+        try:
+            existing = self.store.load(student_id, project.id)
+        except Exception:
+            existing = None
+        started = existing is not None and bool(existing.attempts or existing.passed_problems)
+        placed_at = existing.current_problem if started else None
+        if not started:
+            engine.initial_stages = {c: int(s) for c, s in concepts.items()}
+            record = engine._fresh_record(student_id)
+            if start and project.manifest.has_problem(start):
+                record.current_problem = start
+                practice = project.manifest.practice(start)
+                if practice is not None:
+                    record.origin_level = next((lvl.id for lvl in project.manifest.levels_in_order()
+                                                if practice.concept in lvl.concepts), project.manifest.fallback_path[0])
+                record.routing_log.append({"selected": start, "reason": "diagnostic_placement", "policy": "diagnostic",
+                                           "stages": record.stages(),
+                                           "timestamp": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")})
+            self.store.save(record)
+            placed_at = record.current_problem
+        summary = {"applied": True, "at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
+                   "seeded": {c: d["stage"] for c, d in decisions.items() if d["used"]},
+                   "decisions": decisions, "start_problem": placed_at, "lesson_already_started": started}
+        profile["diagnostic"] = summary
+        profile.setdefault("active_project", str(project.root))
+        self.store.save_profile(student_id, profile)
+        self.events.write("diagnostic_applied", student_id=student_id, project_id=project.id, selected=placed_at,
+                          stages=summary["seeded"], reason="lesson_already_started" if started else "placed")
+        return summary
+
+    def diagnostic_status(self, student_id: str) -> str:
+        """none, in_progress, finished (not applied yet), or applied."""
+        if self.store.profile(student_id).get("diagnostic", {}).get("applied"):
+            return "applied"
+        try:
+            from diagnostic.store import DiagnosticStore, check_student_id
+            check_student_id(student_id)
+            state = DiagnosticStore(self.data_dir).load(student_id)
+        except Exception:
+            return "none"
+        if state is None:
+            return "none"
+        return "finished" if state.placement else "in_progress"
+
     # Views --------------------------------------------------------------------------------
     def state(self, student_id: str) -> dict:
         """Everything a UI needs to draw the current screen."""
@@ -363,4 +489,5 @@ class Course:
             "concepts": [{"id": c, "name": name, "stage": stages[c], "stageName": STAGE_NAMES[stages[c]],
                           "inProject": c in record.concepts} for c, name in self.catalog.concepts.items()],
             "nextStep": profile.get("next_step") if record.complete else None,
+            "diagnostic": self.diagnostic_status(student_id),
         }

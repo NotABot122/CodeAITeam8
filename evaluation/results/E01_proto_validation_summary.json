@@ -1,0 +1,310 @@
+{
+  "n_scored": 25,
+  "n_review": 2,
+  "agreement": 0.92,
+  "cohens_kappa": 0.841,
+  "false_pass": [
+    "V-L2-05",
+    "V-L4-04"
+  ],
+  "false_fail": [],
+  "rows": [
+    {
+      "id": "V-L1-01",
+      "level": "level-1",
+      "function": "get_readings",
+      "key": "pass",
+      "why": "BETWEEN is inclusive on both ends.",
+      "grader": "pass",
+      "status": "passed",
+      "first_message": "Level 1: passed. Every check works.",
+      "n_messages": 1
+    },
+    {
+      "id": "V-L1-02",
+      "level": "level-1",
+      "function": "get_readings",
+      "key": "pass",
+      "why": "Builds each dictionary by hand with a loop.",
+      "grader": "pass",
+      "status": "passed",
+      "first_message": "Level 1: passed. Every check works.",
+      "n_messages": 1
+    },
+    {
+      "id": "V-L1-03",
+      "level": "level-1",
+      "function": "get_readings",
+      "key": "pass",
+      "why": "SELECT * (the table has exactly the five columns).",
+      "grader": "pass",
+      "status": "passed",
+      "first_message": "Level 1: passed. Every check works.",
+      "n_messages": 1
+    },
+    {
+      "id": "V-L1-04",
+      "level": "level-1",
+      "function": "get_readings",
+      "key": "pass",
+      "why": "Uses sqlite3.Row on a new cursor-level row factory.",
+      "grader": "pass",
+      "status": "passed",
+      "first_message": "Level 1: passed. Every check works.",
+      "n_messages": 1
+    },
+    {
+      "id": "V-L1-05",
+      "level": "level-1",
+      "function": "get_readings",
+      "key": "pass",
+      "why": "Named placeholders (:station) are still placeholders.",
+      "grader": "pass",
+      "status": "passed",
+      "first_message": "Level 1: passed. Every check works.",
+      "n_messages": 1
+    },
+    {
+      "id": "V-L1-06",
+      "level": "level-1",
+      "function": "get_readings",
+      "key": "fail",
+      "why": "f-string with quotes: works on normal ids but breaks the placeholder rule (SQL injection).",
+      "grader": "fail",
+      "status": "failed",
+      "first_message": "Level 1: the station ID ' OR '1'='1 should match no rows, but 1095 came back. Use ? placeholders instead of putting values into the SQL text.",
+      "n_messages": 1
+    },
+    {
+      "id": "V-L1-07",
+      "level": "level-1",
+      "function": "get_readings",
+      "key": "fail",
+      "why": "No station filter.",
+      "grader": "fail",
+      "status": "failed",
+      "first_message": "Level 1: asking for station ST-A returned rows that aren't for ST-A.",
+      "n_messages": 5
+    },
+    {
+      "id": "V-L1-08",
+      "level": "level-1",
+      "function": "get_readings",
+      "key": "fail",
+      "why": "Sorted newest first.",
+      "grader": "fail",
+      "status": "failed",
+      "first_message": "Level 1: rows should be sorted by date, oldest first. Try ORDER BY date.",
+      "n_messages": 1
+    },
+    {
+      "id": "V-L1-09",
+      "level": "level-1",
+      "function": "get_readings",
+      "key": "review",
+      "why": "Reads all rows and filters in Python; no values in the SQL, so no placeholders needed. Meets the outputs, not the spirit of 'database retrieval'.",
+      "grader": "pass",
+      "status": "passed",
+      "first_message": "Level 1: passed. Every check works.",
+      "n_messages": 1
+    },
+    {
+      "id": "V-L2-01",
+      "level": "level-2",
+      "function": "classify_day",
+      "key": "pass",
+      "why": "Literal thresholds instead of constants.",
+      "grader": "pass",
+      "status": "passed",
+      "first_message": "Level 2: passed. Every check works.",
+      "n_messages": 1
+    },
+    {
+      "id": "V-L2-02",
+      "level": "level-2",
+      "function": "classify_day",
+      "key": "pass",
+      "why": "if/elif chain that covers all four cases explicitly.",
+      "grader": "pass",
+      "status": "passed",
+      "first_message": "Level 2: passed. Every check works.",
+      "n_messages": 1
+    },
+    {
+      "id": "V-L2-03",
+      "level": "level-2",
+      "function": "classify_day",
+      "key": "fail",
+      "why": "Labels in the wrong order for a hot and wet day.",
+      "grader": "fail",
+      "status": "failed",
+      "first_message": "Level 2: 35.0 \u00b0C with 20.0 mm should return [\"heat_wave\", \"heavy_rain\"] (got ['heavy_rain', 'heat_wave']).",
+      "n_messages": 2
+    },
+    {
+      "id": "V-L2-04",
+      "level": "level-2",
+      "function": "classify_day",
+      "key": "fail",
+      "why": "Changes the row dictionary (instructions: don't change row).",
+      "grader": "fail",
+      "status": "failed",
+      "first_message": "Level 2: classify_day should not change the row dictionary it is given.",
+      "n_messages": 1
+    },
+    {
+      "id": "V-L2-05",
+      "level": "level-2",
+      "function": "classify_day",
+      "key": "fail",
+      "why": "Threshold 34.95: wrong rule (35.0 or more), only visible for 34.95-34.99 values.",
+      "grader": "pass",
+      "status": "passed",
+      "first_message": "Level 2: passed. Every check works.",
+      "n_messages": 1
+    },
+    {
+      "id": "V-L2-06",
+      "level": "level-2",
+      "function": "classify_day",
+      "key": "fail",
+      "why": "Returns a string, not a list.",
+      "grader": "fail",
+      "status": "failed",
+      "first_message": "Level 2: classify_day should return a list, but it returned 'normal'.",
+      "n_messages": 6
+    },
+    {
+      "id": "V-L2-07",
+      "level": "level-2",
+      "function": "classify_day",
+      "key": "fail",
+      "why": "Rounds the temperature first, so 34.5-34.9 count as a heat wave.",
+      "grader": "fail",
+      "status": "failed",
+      "first_message": "Level 2: a temperature of 34.9 is not a heat wave, so it should be normal (got ['heat_wave']).",
+      "n_messages": 3
+    },
+    {
+      "id": "V-L3-01",
+      "level": "level-3",
+      "function": "summarize",
+      "key": "pass",
+      "why": "while loop with an index.",
+      "grader": "pass",
+      "status": "passed",
+      "first_message": "Level 3: passed. Every check works.",
+      "n_messages": 1
+    },
+    {
+      "id": "V-L3-02",
+      "level": "level-3",
+      "function": "summarize",
+      "key": "pass",
+      "why": "Counts with a dictionary of counters.",
+      "grader": "pass",
+      "status": "passed",
+      "first_message": "Level 3: passed. Every check works.",
+      "n_messages": 1
+    },
+    {
+      "id": "V-L3-03",
+      "level": "level-3",
+      "function": "summarize",
+      "key": "pass",
+      "why": "Uses 'if not readings' for the empty case (no banned call).",
+      "grader": "pass",
+      "status": "passed",
+      "first_message": "Level 3: passed. Every check works.",
+      "n_messages": 1
+    },
+    {
+      "id": "V-L3-04",
+      "level": "level-3",
+      "function": "summarize",
+      "key": "fail",
+      "why": "Calls len() for the empty check (banned by the instructions).",
+      "grader": "fail",
+      "status": "failed",
+      "first_message": "Level 3: summarize must not call len() (line 35). Work it out with a loop instead.",
+      "n_messages": 1
+    },
+    {
+      "id": "V-L3-05",
+      "level": "level-3",
+      "function": "summarize",
+      "key": "fail",
+      "why": "Uses sorted() (banned by the instructions).",
+      "grader": "fail",
+      "status": "failed",
+      "first_message": "Level 3: summarize must not call sorted() (line 45). Work it out with a loop instead.",
+      "n_messages": 1
+    },
+    {
+      "id": "V-L3-06",
+      "level": "level-3",
+      "function": "summarize",
+      "key": "review",
+      "why": "Avoids the ban with readings.__len__() and builtins.max via getattr: follows the letter, not the intent.",
+      "grader": "pass",
+      "status": "passed",
+      "first_message": "Level 3: passed. Every check works.",
+      "n_messages": 1
+    },
+    {
+      "id": "V-L3-07",
+      "level": "level-3",
+      "function": "summarize",
+      "key": "fail",
+      "why": "Counts heavy rain from rain_mm > 20 instead of the labels (wrong at exactly 20.0).",
+      "grader": "fail",
+      "status": "failed",
+      "first_message": "Level 3: for 7 test days, heavy_rain_days should be 2, but was 1.",
+      "n_messages": 2
+    },
+    {
+      "id": "V-L4-01",
+      "level": "level-4",
+      "function": "build_report",
+      "key": "pass",
+      "why": "List comprehension for the pairs.",
+      "grader": "pass",
+      "status": "passed",
+      "first_message": "Level 4: passed. Every check works.",
+      "n_messages": 1
+    },
+    {
+      "id": "V-L4-02",
+      "level": "level-4",
+      "function": "build_report",
+      "key": "pass",
+      "why": "Keyword arguments and a separate pairs variable.",
+      "grader": "pass",
+      "status": "passed",
+      "first_message": "Level 4: passed. Every check works.",
+      "n_messages": 1
+    },
+    {
+      "id": "V-L4-03",
+      "level": "level-4",
+      "function": "build_report",
+      "key": "fail",
+      "why": "Calls get_readings twice (instructions: once).",
+      "grader": "fail",
+      "status": "failed",
+      "first_message": "Level 4: build_report should call get_readings exactly once.",
+      "n_messages": 1
+    },
+    {
+      "id": "V-L4-04",
+      "level": "level-4",
+      "function": "build_report",
+      "key": "fail",
+      "why": "Hard-codes the stored January answer for ST-A (the real stored values) and computes the rest.",
+      "grader": "pass",
+      "status": "passed",
+      "first_message": "Level 4: passed. Every check works.",
+      "n_messages": 1
+    }
+  ]
+}

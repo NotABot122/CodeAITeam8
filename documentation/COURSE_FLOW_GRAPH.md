@@ -26,9 +26,9 @@ flowchart TD
     subgraph AdaptiveLoop ["Backend Adaptive Recommendation Cycle"]
         Aurora --> DetClassifier{Deterministic DAG Classifier\nFinds candidate nodes with point deficits\n& validates unlocked prerequisites}:::decision
 
-        DetClassifier --> StanceDecider["Stance Decider 2B (SLM)\nEvaluates cognitive load, grade,\nresponse latency & error patterns"]:::ai
+        DetClassifier --> StrandsDecider["Strands Decider 2B (SLM)\nEvaluates cognitive load, grade,\nresponse latency & error patterns"]:::ai
 
-        StanceDecider --> StanceDecision{Stance Decision?}:::decision
+        StrandsDecider --> StanceDecision{Stance Decision?}:::decision
 
         %% Stance Paths
         StanceDecision -- "STANCE_REINFORCE\n(Points < Threshold)" --> FollowUpQ["Targeted Follow-Up / Remediation Question\n(Checks Answers & Graded Concepts)"]:::ai

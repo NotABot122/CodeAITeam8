@@ -1,0 +1,144 @@
+# Configuration for the Weather Station readiness quest (grades 3-5).
+# Everything a curriculum author may want to tune lives here, not in code.
+id: weather-station-readiness
+title: Storm Chaser Academy
+grade_band: "3-5"
+version: 1
+
+# The tier ladder: a pass at tier N is evidence for Stage N.
+limits:
+  max_scored_items: 16          # hard cap on scored questions for the whole quest
+  max_items_per_zone: 4         # cap for one concept's ladder
+  max_bonus_items: 3            # confirmation questions after all zones
+  bonus_min_stage: 2            # only confirm stage claims at or above this
+  bonus_confidence_target: 0.8  # confirm a claim whose confidence is below this
+  max_explain_prompts: 2        # typed "tell the guide" answers per quest: typing is the slowest part for young students
+  explain_below_confidence: 0.85  # only ask when the answers alone leave a concept this unsure
+  max_boosters: 2               # unscored "breather" questions
+  misses_before_booster: 3      # consecutive misses that trigger a breather
+  # ASSUMPTIONS for the time estimate only. Measure real grade 3-5 timing in a pilot and update these.
+  seconds_per_item: 45
+  seconds_per_explain: 75
+  target_minutes: 15
+
+# Fraction of an answer that must be right to count as a pass.
+pass_credit:
+  choice: 1.0
+  spot: 1.0
+  trace: 1.0
+  order: 1.0
+  sort: 0.8
+
+# Skill tree thresholds (ratio of points earned to points possible).
+thresholds:
+  unlock: 0.5
+  master: 0.75
+
+# How a stage is estimated from the answers (guess-and-slip model, see diagnostic/scoring.py).
+scoring:
+  slip: 0.08                       # chance a child who knows the idea still misses a question
+  prior: [0.25, 0.30, 0.25, 0.20]  # chance of true stage 0, 1, 2, 3 before any answers
+  borderline_below: 0.7            # confidence under this marks a concept "borderline"
+
+# Reading level for everything students read. Enforced by check-content.
+readability:
+  max_sentence_words: 16
+  max_word_length: 12
+
+# Free-text answers ("tell the guide"). Kids write short answers, so the
+# too-short bar is much lower than the harness default of 8 words.
+text:
+  min_words: 3
+  max_chars: 400
+  max_goal_chars: 80
+
+zones:
+  - id: zone-log
+    concept: database_retrieval
+    name: Weather Log Detective
+    story: "Nimbus keeps a big weather log. Help find the right pages fast!"
+    done_message: "You finished the Weather Log zone!"
+  - id: zone-decide
+    concept: conditionals
+    name: Decision Storm
+    story: "Storm clouds are coming! Make quick if-this-then-that choices."
+    done_message: "You cleared the Decision Storm zone!"
+  - id: zone-repeat
+    concept: loops
+    name: Repeat Rangers
+    story: "The rain gauges need checking again and again. Let's repeat smartly."
+    done_message: "You finished the Repeat Rangers zone!"
+  - id: zone-helpers
+    concept: functions
+    name: Helper Workshop
+    story: "Build little helpers that do one job well, then team them up."
+    done_message: "You finished the Helper Workshop zone!"
+
+# What the student wants to make. Emphasis says which concepts the goal leans on.
+goals:
+  - {id: weather_report, label: "Make my own weather report", emphasis: {database_retrieval: 1.0, conditionals: 0.8, loops: 0.8, functions: 0.6}}
+  - {id: build_game,     label: "Build a game",                emphasis: {database_retrieval: 0.2, conditionals: 1.0, loops: 1.0, functions: 0.7}}
+  - {id: find_facts,     label: "Find cool facts in data",     emphasis: {database_retrieval: 1.0, conditionals: 0.5, loops: 0.9, functions: 0.4}}
+  - {id: make_helpers,   label: "Make tools that help people", emphasis: {database_retrieval: 0.4, conditionals: 0.6, loops: 0.6, functions: 1.0}}
+  - {id: not_sure,       label: "I'm not sure yet",            emphasis: {database_retrieval: 0.6, conditionals: 0.6, loops: 0.6, functions: 0.6}}
+
+# Choose-a-buddy list. Nicknames are picked from this list, never typed, so no names are collected.
+buddies:
+  - {id: cloud,   label: "Cloud Pup"}
+  - {id: bolt,    label: "Bolt Fox"}
+  - {id: drop,    label: "Raindrop Owl"}
+  - {id: sun,     label: "Sunny Gecko"}
+
+game:
+  guide:
+    name: Nimbus
+    welcome: "Hi, I'm {guide}! Pick a buddy and a goal, then we go storm chasing."
+    right:
+      - "Nice one!"
+      - "You got it!"
+      - "Great thinking!"
+      - "Yes! Keep going!"
+    wrong:
+      - "Good try! Here is a tip."
+      - "Not quite, and that is okay. Here is a tip."
+      - "Close! Here is something to remember."
+    streak: "You are on a hot streak!"
+    booster_intro: "Quick breather! Here is an easy one."
+    explain_intro: "Tell {guide} in your own words. Short is fine."
+    explain_skip: "No problem. Let's keep going!"
+    bonus_intro: "Bonus round! One more to make sure."
+    flagged_text: "Let's keep our words kind and friendly. We will skip that one."
+    goal_flagged: "I will pick a goal for you. You can change it later with a grown-up."
+    finish: "You finished the quest, {buddy}! Great work today."
+  xp:
+    try: 5               # for every answer, so effort is rewarded
+    correct: 5           # added when the answer was right
+    streak_bonus: 2      # per answer after the third correct in a row
+    explain: 8           # for telling the guide in words
+    booster: 3
+  ranks:                 # XP needed -> title (shown to the student, never a mastery claim)
+    - {xp: 0,   title: Cloud Cadet}
+    - {xp: 40,  title: Rain Ranger}
+    - {xp: 90,  title: Storm Chaser}
+    - {xp: 150, title: Thunder Captain}
+  badges:
+    - {id: first_step,   name: First Step,       when: "answer one question"}
+    - {id: hot_streak,   name: Hot Streak,       when: "3 right answers in a row"}
+    - {id: bounce_back,  name: Bounce Back,      when: "a right answer right after a miss"}
+    - {id: storyteller,  name: Storyteller,      when: "explain an idea in words"}
+    - {id: zone_clear,   name: Zone Explorer,    when: "finish a zone"}
+    - {id: quest_done,   name: Quest Complete,   when: "finish the whole quest"}
+
+# Words kept out of anything a student reads. Stages and scores stay with teachers.
+student_text_ban:
+  - stage
+  - score
+  - scored
+  - grade
+  - failed
+  - mastery
+  - percent
+  - level 0
+  - level 1
+  - level 2
+  - level 3

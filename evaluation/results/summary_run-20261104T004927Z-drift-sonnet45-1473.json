@@ -1,0 +1,182 @@
+{
+  "run_id": "run-20261104T004927Z-drift-sonnet45-1473",
+  "contract_version": "0.2",
+  "model_id": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+  "temperature": 0.0,
+  "rubric_id": "C3-L6-v0.1-draft",
+  "n_submissions": 60,
+  "label_source": "synthetic_target (debugging only, overstates real agreement)",
+  "E01_agreement_vs_synthetic_target": {
+    "prompting": {
+      "n": 60,
+      "exact": 0.367,
+      "adjacent": 1.0,
+      "qwk": 0.653,
+      "confusion": [
+        [
+          0,
+          11,
+          0,
+          0
+        ],
+        [
+          0,
+          12,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          6,
+          4
+        ],
+        [
+          0,
+          0,
+          22,
+          4
+        ]
+      ]
+    },
+    "evaluation": {
+      "n": 60,
+      "exact": 0.45,
+      "adjacent": 0.983,
+      "qwk": 0.63,
+      "confusion": [
+        [
+          2,
+          7,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          19,
+          0
+        ],
+        [
+          0,
+          0,
+          16,
+          1
+        ],
+        [
+          0,
+          0,
+          5,
+          9
+        ]
+      ]
+    },
+    "prompt_revision": {
+      "n": 60,
+      "exact": 0.583,
+      "adjacent": 0.933,
+      "qwk": 0.63,
+      "confusion": [
+        [
+          3,
+          3,
+          4,
+          0
+        ],
+        [
+          0,
+          7,
+          11,
+          0
+        ],
+        [
+          0,
+          0,
+          16,
+          0
+        ],
+        [
+          0,
+          0,
+          7,
+          9
+        ]
+      ]
+    }
+  },
+  "E02_repeat_stability": {
+    "n_items": 0,
+    "repeats": 1
+  },
+  "E11_calibration": {
+    "bins": [
+      {
+        "bin": "[0.8, 0.9]",
+        "n": 112,
+        "mean_confidence": 0.858,
+        "exact_agreement": 0.455
+      },
+      {
+        "bin": "[0.9, 1.0]",
+        "n": 68,
+        "mean_confidence": 0.907,
+        "exact_agreement": 0.485
+      }
+    ],
+    "ece": 0.41,
+    "n": 180
+  },
+  "E08_E16_adversarial": [],
+  "E09_cost_latency": {
+    "model_calls": 60,
+    "tokens_in_per_call": 1264,
+    "tokens_out_per_call": 557,
+    "cost_per_call_usd": 0.01336,
+    "cost_main_pass_usd": 0.8014,
+    "latency_p50_ms": 8839,
+    "latency_p95_ms": 10971
+  },
+  "E14_style_bias_mean_pred_minus_target": {
+    "esl": {
+      "prompting": -0.04,
+      "evaluation": 0.33,
+      "prompt_revision": 0.29
+    },
+    "standard": {
+      "prompting": -0.09,
+      "evaluation": 0.73,
+      "prompt_revision": 0.36
+    },
+    "verbose": {
+      "prompting": 0.09,
+      "evaluation": 0.27,
+      "prompt_revision": -0.18
+    },
+    "informal": {
+      "prompting": -0.5,
+      "evaluation": 0.25,
+      "prompt_revision": 0.62
+    },
+    "terse": {
+      "prompting": -0.17,
+      "evaluation": 0.5,
+      "prompt_revision": 0.17
+    }
+  },
+  "E14_length_bias_mean_pred_minus_target": {
+    "long (>180)": {
+      "prompting": -0.14,
+      "evaluation": 0.39,
+      "prompt_revision": 0.23
+    },
+    "medium (120-180)": {
+      "prompting": 0.67,
+      "evaluation": 0.67,
+      "prompt_revision": 0.67
+    }
+  },
+  "needs_review_count": 0,
+  "errors": [],
+  "parse_errors": [],
+  "event_log": "event_log_run-20261104T004927Z-drift-sonnet45-1473.jsonl"
+}

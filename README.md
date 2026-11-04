@@ -79,6 +79,18 @@ python3 -m engine.cli answer --student ID             # answer a quiz step
 
 For the UI: `docs/HANDOFF-adaptive-path.md` describes the `Course` API and its JSON.
 
+### Readiness quest
+
+New students can start with the readiness quest (`diagnostic/`, merged from the `diagnosis` branch). It's a short game that estimates a stage and a confidence for each lesson concept. When it ends, every concept the quest is confident about (confidence 0.8 or higher, not borderline) becomes the student's starting stage, and the lesson starts at the quest's placement. Less certain concepts start at Stage 0. The rule is in `projects/catalog.yaml`.
+
+```bash
+python3 -m diagnostic.cli play                         # take the quest (prints your STU-... id)
+python3 -m engine.cli placement --student STU-...      # apply it: starting stages and first problem
+python3 -m engine.cli show --student STU-...           # then work as usual
+```
+
+The quest was written for grades 3 to 5, while these lessons target grades 9 to 12. Its questions and wording may need an older version.
+
 ## The lesson
 
 | Level | Function | Concept |
@@ -89,6 +101,19 @@ For the UI: `docs/HANDOFF-adaptive-path.md` describes the `Course` API and its J
 | 4 | `build_report(...)`: combines the three functions above | Functions |
 
 How adaptivity works: a passed problem counts toward the next stage when it took few enough attempts (Stage 1: 3 or fewer, Stage 2: 2 or fewer, Stage 3: first try with no hints). A student must reach Stage 1 on a concept to move past its level. A student who doesn't gets a practice problem for that concept. The rules are in `projects/weather-station/manifest.yaml`.
+
+## Readiness quest for young students (grades 3-5)
+
+`diagnostic/` is a tap-and-drag game that places a student before Level 1: it finds out how well they know the ideas under the lesson
+(finding information in a log, if/else, repeating, reusable helpers), shows them a skill tree, and starts the lesson in the right place.
+
+```bash
+python3 -m diagnostic.cli play                       # play it, or add --profile mixed to watch a simulated child
+python3 -m diagnostic.cli handoff --student STU-... --apply   # then: python3 -m engine.cli show --student STU-...
+python3 -m evaluation.harness.run_diag_eval          # check it against the evaluation contracts (offline)
+```
+
+See [`diagnostic/README.md`](diagnostic/README.md).
 
 ## For curriculum authors
 

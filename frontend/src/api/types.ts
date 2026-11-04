@@ -71,6 +71,7 @@ export interface StudentState {
   code: string;
   path: PathNode[];
   concepts: ConceptProgress[];
+  diagnostic: 'none' | 'in_progress' | 'finished' | 'applied';
   nextStep: NextStep | null;
   themed: boolean;
   aiAvailable: boolean;

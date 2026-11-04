@@ -28,6 +28,12 @@ revision:
   lists: revision-lists
   dictionaries: revision-dictionaries
 
+# The readiness diagnostic (diagnostic/) can set starting stages. Only results the
+# diagnostic is confident about are used; the rest start at the profile's stage.
+diagnostic:
+  min_confidence: 0.8          # the diagnostic's own probability that its stage is right
+  use_borderline: false        # concepts the diagnostic marks "borderline" are not used
+
 # How a finished project is judged, per concept, from its problems' attempts and hints.
 # Change these after feedback; no code changes needed.
 thresholds:

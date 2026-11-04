@@ -80,6 +80,41 @@ class WebApiTests(unittest.TestCase):
             self.svc.start_next(sid, 0)
         self.assertEqual(cm.exception.status, 400)
 
+    def test_quest_runs_then_hands_over_to_the_lesson(self):
+        q = self.svc.quest_start("cloud", "build_game")
+        sid = q["student_id"]
+        self.assertTrue(sid.startswith("STU-"))
+        self.assertEqual(self.svc.state(sid)["diagnostic"], "in_progress")
+        step = q["first"]
+        for _ in range(60):
+            if step.get("done"):
+                break
+            st = step["step"]
+            if st["type"] == "text":
+                response = {"skip": True}
+            elif st["type"] == "order":
+                response = [c["id"] for c in st["cards"]]
+            elif st["type"] == "sort":
+                response = {c["id"]: st["buckets"][0]["id"] for c in st["cards"]}
+            else:
+                response = st["options"][0]["id"]
+            self.svc.quest_answer(sid, response, 500)
+            step = self.svc.quest_next(sid)
+        self.assertTrue(step["done"])
+        state = self.svc.state(sid)
+        self.assertEqual(state["diagnostic"], "applied")
+        self.assertIsNotNone(state["problem"])
+
+    def test_quest_rejects_bad_input(self):
+        with self.assertRaises(ApiError):
+            self.svc.quest_start("not-a-buddy", "build_game")
+        sid = self.svc.quest_start("cloud", "build_game")["student_id"]
+        with self.assertRaises(ApiError) as cm:
+            self.svc.quest_answer(sid, "zzz", 5)
+        self.assertEqual(cm.exception.status, 422)
+        with self.assertRaises(ApiError):
+            self.svc.quest_next("STU-nope")
+
     def test_theme_needs_ai(self):
         sid = self.svc.new_student()["studentId"]
         with self.assertRaises(ApiError) as cm:

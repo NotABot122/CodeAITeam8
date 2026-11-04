@@ -1,0 +1,248 @@
+{
+  "passed": 9,
+  "n": 12,
+  "scenarios": [
+    {
+      "completed": true,
+      "submissions": 4,
+      "crashed": null,
+      "path": [
+        "level-1",
+        "level-2",
+        "level-3",
+        "level-4"
+      ],
+      "notices": [],
+      "hint_sources": [],
+      "fallback_events": [],
+      "ungraded_events": 0,
+      "scenario": "baseline adaptive",
+      "requirement": "-",
+      "expect": "completes, no fallback"
+    },
+    {
+      "completed": true,
+      "submissions": 4,
+      "crashed": null,
+      "path": [
+        "level-1",
+        "level-2",
+        "level-3",
+        "level-4"
+      ],
+      "notices": [
+        "The lesson will continue in a fixed order from here."
+      ],
+      "hint_sources": [],
+      "fallback_events": [
+        "router_error"
+      ],
+      "ungraded_events": 0,
+      "scenario": "router raises on 2nd decision",
+      "requirement": "routing fails",
+      "expect": "fallback to fixed order, completes"
+    },
+    {
+      "completed": true,
+      "submissions": 4,
+      "crashed": null,
+      "path": [
+        "level-1",
+        "level-2",
+        "level-3",
+        "level-4"
+      ],
+      "notices": [
+        "The lesson will continue in a fixed order from here."
+      ],
+      "hint_sources": [],
+      "fallback_events": [
+        "problem_not_in_manifest"
+      ],
+      "ungraded_events": 0,
+      "scenario": "router returns a problem not in the manifest",
+      "requirement": "routing fails",
+      "expect": "fallback to fixed order, completes"
+    },
+    {
+      "completed": true,
+      "submissions": 4,
+      "crashed": null,
+      "path": [
+        "level-1",
+        "level-2",
+        "level-3",
+        "level-4"
+      ],
+      "notices": [
+        "Your saved progress couldn't be loaded, so you're starting again at Level 1. The lesson will continue in a fixed order from here."
+      ],
+      "hint_sources": [],
+      "fallback_events": [
+        "progress_load_failure"
+      ],
+      "ungraded_events": 0,
+      "scenario": "saved progress is corrupted",
+      "requirement": "routing state lost",
+      "expect": "restart on fixed order, completes"
+    },
+    {
+      "completed": true,
+      "submissions": 4,
+      "crashed": null,
+      "path": [
+        "level-1",
+        "level-2",
+        "level-3",
+        "level-4"
+      ],
+      "notices": [
+        "Your progress wasn't saved this time. It will be saved again after your next submission."
+      ],
+      "hint_sources": [],
+      "fallback_events": [],
+      "ungraded_events": 0,
+      "scenario": "progress save fails twice",
+      "requirement": "infrastructure",
+      "expect": "notice, completes"
+    },
+    {
+      "completed": true,
+      "submissions": 6,
+      "crashed": null,
+      "path": [
+        "level-1",
+        "level-1",
+        "level-1",
+        "level-2",
+        "level-3",
+        "level-4"
+      ],
+      "notices": [],
+      "hint_sources": [],
+      "fallback_events": [],
+      "ungraded_events": 2,
+      "scenario": "grader unavailable for 2 submissions",
+      "requirement": "validation fails (transient)",
+      "expect": "retry, completes"
+    },
+    {
+      "completed": false,
+      "submissions": 12,
+      "crashed": null,
+      "path": [
+        "level-1",
+        "level-1",
+        "level-1",
+        "level-1",
+        "level-1",
+        "level-1",
+        "level-1",
+        "level-1",
+        "level-1",
+        "level-1",
+        "level-1",
+        "level-1"
+      ],
+      "notices": [],
+      "hint_sources": [],
+      "fallback_events": [],
+      "ungraded_events": 12,
+      "scenario": "grader unavailable for every submission",
+      "requirement": "validation fails (persistent)",
+      "expect": "falls back to a working non-adaptive path"
+    },
+    {
+      "completed": false,
+      "submissions": 0,
+      "crashed": "RuntimeError: grader crashed (escapes Engine: session.py, line 188, in submit)",
+      "path": [
+        "level-1"
+      ],
+      "notices": [],
+      "hint_sources": [],
+      "fallback_events": [],
+      "ungraded_events": 0,
+      "scenario": "grader raises an unexpected exception once",
+      "requirement": "validation fails (bug)",
+      "expect": "error handled, completes"
+    },
+    {
+      "completed": true,
+      "submissions": 5,
+      "crashed": null,
+      "path": [
+        "level-1",
+        "level-1",
+        "level-2",
+        "level-3",
+        "level-4"
+      ],
+      "notices": [],
+      "hint_sources": [
+        "authored"
+      ],
+      "fallback_events": [],
+      "ungraded_events": 0,
+      "scenario": "grader times out once",
+      "requirement": "validation fails (timeout)",
+      "expect": "counted as a failed attempt, completes"
+    },
+    {
+      "completed": true,
+      "submissions": 5,
+      "crashed": null,
+      "path": [
+        "level-1",
+        "level-1",
+        "level-2",
+        "level-3",
+        "level-4"
+      ],
+      "notices": [],
+      "hint_sources": [
+        "authored"
+      ],
+      "fallback_events": [],
+      "ungraded_events": 0,
+      "scenario": "AI hint model returns ModelError",
+      "requirement": "AI hint fails",
+      "expect": "teacher hint, completes"
+    },
+    {
+      "completed": false,
+      "submissions": 0,
+      "crashed": "RuntimeError: SDK bug (escapes Engine: session.py, line 254, in _ai_hint)",
+      "path": [
+        "level-1"
+      ],
+      "notices": [],
+      "hint_sources": [],
+      "fallback_events": [],
+      "ungraded_events": 0,
+      "scenario": "AI hint model raises an unexpected exception",
+      "requirement": "AI hint fails (bug)",
+      "expect": "teacher hint, completes"
+    },
+    {
+      "completed": true,
+      "submissions": 4,
+      "crashed": null,
+      "path": [
+        "level-1",
+        "level-2",
+        "level-3",
+        "level-4"
+      ],
+      "notices": [],
+      "hint_sources": [],
+      "fallback_events": [
+        "adaptive_routing_disabled"
+      ],
+      "ungraded_events": 0,
+      "scenario": "adaptive routing turned off",
+      "requirement": "operator switch",
+      "expect": "fixed order, completes"
+    }
+  ]
+}

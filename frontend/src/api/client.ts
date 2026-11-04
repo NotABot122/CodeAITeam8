@@ -1,3 +1,4 @@
+import type {AnswerResult, QuestNext, QuestOptions, QuestStart} from '@/quest/types';
 import type {BlocksResult, Health, StartResult, StudentState, SubmitResult, ThemeResult} from './types';
 
 export class ApiError extends Error {
@@ -9,6 +10,11 @@ export class ApiError extends Error {
 export interface ApiClient {
   health(): Promise<Health>;
   newStudent(): Promise<StudentState>;
+  questOptions(): Promise<QuestOptions>;
+  questStart(buddy: string | null, goal: string | null): Promise<QuestStart>;
+  questNext(id: string): Promise<QuestNext>;
+  questAnswer(id: string, response: unknown, elapsedMs: number | null): Promise<AnswerResult>;
+  questFinish(id: string): Promise<unknown>;
   getState(id: string): Promise<StudentState>;
   submit(id: string, code: string): Promise<SubmitResult>;
   answer(id: string, answers: Record<string, number | string>): Promise<SubmitResult>;
@@ -47,6 +53,11 @@ export function createHttpClient(base = ''): ApiClient {
   return {
     health: () => call('GET', '/api/health'),
     newStudent: () => call('POST', '/api/students'),
+    questOptions: () => call('GET', '/api/quest/options'),
+    questStart: (buddy, goal) => call('POST', '/api/quest', {buddy, goal}),
+    questNext: id => call('GET', `/api/quest/${encodeURIComponent(id)}/next`),
+    questAnswer: (id, response, elapsedMs) => call('POST', `/api/quest/${encodeURIComponent(id)}/answer`, {response, elapsedMs}),
+    questFinish: id => call('POST', `/api/quest/${encodeURIComponent(id)}/finish`, {}),
     getState: id => call('GET', s(id)),
     submit: (id, code) => call('POST', `${s(id)}/submit`, {code}),
     answer: (id, answers) => call('POST', `${s(id)}/answer`, {answers}),
