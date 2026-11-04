@@ -34,6 +34,7 @@ Every autonomous agent or developer **MUST read this file before writing code** 
 | `Agent-2` | Unassigned | `idle` | None | - |
 | `Agent-3` | Unassigned | `idle` | None | - |
 | `zane-claude` | Claude Opus 5.5 (Kiro) | `idle` | Renamed "Stance Decider 2B" to "Strands Decider 2B" in documentation/ | 2026-11-03 15:30 PST |
+| `Kiro-Demo` | Claude Opus 5.5 (Kiro) | `idle` | Built the Python weather-station adaptive lesson demo (`engine/`, `projects/weather-station/`, `tests/`) on `proto-branch` | 2026-11-04 08:56 PST |
 
 ---
 
@@ -41,7 +42,12 @@ Every autonomous agent or developer **MUST read this file before writing code** 
 
 > *Most recent on top. Maximum 10 items.*
 
-1. **[Task 008] Vision Document Ingestion & Intra-Lesson Adaptivity Invariant**
+1. **[Task 011] Weather Station Adaptive Lesson Demo (Python Prototype)**
+   - **Model:** Claude Opus 5.5 (Kiro)
+   - **Agent:** `Kiro-Demo`
+   - **Timestamp:** 2026-11-04 08:56 PST
+   - **Summary:** Added a local Python prototype of the adaptive engine on `proto-branch` (commit `4f7669a`), with no cloud calls. One project, `projects/weather-station/`: a seeded synthetic SQLite dataset and four levels (SQL retrieval, conditionals, loops, functions) with three practice problems. The engine grades each submission in a separate process with a 10 s limit, enforces a loop rule on Level 3, gives ordered hand-written hints, tracks a Stage 0–3 per concept, routes struggling students to practice problems, and falls back to fixed level order if routing fails. Progress is saved per student. Run `python3 -m engine.demo` or see `README.md`. 51 tests pass. Spec is in `.kiro/specs/weather-station-adaptive-lesson/`. Not built yet: Bedrock rubric grading, content filter, grader benchmark. Numbered 011 because `main` already uses 009 and 010.
+2. **[Task 008] Vision Document Ingestion & Intra-Lesson Adaptivity Invariant**
    - **Model:** Gemini 3.8 Flash (Authoritative)
    - **Agent:** Lead-Antigravity
    - **Timestamp:** 2026-11-03 15:33 PST
