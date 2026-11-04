@@ -88,6 +88,7 @@ The three new projects were rendered from hand-written specs with the theme temp
 - The pathway screen has a project picker; the pathway's steps and message follow the choice. Students who skip the check pick a project first.
 - The choice can change until the student runs code in it. After that it stays until the project is finished; then the course moves on to the next topic (Lists and Dictionaries).
 - API: `GET /api/students/<id>/projects`, `POST /api/students/<id>/project {"project": "monster-arena"}`.
+- **Make it yours** (the AI theme builder) is a card in the picker and a button at the top right of every lesson screen whenever the first topic is current or still ahead on the pathway. On a review step, the theme replaces the upcoming project and starts when the student gets there. "Back to the ready-made projects" undoes it.
 
 ## Help that fades as students improve (adaptive support)
 

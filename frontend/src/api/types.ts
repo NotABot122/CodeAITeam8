@@ -95,7 +95,7 @@ export interface PathwayView {
 export interface PathwayResult {pathway: PathwayView; state: StudentState}
 
 /** Projects with the same skills and different stories; the readiness check's goal suggests one. */
-export interface ProjectChoice {project: string; title: string; pitch: string; suggested: boolean; current: boolean}
+export interface ProjectChoice {project: string; title: string; pitch: string; suggested: boolean; current: boolean; custom?: boolean}
 export interface ProjectChoices {choices: ProjectChoice[]; locked: boolean; topic: string}
 export interface ChooseResult extends ProjectChoices {state: StudentState}
 
@@ -114,6 +114,8 @@ export interface StudentState {
   themed: boolean;
   aiAvailable: boolean;
   pathway: PathwayView | null;
+  /** When "Make it yours" applies: now (first topic), later (it's ahead on the pathway), or null. */
+  themeable: 'now' | 'later' | null;
   streakLength: number;
   maxStage: number;
   stageNames: string[];

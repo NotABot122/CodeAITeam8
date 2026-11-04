@@ -394,14 +394,69 @@ class Course:
                           model_id=self.provider.model_id)
         if result.status != BUILT:
             return {"message": result.message, "project": None, "state": self.state(student_id), "built": False}
-        out = self._switch(student_id, self._project(result.project_path), result.message)
+        project = self._project(result.project_path)
+        when = self.theme_target(student_id)
+        if when == "later":
+            # On a review (or another step) first: the themed project waits for the pathway's core step.
+            self._set_core(student_id, str(project.root))
+            return {"message": f"{result.message}. You'll start it after your current project.", "project": project.id,
+                    "state": self.state(student_id), "built": True}
+        if self.store.profile(student_id).get("pathway") or self.catalog.topics[0].choices:
+            self._set_core(student_id, str(project.root))
+        out = self._switch(student_id, project, result.message)
         out["built"] = True
         return out
 
     def reset_theme(self, student_id: str) -> dict:
+        """Back to a ready-made project: the student's catalog choice (or the goal's suggestion)."""
         self._require(student_id)
-        self.store.set_active_project(student_id, str(self.default_project().root))
+        profile = self.store.profile(student_id)
+        if profile.get("core_project") and profile["core_project"] not in self.core_choices():
+            profile.pop("core_project")
+            self.store.save_profile(student_id, profile)
+        folder = self.core_project_for(student_id)
+        self._set_core(student_id, folder, keep_choice=False)
+        if self._is_core(self.project_for(student_id)):
+            self.store.set_active_project(student_id, str(self._project(self.projects_root / folder).root))
         return self.state(student_id)
+
+    def _is_core(self, project: Project) -> bool:
+        return project.topic == self.catalog.topics[0].id
+
+    def _set_core(self, student_id: str, folder: str, keep_choice: bool = True) -> None:
+        """Make `folder` (a catalog choice, or a themed project's path) the student's first-topic project,
+        including the pathway steps that haven't been reached yet."""
+        profile = self.store.profile(student_id)
+        if keep_choice:
+            profile["core_project"] = folder
+        pathway = profile.get("pathway")
+        if pathway:
+            new_title = self._project(self.projects_root / folder).title
+            for i, step in enumerate(pathway.get("steps") or []):
+                if i < pathway.get("current", 0):
+                    continue
+                if self._is_core(self._project(self.projects_root / step["project"])):
+                    old_title = step["title"]
+                    step["project"], step["title"] = folder, new_title
+                    if old_title != new_title and old_title in (pathway.get("student_message") or ""):
+                        pathway["student_message"] = pathway["student_message"].replace(old_title, new_title)
+        self.store.save_profile(student_id, profile)
+
+    def theme_target(self, student_id: str) -> Optional[str]:
+        """When a theme the student builds would be used: "now" (they're on the first topic and haven't
+        finished it), "later" (a pathway step on the first topic is still ahead), or None."""
+        try:
+            record, _ = self.engine(student_id).open(student_id)
+        except Exception:
+            return None
+        if self._is_core(self.project_for(student_id)):
+            return "now"
+        pathway = self.store.profile(student_id).get("pathway") or {}
+        steps = pathway.get("steps") or []
+        for step in steps[pathway.get("current", 0):]:
+            if self._is_core(self._project(self.projects_root / step["project"])):
+                return "later"
+        return None
 
     # Project choice: same skills, different stories (catalog topics[0].choices) ---------------
     def core_choices(self) -> List[str]:
@@ -425,8 +480,13 @@ class Course:
         return self.catalog.topics[0].project
 
     def core_project_for(self, student_id: str) -> str:
+        """The student's first-topic project: a catalog folder name, or the path of a theme they built."""
         chosen = self.store.profile(student_id).get("core_project") if student_id else None
-        return chosen if chosen in self.core_choices() else self.suggested_project(student_id)
+        if chosen in self.core_choices():
+            return chosen
+        if chosen and Path(chosen).is_absolute() and (Path(chosen) / "manifest.yaml").is_file():
+            return chosen
+        return self.suggested_project(student_id)
 
     def _core_started(self, student_id: str, folder: str) -> bool:
         try:
@@ -441,49 +501,49 @@ class Course:
         # Only a readiness-check goal suggests a project; students who skipped it get no "matches your goal" tag.
         suggested = self.suggested_project(student_id) if self._goal(student_id) else None
         out = []
+        if current not in self.core_choices():         # a theme the student built
+            project = self._project(self.projects_root / current)
+            out.append({"project": "custom", "title": project.title, "pitch": "Your own theme, built by your AI guide.",
+                        "suggested": False, "current": True, "custom": True})
         for choice in self.catalog.topics[0].choices:
             folder = choice["project"]
             if folder not in self.core_choices():
                 continue
             project = self._project(self.projects_root / folder)
             out.append({"project": folder, "title": project.title, "pitch": choice.get("pitch", ""),
-                        "suggested": folder == suggested, "current": folder == current})
+                        "suggested": folder == suggested, "current": folder == current, "custom": False})
         return {"choices": out, "locked": self._core_started(student_id, current),
                 "topic": self.catalog.topics[0].title}
 
     def choose_project(self, student_id: str, folder: str) -> dict:
         """Pick which story to learn the first topic's skills in. Allowed until that project is started."""
         self._require(student_id)
+        current = self.core_project_for(student_id)
+        if folder == "custom" and current not in self.core_choices():
+            return self.state(student_id)               # already on their own theme
         if folder not in self.core_choices():
             raise CourseError("Pick one of the projects in the list.")
-        current = self.core_project_for(student_id)
         if folder != current and self._core_started(student_id, current):
             title = self._project(self.projects_root / current).title
             raise CourseError(f"You've already started {title}. Finish it first.")
+        self._set_core(student_id, folder)
         profile = self.store.profile(student_id)
-        profile["core_project"] = folder
         pathway = profile.get("pathway")
-        if pathway:
-            new_title = self._project(self.projects_root / folder).title
-            for step in pathway.get("steps") or []:
-                if step["project"] in self.core_choices():
-                    old_title = step["title"]
-                    step["project"], step["title"] = folder, new_title
-                    # The decider's message may name the old project; keep it true.
-                    if old_title != new_title and old_title in (pathway.get("student_message") or ""):
-                        pathway["student_message"] = pathway["student_message"].replace(old_title, new_title)
         if (profile.get("diagnostic") or {}).get("applied"):
             profile["diagnostic"]["applied"] = False        # place the student again, in the chosen project
-        self.store.save_profile(student_id, profile)
+            self.store.save_profile(student_id, profile)
         self.events.write("choose_project", student_id=student_id, project_id=folder, selected=folder)
-        active = Path(self.store.active_project(student_id) or "").name
+        on_core = self._is_core(self.project_for(student_id))
+        if on_core:
+            self.store.set_active_project(student_id, str(self._project(self.projects_root / folder).root))
         if (profile.get("diagnostic") or {}).get("decisions") is not None:
             self.apply_diagnostic(student_id)
             if pathway:
-                step = (pathway.get("steps") or [])[pathway.get("current", 0)] if pathway.get("steps") else None
+                steps = pathway.get("steps") or []
+                step = steps[pathway.get("current", 0)] if pathway.get("current", 0) < len(steps) else None
                 if step and step["project"] == folder:
                     self._start_step(student_id, step)
-        elif active in self.core_choices():
+        elif on_core:
             project = self._project(self.projects_root / folder)
             self._switch(student_id, project, f"Starting {project.title}.")
         return self.state(student_id)
@@ -582,8 +642,8 @@ class Course:
 
     def _start_step(self, student_id: str, step: dict) -> None:
         project = self._project(self.projects_root / step["project"])
-        if project.root.name not in self.core_choices():
-            self._switch(student_id, project, f"Starting {project.title}.")
+        if not self._is_core(project) or project.root.name not in self.core_choices():
+            self._switch(student_id, project, f"Starting {project.title}.")     # reviews, later topics, own themes
             return
         self.store.set_active_project(student_id, str(project.root))
         start = step.get("start")
@@ -612,7 +672,7 @@ class Course:
             return
         steps = pathway.get("steps") or []
         i = pathway.get("current", 0)
-        if i < len(steps) and steps[i]["project"] == finished.root.name:
+        if i < len(steps) and Path(steps[i]["project"]).name == finished.root.name:
             pathway["current"] = i = i + 1
         if i >= len(steps):
             return

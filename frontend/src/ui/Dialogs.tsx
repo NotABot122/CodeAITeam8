@@ -34,20 +34,26 @@ export function PracticeDialog({state, onClose}: {state: StudentState; onClose: 
   );
 }
 
-export function ThemeDialog({open, aiOn, aiReason, themed, busy, error, onBuild, onReset, onClose}: {
+/** "Make it yours": the AI builds the same project around a theme the student picks.
+ *  `later`: the student is on another step first (a review), so the theme waits until they reach the project.
+ *  `done`: the success message after a build that doesn't switch the screen. */
+export function ThemeDialog({open, aiOn, aiReason, themed, busy, error, onBuild, onReset, onClose, later = false, done = null}: {
   open: boolean; aiOn: boolean; aiReason: string | null; themed: boolean; busy: boolean; error: string | null;
-  onBuild: (request: string) => void; onReset: () => void; onClose: () => void;
+  onBuild: (request: string) => void; onReset: () => void; onClose: () => void; later?: boolean; done?: string | null;
 }) {
   const [text, setText] = useState('');
   return (
     <Dialog open={open} onClose={busy ? undefined : onClose} aria-labelledby="theme-title" maxWidth="xs" fullWidth>
       <DialogTitle id="theme-title">Make it yours</DialogTitle>
       <DialogContent>
-        {!aiOn ? (
+        {done ? (
+          <Alert severity="success">{done}</Alert>
+        ) : !aiOn ? (
           <Alert severity="info">Themes need the AI tutor, which is off right now{aiReason ? ` (${aiReason})` : ''}.</Alert>
         ) : (
           <>
             <Typography sx={{mb: 2}}>Tell us what you're into and we'll rebuild the same project around it. Same concepts, your theme.</Typography>
+            {later && <Typography variant="body2" color="text.secondary" sx={{mb: 2}}>You'll finish what you're working on first, then start your themed project.</Typography>}
             <TextField autoFocus fullWidth label="I like…" placeholder="pokemon, soccer, space" value={text} disabled={busy}
               slotProps={{htmlInput: {maxLength: 300}}} onChange={e => setText(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter' && text.trim() && !busy) onBuild(text); }} />
@@ -57,9 +63,9 @@ export function ThemeDialog({open, aiOn, aiReason, themed, busy, error, onBuild,
         )}
       </DialogContent>
       <DialogActions>
-        {themed && <Button disabled={busy} onClick={onReset}>Back to Weather Station</Button>}
+        {themed && !done && <Button disabled={busy} onClick={onReset}>Back to the ready-made projects</Button>}
         <Button disabled={busy} onClick={onClose}>Close</Button>
-        {aiOn && <Button variant="contained" disabled={busy || !text.trim()} onClick={() => onBuild(text)}>Build it</Button>}
+        {aiOn && !done && <Button variant="contained" disabled={busy || !text.trim()} onClick={() => onBuild(text)}>Build it</Button>}
       </DialogActions>
     </Dialog>
   );

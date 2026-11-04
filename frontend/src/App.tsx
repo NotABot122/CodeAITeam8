@@ -97,6 +97,7 @@ export default function App({client: injected}: {client?: ApiClient}) {
   const [themeOpen, setThemeOpen] = useState(false);
   const [themeBusy, setThemeBusy] = useState(false);
   const [themeError, setThemeError] = useState<string | null>(null);
+  const [themeDone, setThemeDone] = useState<string | null>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
   const dark = useTheme().palette.mode === 'dark';
   const [editorMode, setEditorMode] = useState<EditorMode>(savedEditorMode);
@@ -215,8 +216,11 @@ export default function App({client: injected}: {client?: ApiClient}) {
     if (!state) return;
     setThemeBusy(true); setThemeError(null);
     try {
+      const later = state.themeable === 'later';
       const res = await client.buildTheme(state.studentId, request);
-      if (res.built) { adopt(res.state); setOutcome(null); setThemeOpen(false); }
+      // Built for later (the student is on a review first): stay put and say so. Otherwise open the new project.
+      if (res.built && later) { adopt(res.state, true); setThemeDone(res.message); }
+      else if (res.built) { adopt(res.state); setOutcome(null); setThemeOpen(false); }
       else setThemeError(res.message);
     } catch (e) { setThemeError(msg(e)); } finally { setThemeBusy(false); }
   };
@@ -261,10 +265,11 @@ export default function App({client: injected}: {client?: ApiClient}) {
       onSkip={() => void skipQuest()} />;
   }
   if (mode === 'choose' && state) {
-    return <ChooseScreen client={client} studentId={state.studentId} onStart={s => void startPathway(s)} />;
+    return <ChooseScreen client={client} studentId={state.studentId} aiOn={!!health?.ai} aiReason={health?.aiReason ?? null} onStart={s => void startPathway(s)} />;
   }
   if (mode === 'pathway' && state) {
     return <PathwayScreen client={client} studentId={state.studentId} grade={grade} existing={state.pathway}
+      aiOn={!!health?.ai} aiReason={health?.aiReason ?? null}
       onGrade={setGrade} onStart={s => void startPathway(s)} />;
   }
   if (mode === 'quest' || (mode === 'resume' && state)) {
@@ -288,7 +293,7 @@ export default function App({client: injected}: {client?: ApiClient}) {
             {state.pathway && <Typography component="span" variant="body2" sx={{opacity: 0.85}}>Pathway: {state.pathway.title}</Typography>}
           </Typography>
           <Button color="inherit" onClick={() => setShowCourse(v => !v)}>{showCourse ? 'My lesson' : 'My course'}</Button>
-          {state.project.topic === 'data-logic' && <Button color="inherit" startIcon={<AutoAwesomeIcon />} onClick={() => { setThemeError(null); setThemeOpen(true); }}>Make it yours</Button>}
+          {state.themeable && <Button color="inherit" startIcon={<AutoAwesomeIcon />} onClick={() => { setThemeError(null); setThemeDone(null); setThemeOpen(true); }}>Make it yours</Button>}
         </Container>
       </Box>
 
@@ -401,6 +406,7 @@ export default function App({client: injected}: {client?: ApiClient}) {
 
       {practiceShown && <PracticeDialog state={state} onClose={() => setPracticeShown(false)} />}
       <ThemeDialog open={themeOpen} aiOn={!!health?.ai} aiReason={health?.aiReason ?? null} themed={themed} busy={themeBusy} error={themeError}
+        later={state.themeable === 'later'} done={themeDone}
         onBuild={build} onReset={resetTheme} onClose={() => setThemeOpen(false)} />
     </Box>
   );

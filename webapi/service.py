@@ -158,6 +158,8 @@ class Service:
             "themed": project.root.parent != course.projects_root and project.topic != "revision",
             "aiAvailable": self.provider is not None,
             "pathway": pathway_view(course.store.profile(student_id).get("pathway")),
+            # When "Make it yours" applies: "now" (first topic), "later" (a pathway step on it is ahead), or None.
+            "themeable": course.theme_target(student_id),
         })
         return state
 
