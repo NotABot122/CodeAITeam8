@@ -4,7 +4,12 @@
 
 Routes (JSON):
     GET  /api/health
-    POST /api/students                      -> new student + state
+    POST /api/students                      -> new student + state (skips the readiness quest)
+    GET  /api/quest/options                 -> buddies, goals, zones
+    POST /api/quest                         {"buddy", "goal"} -> {student_id, welcome, first}
+    GET  /api/quest/<id>/next               -> next step, or {done: true, ...} (result is applied)
+    POST /api/quest/<id>/answer             {"response", "elapsedMs"} -> feedback
+    POST /api/quest/<id>/finish             -> end early (result is applied)
     GET  /api/students/<id>                 -> state
     POST /api/students/<id>/submit          {"code": "..."} -> {outcome, state}
     POST /api/students/<id>/answer          {"answers": {"q1": 1, "q3": "text"}} -> {outcome, state}
@@ -12,6 +17,8 @@ Routes (JSON):
     POST /api/students/<id>/next            {"option": 0, "theme": "..."} -> {message, built, state}
     POST /api/students/<id>/theme           {"request": "pokemon"} -> {built, message, state}
     POST /api/students/<id>/theme/reset     -> state
+Teacher routes (GET, need header X-Teacher-Token = $CODEAI_TEACHER_TOKEN; off if unset):
+    /api/teacher/overview, /api/teacher/students/<id>, /api/teacher/content-check
 Anything else is served from frontend/dist if it has been built.
 """
 from __future__ import annotations
@@ -19,6 +26,7 @@ from __future__ import annotations
 import argparse
 import json
 import mimetypes
+import os
 import re
 import sys
 import traceback
@@ -30,6 +38,7 @@ from engine.ai import ModelError, provider_from_env
 from engine.cli import DEFAULT_DATA, DEFAULT_PROJECT
 
 from .service import ApiError, Service
+from .teacher import Teacher, token_ok
 
 DIST = Path(__file__).resolve().parent.parent / "frontend" / "dist"
 MAX_BODY = 64 * 1024
@@ -37,6 +46,11 @@ ID = r"([^/]+)"
 ROUTES = [
     ("GET", re.compile(r"^/api/health$"), lambda s, m, b: s.health()),
     ("POST", re.compile(r"^/api/students$"), lambda s, m, b: s.new_student()),
+    ("GET", re.compile(r"^/api/quest/options$"), lambda s, m, b: s.quest_options()),
+    ("POST", re.compile(r"^/api/quest$"), lambda s, m, b: s.quest_start(b.get("buddy"), b.get("goal"))),
+    ("GET", re.compile(rf"^/api/quest/{ID}/next$"), lambda s, m, b: s.quest_next(m[1])),
+    ("POST", re.compile(rf"^/api/quest/{ID}/answer$"), lambda s, m, b: s.quest_answer(m[1], b.get("response"), b.get("elapsedMs"))),
+    ("POST", re.compile(rf"^/api/quest/{ID}/finish$"), lambda s, m, b: s.quest_finish(m[1])),
     ("GET", re.compile(rf"^/api/students/{ID}$"), lambda s, m, b: s.state(m[1])),
     ("POST", re.compile(rf"^/api/students/{ID}/submit$"), lambda s, m, b: s.submit(m[1], b.get("code"))),
     ("POST", re.compile(rf"^/api/students/{ID}/answer$"), lambda s, m, b: s.answer(m[1], b.get("answers"))),
@@ -47,7 +61,12 @@ ROUTES = [
 ]
 
 
-def make_handler(service: Service):
+def make_handler(service: Service, teacher_token=None):
+    teacher = Teacher(service)
+    teacher_routes = {
+        "/api/teacher/overview": lambda: teacher.overview(),
+        "/api/teacher/content-check": lambda: teacher.content_check(),
+    }
     class Handler(BaseHTTPRequestHandler):
         server_version = "CodeAI"
 
@@ -82,6 +101,16 @@ def make_handler(service: Service):
 
         def _api(self, method: str, path: str):
             try:
+                if path.startswith("/api/teacher/"):
+                    token_ok(teacher_token, self.headers.get("X-Teacher-Token"))
+                    if method != "GET":
+                        raise ApiError(405, "method_not_allowed", "Wrong method.")
+                    if path in teacher_routes:
+                        return self._send(200, teacher_routes[path]())
+                    m = re.match(r"^/api/teacher/students/([^/]+)$", path)
+                    if m:
+                        return self._send(200, teacher.student(m.group(1)))
+                    raise ApiError(404, "not_found", "No such endpoint.")
                 wrong_method = False
                 for verb, pattern, fn in ROUTES:
                     match = pattern.match(path)
@@ -143,7 +172,7 @@ def main(argv=None) -> int:
     parser.add_argument("--no-adaptive", action="store_true")
     args = parser.parse_args(argv)
     service = build_service(args.data_dir, args.ai, not args.no_adaptive)
-    httpd = ThreadingHTTPServer((args.host, args.port), make_handler(service))
+    httpd = ThreadingHTTPServer((args.host, args.port), make_handler(service, os.environ.get("CODEAI_TEACHER_TOKEN") or None))
     print(f"CodeAI student UI on http://{args.host}:{args.port}  (AI {'on' if service.provider else 'off'})")
     try:
         httpd.serve_forever()
