@@ -127,15 +127,39 @@ Suggested-order steps 1 and 3 now have a first draft. See [`HARNESS_AND_MCP_STAN
 | `schemas/` | JSON Schemas for `validate_submission`, `route_next`, and the event log |
 | `rubrics/concept3_task_rubric.json` | Draft task-level rubric for Concept 3 (HS-PRO-RD-18); expected to be replaced by T&L |
 | `harness/` | Mock-data generator, reference grader, metrics, run script, draft MCP server |
-| `data/` | 20 synthetic students, 38 synthetic submissions (1-3 attempts each), 13 adversarial / abnormal cases |
+| `data/` | 100 synthetic students, 191 synthetic submissions (1-3 attempts each), 13 adversarial cases, simulated routing cohort (E06/E07), pre/post/transfer set (E04), lesson telemetry. See [`data/README.md`](data/README.md) |
 | `results/` | Event logs, summaries, and markdown reports from harness runs |
 
 ```bash
 pip install -r evaluation/requirements.txt
 export AWS_DEFAULT_REGION=us-west-2           # plus AWS credentials
 python -m evaluation.harness.simulate --students 20
-python -m evaluation.harness.run_eval --repeat-n 8 --repeats 3
+python -m evaluation.harness.simulate --students 80 --seed 21 --append --start-weights uniform
+python -m evaluation.harness.cohort_sim --seed 8   # E04 / E06 / E07 / telemetry, no model calls
+python -m evaluation.harness.run_eval --repeat-n 20 --repeats 3
 python -m evaluation.harness.mcp_server       # MCP over stdio
 ```
 
 Mock submissions are synthetic. Agreement with their target stages only shows that the harness works; it is not the E01 result.
+
+## Evaluating the proto-branch engine (and the Evaluation Console)
+
+These scripts import `engine/` from the repo root (the layout after proto-branch is merged) and never change engine code. Set `CODEAI_PROTO_ROOT` to point elsewhere.
+
+| Script | Item | Model calls | Output |
+| --- | --- | --- | --- |
+| `harness/proto_validation_bench.py` | E01: grader pass/fail vs. a draft human key (26 submissions) | none | `results/E01_proto_validation_*` |
+| `harness/proto_fallback_eval.py` | E07: 12 injected failures (routing, grading, storage, AI hint) | none | `results/E07_proto_fallback_*` |
+| `harness/proto_safety_eval.py` | E08: theme requests (input) and hint texts (output) through proto's filters and our Guardrail | Bedrock | `results/E08_proto_safety_*` |
+| `harness/proto_hint_eval.py` | E12: AI vs. teacher hints, LLM judge + AgentCore Evaluations, blind rating sheet | Bedrock, AgentCore | `results/E12_proto_hint_*`, `annotation/E12_proto_hint_*` |
+| `harness/agentcore_eval.py` | AgentCore on-demand `Evaluate` on spans we build (no Runtime needed); custom evaluator `codeai_team8_hint_socratic` | AgentCore | – |
+
+The **Evaluation Console** is the interactive front end for presenting these results: a requirements page (customer requirement → status → evidence), live tools (grade any code, check any text through every filter layer, get and score a hint, re-run E01/E07), and a blind human-rating page for validating the judge.
+
+```bash
+cd evaluation/console && npm install && npm run build && cd ../..
+python -m evaluation.harness.console_server          # http://127.0.0.1:8090 (needs PyYAML; AWS creds for live AI)
+# development: run the server, then `npm run dev` in evaluation/console (http://127.0.0.1:5174)
+```
+
+The console runs student code through proto's grader (separate process, time limit, no security sandbox). Keep it on localhost.

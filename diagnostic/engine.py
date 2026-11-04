@@ -279,7 +279,7 @@ class DiagnosticEngine:
                 "new_badges": [{"id": b, "name": game.badge_name(self.content, b)} for b in badges]}
 
     def _log_reading(self, state: DiagnosticState, prompt_id: str, text: str, reading: ExplainReading) -> None:
-        tool_input = {"student_id": state.student_id, "lesson_id": self.content.config.id, "level_id": prompt_id,
+        tool_input = {"student_id": state.student_id, "lesson_id": self.content.config.id, "task_id": prompt_id,
                       "attempt_no": 1, "submission_text": text, "rubric_id": RUBRIC_ID}
         prompt = next(p for p in self.content.explain.values() if p.id == prompt_id)
         self.eval_log.write_validate(state.student_id, self.content.config.id, prompt_id, 1, tool_input,

@@ -1,5 +1,8 @@
 {
   "rubric_id": "C3-L6-v0.1-draft",
+  "subskill_order": ["prompting", "evaluation", "prompt_revision"],
+  "stage_max": 3,
+  "mastery_stage": 2,
   "status": "DRAFT. Written by the evaluation workstream from the concept-level Learning Trajectory. Staff (T&L) are expected to replace it with an official task-level rubric.",
   "concept": "Concept 3: AI Collaboration and Iterative Prompting",
   "csta_standard": "HS-PRO-RD-18",

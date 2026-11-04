@@ -45,7 +45,7 @@ from diagnostic import engine as engine_module
 from diagnostic.ai.factory import ProviderUnavailable, make_provider
 from diagnostic.ai.mock import FailingProvider
 from diagnostic.content import load_content
-from diagnostic.contract import ToolError, validate_submission
+from diagnostic.contract import CONTRACT_VERSION, RUBRIC_ID, ToolError, validate_submission
 from diagnostic.engine import DiagnosticEngine
 from diagnostic.eval_log import EvalEventLog
 from diagnostic.game import find_leaks
@@ -148,7 +148,7 @@ def run_rescoring(engine: DiagnosticEngine, provider: Optional[ModelProvider], r
     for _ in range(repeats):
         row = []
         for concept, text in texts:
-            out = validate_submission({"lesson_id": engine.content.config.id, "level_id": prompts[concept].id, "attempt_no": 1,
+            out = validate_submission({"lesson_id": engine.content.config.id, "task_id": prompts[concept].id, "attempt_no": 1,
                                        "submission_text": text, "rubric_id": "WS-DIAG-v0.1-draft"}, engine.content, provider)
             row.append(out["results"][0]["stage"])
         runs.append(row)
@@ -175,14 +175,16 @@ def run_repeats(provider_factory, cohort: List[SimStudent], first: Dict[str, Any
 def run_adversarial(engine: DiagnosticEngine, provider: Optional[ModelProvider], log: EvalEventLog) -> Dict[str, Any]:
     rows, results = adversarial_cases(), []
     for row in rows:
-        tool_input = {k: row[k] for k in ("student_id", "lesson_id", "level_id", "attempt_no", "submission_text", "rubric_id")}
+        tool_input = {k: row[k] for k in ("student_id", "lesson_id", "task_id", "attempt_no", "submission_text", "rubric_id")}
         error = None
         try:
             output = validate_submission(tool_input, engine.content, provider)
         except ToolError as exc:
-            output, error = {"results": [{"subskill": "loops", "stage": None, "confidence": 0.0, "rationale": "call failed",
-                                          "evidence_quotes": []}], "model_id": "none", "latency_ms": 0, "filter_flags": []}, str(exc)
-        log.write_validate(row["student_id"], row["lesson_id"], row["level_id"], 1, tool_input, output,
+            output, error = {"contract_version": CONTRACT_VERSION, "rubric_id": RUBRIC_ID,
+                             "results": [{"subskill": "loops", "stage": None, "confidence": 0.0, "rationale": "call failed",
+                                          "evidence_quotes": []}], "scorable": False, "needs_review": False,
+                             "model_id": "none", "latency_ms": 0, "filter_flags": []}, str(exc)
+        log.write_validate(row["student_id"], row["lesson_id"], row["task_id"], 1, tool_input, output,
                            fallback=error is not None, error=error)
         flags = set(output["filter_flags"])
         stages = [r["stage"] for r in output["results"]]
@@ -299,7 +301,7 @@ def run_benchmark(path: Path, engine: DiagnosticEngine, provider: Optional[Model
     agreed = [(r, int(r["rater1_stage"])) for r in rated if r["rater1_stage"] == r["rater2_stage"]]
     gold, pred = [], []
     for row, stage in agreed:
-        output = validate_submission({"lesson_id": engine.content.config.id, "level_id": row["prompt_id"], "attempt_no": 1,
+        output = validate_submission({"lesson_id": engine.content.config.id, "task_id": row["prompt_id"], "attempt_no": 1,
                                       "submission_text": row["student_text"], "rubric_id": "WS-DIAG-v0.1-draft"},
                                      engine.content, provider)
         gold.append(stage)

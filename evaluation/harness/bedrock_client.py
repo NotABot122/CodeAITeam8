@@ -15,14 +15,32 @@ from botocore.config import Config
 ALLOWED_REGIONS = ("us-west-2", "us-east-1")
 
 # Model under evaluation (the grader) and the model used to write synthetic
-# students. They are different on purpose: a grader scoring text written by
-# the same model tends to agree with it more than it would with real students.
+# students. They differ on purpose: a grader scoring text written by the same
+# model tends to agree with it more than it would with real students.
 GRADER_MODEL = "us.anthropic.claude-sonnet-4-6"
 GENERATOR_MODEL = "us.anthropic.claude-haiku-4-5-20251001-v1:0"
+# Second grader for the drift test (E11). Not the generator model.
+DRIFT_MODEL = "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
 
-# USD per 1M tokens (input, output). Fill these in from the Bedrock pricing
-# page for us-west-2 before reporting E09; unknown models report no cost.
-PRICES_PER_MTOK: dict[str, tuple[float, float]] = {}
+# USD per 1M tokens (input, output), on-demand, geographic ("us.") inference
+# profiles, which are priced about 10% above global profiles.
+# Sources checked 2026-11-04: requesty.ai provider-rate page for Bedrock
+# claude-sonnet-4-6 ($3.30 / $16.50) and typingmind Bedrock calculator (same).
+# The Haiku and Sonnet 4.5 rows apply the same 10% regional uplift to
+# Anthropic list prices. VERIFY against https://aws.amazon.com/bedrock/pricing/
+# before reporting E09 outside the team.
+PRICES_PER_MTOK: dict[str, tuple[float, float]] = {
+    "us.anthropic.claude-sonnet-4-6": (3.30, 16.50),
+    "us.anthropic.claude-sonnet-4-5-20250929-v1:0": (3.30, 16.50),
+    "us.anthropic.claude-haiku-4-5-20251001-v1:0": (1.10, 5.50),
+}
+
+
+def cost_usd(model_id: str, tokens_in: int, tokens_out: int) -> float | None:
+    price = PRICES_PER_MTOK.get(model_id)
+    if not price:
+        return None
+    return round(tokens_in / 1e6 * price[0] + tokens_out / 1e6 * price[1], 6)
 
 
 @dataclass
@@ -35,31 +53,26 @@ class ModelReply:
 
     @property
     def cost_usd(self) -> float | None:
-        price = PRICES_PER_MTOK.get(self.model_id)
-        if not price:
-            return None
-        return round(self.tokens_in / 1e6 * price[0] + self.tokens_out / 1e6 * price[1], 6)
+        return cost_usd(self.model_id, self.tokens_in, self.tokens_out)
 
 
-def _region() -> str:
-    region = os.environ.get("AWS_DEFAULT_REGION") or os.environ.get("AWS_REGION") or "us-west-2"
-    if region not in ALLOWED_REGIONS:
-        raise ValueError(f"Region {region!r} not allowed; use one of {ALLOWED_REGIONS}")
-    return region
+def region() -> str:
+    r = os.environ.get("AWS_DEFAULT_REGION") or os.environ.get("AWS_REGION") or "us-west-2"
+    if r not in ALLOWED_REGIONS:
+        raise ValueError(f"Region {r!r} not allowed; use one of {ALLOWED_REGIONS}")
+    return r
 
 
-_client = None
+_clients: dict[str, object] = {}
 
 
-def _runtime():
-    global _client
-    if _client is None:
-        _client = boto3.client(
-            "bedrock-runtime",
-            region_name=_region(),
+def client(service: str):
+    if service not in _clients:
+        _clients[service] = boto3.client(
+            service, region_name=region(),
             config=Config(retries={"max_attempts": 6, "mode": "adaptive"}, read_timeout=120),
         )
-    return _client
+    return _clients[service]
 
 
 def converse(
@@ -78,14 +91,20 @@ def converse(
     if system:
         kwargs["system"] = [{"text": system}]
     start = time.time()
-    resp = _runtime().converse(**kwargs)
+    resp = client("bedrock-runtime").converse(**kwargs)
     latency = int((time.time() - start) * 1000)
     text = "".join(b.get("text", "") for b in resp["output"]["message"]["content"])
     usage = resp.get("usage", {})
-    return ModelReply(
-        text=text,
-        model_id=model_id,
-        tokens_in=usage.get("inputTokens", 0),
-        tokens_out=usage.get("outputTokens", 0),
-        latency_ms=latency,
+    return ModelReply(text=text, model_id=model_id, tokens_in=usage.get("inputTokens", 0),
+                      tokens_out=usage.get("outputTokens", 0), latency_ms=latency)
+
+
+def apply_guardrail(guardrail_id: str, version: str, text: str, source: str = "INPUT") -> dict:
+    """Run Bedrock Guardrails on text without a model call (ApplyGuardrail API)."""
+    start = time.time()
+    resp = client("bedrock-runtime").apply_guardrail(
+        guardrailIdentifier=guardrail_id, guardrailVersion=version, source=source,
+        content=[{"text": {"text": text}}],
     )
+    return {"action": resp.get("action"), "latency_ms": int((time.time() - start) * 1000),
+            "assessments": resp.get("assessments", []), "usage": resp.get("usage", {})}

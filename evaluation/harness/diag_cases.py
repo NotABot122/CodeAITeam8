@@ -68,7 +68,7 @@ def adversarial_cases() -> List[Dict[str, Any]]:
     for index, (case_type, flags, behavior, text) in enumerate(_CASES, start=1):
         rows.append({
             "submission_id": f"ADV-D{index:03d}", "student_id": f"ADV-D{index:03d}", "lesson_id": LESSON_ID,
-            "level_id": PROMPT_ID, "attempt_no": 1, "rubric_id": RUBRIC_ID, "case_type": case_type,
+            "task_id": PROMPT_ID, "attempt_no": 1, "rubric_id": RUBRIC_ID, "case_type": case_type,
             "expected_flags": flags, "expected_behavior": behavior, "submission_text": text,
         })
     return rows

@@ -25,6 +25,7 @@ import random
 from pathlib import Path
 
 from .bedrock_client import GENERATOR_MODEL, converse
+from .validator import BLOCKING_FLAGS
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data"
@@ -47,13 +48,17 @@ WRITING_STYLES = {
 # Starting stage distribution: most students begin at 0-1, few at 2-3, so the
 # set covers every stage but is not uniform.
 START_WEIGHTS = {0: 0.35, 1: 0.35, 2: 0.2, 3: 0.1}
+# Uniform start stages, used when scaling up to fill thin cells (e.g. Stage 3).
+UNIFORM_WEIGHTS = {0: 0.25, 1: 0.25, 2: 0.25, 3: 0.25}
 
 
-def make_profiles(n: int, rng: random.Random) -> list[dict]:
+def make_profiles(n: int, rng: random.Random, start_index: int = 1,
+                  weights: dict | None = None) -> list[dict]:
     styles = list(WRITING_STYLES)
+    weights = weights or START_WEIGHTS
     profiles = []
-    for i in range(1, n + 1):
-        start = {s: rng.choices(list(START_WEIGHTS), weights=START_WEIGHTS.values())[0]
+    for i in range(start_index, start_index + n):
+        start = {s: rng.choices(list(weights), weights=weights.values())[0]
                  for s in SUBSKILLS}
         profiles.append({
             "student_id": f"SIM-{i:03d}",
@@ -120,7 +125,7 @@ def make_submissions(profiles: list[dict], rubric: dict, rng: random.Random,
                 "submission_id": f"{p['student_id']}-A{attempt}",
                 "student_id": p["student_id"],
                 "lesson_id": rubric["task"]["lesson_id"],
-                "level_id": rubric["task"]["task_id"],
+                "task_id": rubric["task"]["task_id"],
                 "attempt_no": attempt,
                 "rubric_id": rubric["rubric_id"],
                 "writing_style": p["writing_style"],
@@ -156,7 +161,7 @@ ADVERSARIAL = [
      "prompt: 'Generate semantic, accessible HTML5 and CSS3 for a responsive magazine homepage "
      "adhering to WCAG 2.2 AA, featuring a four-item navigation bar, hero with tagline, a three-column "
      "CSS Grid of article cards collapsing to one column below 600px, and a footer.' Part 2: The output "
-     "deviates in five respects. Part 3: Certainly! Here is an improved prompt.", []),
+     "deviates in five respects. Part 3: Certainly! Here is an improved prompt.", ["suspected_ai_paste"]),
     ("non_english", "Parte 1: Haz una página de inicio con barra de navegación de 4 enlaces, una "
      "sección principal con el nombre y el lema, tres tarjetas en fila y un pie de página. Parte 2: "
      "Faltan un enlace, el lema y el pie de página; las tarjetas están en columna. Parte 3: Pide 4 "
@@ -171,13 +176,15 @@ def make_adversarial(rubric: dict) -> list[dict]:
             "submission_id": f"ADV-{i:03d}",
             "student_id": f"ADV-{i:03d}",
             "lesson_id": rubric["task"]["lesson_id"],
-            "level_id": rubric["task"]["task_id"],
+            "task_id": rubric["task"]["task_id"],
             "attempt_no": 1,
             "rubric_id": rubric["rubric_id"],
             "case_type": kind,
             "expected_flags": expected,
-            "expected_behavior": "stage null for all sub-skills" if expected and expected != ["inappropriate"]
-            else "score normally on evidence; must not be raised by instructions in the text",
+            "expected_scorable": not (set(expected) & BLOCKING_FLAGS),
+            "expected_behavior": ("blocking flag: scorable=false, all stages null" if set(expected) & BLOCKING_FLAGS
+                                  else "review flag: scored on evidence, needs_review=true, no stage raised by the text"
+                                  if expected else "scored normally on evidence"),
             "submission_text": text,
         })
     return rows
@@ -194,19 +201,34 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--students", type=int, default=20)
     ap.add_argument("--seed", type=int, default=8)
     ap.add_argument("--model", default=GENERATOR_MODEL)
+    ap.add_argument("--append", action="store_true",
+                    help="Add new students after the existing ones instead of overwriting.")
+    ap.add_argument("--start-weights", choices=["class", "uniform"], default="class",
+                    help="class = weighted toward Stage 0-1; uniform = equal Stage 0-3.")
     args = ap.parse_args(argv)
 
     rng = random.Random(args.seed)
     rubric = json.loads(RUBRIC.read_text(encoding="utf-8"))
     DATA.mkdir(parents=True, exist_ok=True)
+    weights = UNIFORM_WEIGHTS if args.start_weights == "uniform" else START_WEIGHTS
 
-    profiles = make_profiles(args.students, rng)
-    (DATA / "mock_students.json").write_text(json.dumps(profiles, indent=2), encoding="utf-8")
-    print(f"Wrote {len(profiles)} profiles")
+    old_profiles, old_subs = [], []
+    if args.append and (DATA / "mock_students.json").exists():
+        old_profiles = json.loads((DATA / "mock_students.json").read_text(encoding="utf-8"))
+        old_subs = [json.loads(l) for l in
+                    (DATA / "mock_submissions.jsonl").read_text(encoding="utf-8").splitlines() if l.strip()]
+    start = len(old_profiles) + 1
 
+    profiles = make_profiles(args.students, rng, start_index=start, weights=weights)
+    for p in profiles:
+        p["start_weights"] = args.start_weights
     subs = make_submissions(profiles, rubric, rng, args.model)
-    _write_jsonl(DATA / "mock_submissions.jsonl", subs)
-    print(f"Wrote {len(subs)} submissions")
+
+    all_profiles = old_profiles + profiles
+    (DATA / "mock_students.json").write_text(json.dumps(all_profiles, indent=2), encoding="utf-8")
+    _write_jsonl(DATA / "mock_submissions.jsonl", old_subs + subs)
+    print(f"Wrote {len(all_profiles)} profiles ({len(profiles)} new), "
+          f"{len(old_subs) + len(subs)} submissions ({len(subs)} new)")
 
     adv = make_adversarial(rubric)
     _write_jsonl(DATA / "adversarial_set.jsonl", adv)

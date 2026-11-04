@@ -1,8 +1,12 @@
-"""Draft MCP server exposing the evaluation contract (stdio transport).
+"""Draft MCP server exposing the evaluation contract v0.2 (stdio transport).
 
 Tools:
-  - validate_submission : reference grader (harness/validator.py)
+  - validate_submission : reference grader (harness/validator.py), or the Weather Station
+                          readiness diagnostic for rubrics marked "provider": "diagnostic"
   - get_rubric          : returns the active task rubric so clients can show it
+
+Graders are imported lazily so each path loads only what it needs: the Concept 3
+reference grader needs boto3, the diagnostic runs without it.
 
 `route_next` is defined in schemas/route_next.schema.json but is NOT served
 here: routing is owned by teammates. The harness only calls it.
@@ -25,7 +29,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PROTOCOL_VERSION = "2025-06-18"
-SERVER_INFO = {"name": "codeai-team8-evaluation", "version": "0.1.0"}
+SERVER_INFO = {"name": "codeai-team8-evaluation", "version": "0.2.0"}
 
 _RUBRICS = {
     json.loads(p.read_text(encoding="utf-8"))["rubric_id"]: json.loads(p.read_text(encoding="utf-8"))
@@ -33,13 +37,30 @@ _RUBRICS = {
 }
 _VS_SCHEMA = json.loads((ROOT / "schemas" / "validate_submission.schema.json").read_text(encoding="utf-8"))
 
+
+def _inline_refs(node, defs):
+    """MCP clients expect self-contained schemas; inline local #/$defs refs."""
+    if isinstance(node, dict):
+        if node.get("$ref", "").startswith("#/$defs/"):
+            return _inline_refs(defs[node["$ref"].split("/")[-1]], defs)
+        return {k: _inline_refs(v, defs) for k, v in node.items()}
+    if isinstance(node, list):
+        return [_inline_refs(v, defs) for v in node]
+    return node
+
+
+_IN = _inline_refs(_VS_SCHEMA["properties"]["input"], _VS_SCHEMA["$defs"])
+_OUT = _inline_refs(_VS_SCHEMA["properties"]["output"], _VS_SCHEMA["$defs"])
+CONTRACT_VERSION = _OUT["properties"]["contract_version"]["const"]
+
 TOOLS = [
     {
         "name": "validate_submission",
-        "description": "Score one student submission against a task rubric. Returns a stage (0-3) "
-                       "per sub-skill with confidence, rationale, and evidence quotes. Contract v0.1.",
-        "inputSchema": _VS_SCHEMA["properties"]["input"],
-        "outputSchema": _VS_SCHEMA["properties"]["output"],
+        "description": f"Score one student submission against a task rubric. Returns a stage per sub-skill "
+                       f"(range from the rubric) with confidence, rationale, and evidence quotes, plus "
+                       f"scorable / needs_review / filter_flags. Contract v{CONTRACT_VERSION}.",
+        "inputSchema": _IN,
+        "outputSchema": _OUT,
     },
     {
         "name": "get_rubric",
@@ -57,21 +78,19 @@ def _call(name: str, args: dict) -> dict:
             raise ValueError(f"unknown rubric_id; available: {sorted(_RUBRICS)}")
         return rubric
     if name == "validate_submission":
-        missing = [k for k in _VS_SCHEMA["properties"]["input"]["required"] if k not in args]
+        if "task_id" not in args and "level_id" in args:  # deprecated v0.1 name, accepted until v1.0
+            args = {**args, "task_id": args["level_id"]}
+            del args["level_id"]
+        missing = [k for k in _IN["required"] if k not in args]
         if missing:
             raise ValueError(f"missing required fields: {missing}")
         rubric = _RUBRICS.get(args["rubric_id"])
         if rubric is None:
             raise ValueError(f"unknown rubric_id; available: {sorted(_RUBRICS)}")
-        # Rubrics marked "provider": "diagnostic" are served by the Weather Station readiness
-        # diagnostic (diagnostic/). Imports are lazy so each path loads only what it needs
-        # (the Concept 3 reference grader needs boto3; the diagnostic runs without it).
         if rubric.get("provider") == "diagnostic":
             from diagnostic.tool_server import validate_submission_tool
-
             return validate_submission_tool(args)
         from .validator import validate_submission
-
         return validate_submission(args, rubric)
     raise ValueError(f"unknown tool: {name}")
 

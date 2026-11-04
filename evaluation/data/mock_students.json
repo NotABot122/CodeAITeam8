@@ -338,5 +338,1445 @@
     "attempts": 3,
     "target_standard": "HS-PRO-RD-18",
     "builds_on_standard": "MS-PRO-RD-17"
+  },
+  {
+    "student_id": "SIM-021",
+    "synthetic": true,
+    "grade": 12,
+    "grade_band": "High School",
+    "prior_exposure": "scratch_or_blocks",
+    "writing_style": "terse",
+    "start_stage": {
+      "prompting": 0,
+      "evaluation": 2,
+      "prompt_revision": 2
+    },
+    "learning_rate": "medium",
+    "attempts": 3,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-022",
+    "synthetic": true,
+    "grade": 9,
+    "grade_band": "High School",
+    "prior_exposure": "some_python",
+    "writing_style": "standard",
+    "start_stage": {
+      "prompting": 0,
+      "evaluation": 2,
+      "prompt_revision": 3
+    },
+    "learning_rate": "fast",
+    "attempts": 2,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-023",
+    "synthetic": true,
+    "grade": 10,
+    "grade_band": "High School",
+    "prior_exposure": "none",
+    "writing_style": "verbose",
+    "start_stage": {
+      "prompting": 0,
+      "evaluation": 3,
+      "prompt_revision": 0
+    },
+    "learning_rate": "medium",
+    "attempts": 3,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-024",
+    "synthetic": true,
+    "grade": 11,
+    "grade_band": "High School",
+    "prior_exposure": "web_html_css",
+    "writing_style": "informal",
+    "start_stage": {
+      "prompting": 3,
+      "evaluation": 1,
+      "prompt_revision": 1
+    },
+    "learning_rate": "fast",
+    "attempts": 1,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-025",
+    "synthetic": true,
+    "grade": 9,
+    "grade_band": "High School",
+    "prior_exposure": "none",
+    "writing_style": "esl",
+    "start_stage": {
+      "prompting": 2,
+      "evaluation": 3,
+      "prompt_revision": 0
+    },
+    "learning_rate": "slow",
+    "attempts": 2,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-026",
+    "synthetic": true,
+    "grade": 10,
+    "grade_band": "High School",
+    "prior_exposure": "scratch_or_blocks",
+    "writing_style": "terse",
+    "start_stage": {
+      "prompting": 0,
+      "evaluation": 2,
+      "prompt_revision": 1
+    },
+    "learning_rate": "fast",
+    "attempts": 1,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-027",
+    "synthetic": true,
+    "grade": 10,
+    "grade_band": "High School",
+    "prior_exposure": "scratch_or_blocks",
+    "writing_style": "standard",
+    "start_stage": {
+      "prompting": 1,
+      "evaluation": 3,
+      "prompt_revision": 0
+    },
+    "learning_rate": "fast",
+    "attempts": 3,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-028",
+    "synthetic": true,
+    "grade": 9,
+    "grade_band": "High School",
+    "prior_exposure": "none",
+    "writing_style": "verbose",
+    "start_stage": {
+      "prompting": 3,
+      "evaluation": 3,
+      "prompt_revision": 2
+    },
+    "learning_rate": "fast",
+    "attempts": 2,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-029",
+    "synthetic": true,
+    "grade": 10,
+    "grade_band": "High School",
+    "prior_exposure": "web_html_css",
+    "writing_style": "informal",
+    "start_stage": {
+      "prompting": 2,
+      "evaluation": 1,
+      "prompt_revision": 1
+    },
+    "learning_rate": "medium",
+    "attempts": 2,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-030",
+    "synthetic": true,
+    "grade": 12,
+    "grade_band": "High School",
+    "prior_exposure": "web_html_css",
+    "writing_style": "esl",
+    "start_stage": {
+      "prompting": 3,
+      "evaluation": 2,
+      "prompt_revision": 1
+    },
+    "learning_rate": "medium",
+    "attempts": 1,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-031",
+    "synthetic": true,
+    "grade": 12,
+    "grade_band": "High School",
+    "prior_exposure": "none",
+    "writing_style": "terse",
+    "start_stage": {
+      "prompting": 3,
+      "evaluation": 0,
+      "prompt_revision": 2
+    },
+    "learning_rate": "medium",
+    "attempts": 1,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-032",
+    "synthetic": true,
+    "grade": 11,
+    "grade_band": "High School",
+    "prior_exposure": "none",
+    "writing_style": "standard",
+    "start_stage": {
+      "prompting": 2,
+      "evaluation": 2,
+      "prompt_revision": 0
+    },
+    "learning_rate": "slow",
+    "attempts": 3,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-033",
+    "synthetic": true,
+    "grade": 11,
+    "grade_band": "High School",
+    "prior_exposure": "some_python",
+    "writing_style": "verbose",
+    "start_stage": {
+      "prompting": 0,
+      "evaluation": 1,
+      "prompt_revision": 3
+    },
+    "learning_rate": "slow",
+    "attempts": 1,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-034",
+    "synthetic": true,
+    "grade": 12,
+    "grade_band": "High School",
+    "prior_exposure": "some_python",
+    "writing_style": "informal",
+    "start_stage": {
+      "prompting": 0,
+      "evaluation": 3,
+      "prompt_revision": 0
+    },
+    "learning_rate": "slow",
+    "attempts": 3,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-035",
+    "synthetic": true,
+    "grade": 10,
+    "grade_band": "High School",
+    "prior_exposure": "web_html_css",
+    "writing_style": "esl",
+    "start_stage": {
+      "prompting": 0,
+      "evaluation": 2,
+      "prompt_revision": 2
+    },
+    "learning_rate": "slow",
+    "attempts": 3,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-036",
+    "synthetic": true,
+    "grade": 12,
+    "grade_band": "High School",
+    "prior_exposure": "scratch_or_blocks",
+    "writing_style": "terse",
+    "start_stage": {
+      "prompting": 2,
+      "evaluation": 3,
+      "prompt_revision": 1
+    },
+    "learning_rate": "slow",
+    "attempts": 1,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-037",
+    "synthetic": true,
+    "grade": 12,
+    "grade_band": "High School",
+    "prior_exposure": "none",
+    "writing_style": "standard",
+    "start_stage": {
+      "prompting": 2,
+      "evaluation": 1,
+      "prompt_revision": 1
+    },
+    "learning_rate": "medium",
+    "attempts": 1,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-038",
+    "synthetic": true,
+    "grade": 10,
+    "grade_band": "High School",
+    "prior_exposure": "scratch_or_blocks",
+    "writing_style": "verbose",
+    "start_stage": {
+      "prompting": 3,
+      "evaluation": 2,
+      "prompt_revision": 0
+    },
+    "learning_rate": "medium",
+    "attempts": 1,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-039",
+    "synthetic": true,
+    "grade": 10,
+    "grade_band": "High School",
+    "prior_exposure": "web_html_css",
+    "writing_style": "informal",
+    "start_stage": {
+      "prompting": 3,
+      "evaluation": 2,
+      "prompt_revision": 0
+    },
+    "learning_rate": "slow",
+    "attempts": 2,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-040",
+    "synthetic": true,
+    "grade": 12,
+    "grade_band": "High School",
+    "prior_exposure": "none",
+    "writing_style": "esl",
+    "start_stage": {
+      "prompting": 0,
+      "evaluation": 2,
+      "prompt_revision": 3
+    },
+    "learning_rate": "slow",
+    "attempts": 2,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-041",
+    "synthetic": true,
+    "grade": 12,
+    "grade_band": "High School",
+    "prior_exposure": "web_html_css",
+    "writing_style": "terse",
+    "start_stage": {
+      "prompting": 3,
+      "evaluation": 3,
+      "prompt_revision": 2
+    },
+    "learning_rate": "fast",
+    "attempts": 2,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-042",
+    "synthetic": true,
+    "grade": 9,
+    "grade_band": "High School",
+    "prior_exposure": "web_html_css",
+    "writing_style": "standard",
+    "start_stage": {
+      "prompting": 1,
+      "evaluation": 2,
+      "prompt_revision": 1
+    },
+    "learning_rate": "fast",
+    "attempts": 1,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-043",
+    "synthetic": true,
+    "grade": 10,
+    "grade_band": "High School",
+    "prior_exposure": "web_html_css",
+    "writing_style": "verbose",
+    "start_stage": {
+      "prompting": 3,
+      "evaluation": 0,
+      "prompt_revision": 2
+    },
+    "learning_rate": "medium",
+    "attempts": 3,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-044",
+    "synthetic": true,
+    "grade": 10,
+    "grade_band": "High School",
+    "prior_exposure": "scratch_or_blocks",
+    "writing_style": "informal",
+    "start_stage": {
+      "prompting": 1,
+      "evaluation": 3,
+      "prompt_revision": 3
+    },
+    "learning_rate": "slow",
+    "attempts": 2,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-045",
+    "synthetic": true,
+    "grade": 10,
+    "grade_band": "High School",
+    "prior_exposure": "none",
+    "writing_style": "esl",
+    "start_stage": {
+      "prompting": 0,
+      "evaluation": 0,
+      "prompt_revision": 1
+    },
+    "learning_rate": "slow",
+    "attempts": 3,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-046",
+    "synthetic": true,
+    "grade": 12,
+    "grade_band": "High School",
+    "prior_exposure": "web_html_css",
+    "writing_style": "terse",
+    "start_stage": {
+      "prompting": 1,
+      "evaluation": 1,
+      "prompt_revision": 3
+    },
+    "learning_rate": "slow",
+    "attempts": 3,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-047",
+    "synthetic": true,
+    "grade": 9,
+    "grade_band": "High School",
+    "prior_exposure": "none",
+    "writing_style": "standard",
+    "start_stage": {
+      "prompting": 0,
+      "evaluation": 0,
+      "prompt_revision": 1
+    },
+    "learning_rate": "slow",
+    "attempts": 2,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-048",
+    "synthetic": true,
+    "grade": 10,
+    "grade_band": "High School",
+    "prior_exposure": "scratch_or_blocks",
+    "writing_style": "verbose",
+    "start_stage": {
+      "prompting": 1,
+      "evaluation": 0,
+      "prompt_revision": 3
+    },
+    "learning_rate": "medium",
+    "attempts": 3,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-049",
+    "synthetic": true,
+    "grade": 10,
+    "grade_band": "High School",
+    "prior_exposure": "some_python",
+    "writing_style": "informal",
+    "start_stage": {
+      "prompting": 2,
+      "evaluation": 2,
+      "prompt_revision": 0
+    },
+    "learning_rate": "fast",
+    "attempts": 2,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-050",
+    "synthetic": true,
+    "grade": 9,
+    "grade_band": "High School",
+    "prior_exposure": "none",
+    "writing_style": "esl",
+    "start_stage": {
+      "prompting": 3,
+      "evaluation": 3,
+      "prompt_revision": 1
+    },
+    "learning_rate": "fast",
+    "attempts": 3,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-051",
+    "synthetic": true,
+    "grade": 10,
+    "grade_band": "High School",
+    "prior_exposure": "none",
+    "writing_style": "terse",
+    "start_stage": {
+      "prompting": 2,
+      "evaluation": 3,
+      "prompt_revision": 1
+    },
+    "learning_rate": "fast",
+    "attempts": 2,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-052",
+    "synthetic": true,
+    "grade": 12,
+    "grade_band": "High School",
+    "prior_exposure": "none",
+    "writing_style": "standard",
+    "start_stage": {
+      "prompting": 3,
+      "evaluation": 1,
+      "prompt_revision": 1
+    },
+    "learning_rate": "slow",
+    "attempts": 3,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-053",
+    "synthetic": true,
+    "grade": 12,
+    "grade_band": "High School",
+    "prior_exposure": "none",
+    "writing_style": "verbose",
+    "start_stage": {
+      "prompting": 0,
+      "evaluation": 3,
+      "prompt_revision": 3
+    },
+    "learning_rate": "fast",
+    "attempts": 3,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-054",
+    "synthetic": true,
+    "grade": 12,
+    "grade_band": "High School",
+    "prior_exposure": "none",
+    "writing_style": "informal",
+    "start_stage": {
+      "prompting": 2,
+      "evaluation": 1,
+      "prompt_revision": 2
+    },
+    "learning_rate": "slow",
+    "attempts": 1,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-055",
+    "synthetic": true,
+    "grade": 12,
+    "grade_band": "High School",
+    "prior_exposure": "web_html_css",
+    "writing_style": "esl",
+    "start_stage": {
+      "prompting": 0,
+      "evaluation": 1,
+      "prompt_revision": 0
+    },
+    "learning_rate": "medium",
+    "attempts": 1,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-056",
+    "synthetic": true,
+    "grade": 9,
+    "grade_band": "High School",
+    "prior_exposure": "none",
+    "writing_style": "terse",
+    "start_stage": {
+      "prompting": 1,
+      "evaluation": 1,
+      "prompt_revision": 0
+    },
+    "learning_rate": "medium",
+    "attempts": 1,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-057",
+    "synthetic": true,
+    "grade": 12,
+    "grade_band": "High School",
+    "prior_exposure": "some_python",
+    "writing_style": "standard",
+    "start_stage": {
+      "prompting": 1,
+      "evaluation": 2,
+      "prompt_revision": 3
+    },
+    "learning_rate": "slow",
+    "attempts": 2,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-058",
+    "synthetic": true,
+    "grade": 9,
+    "grade_band": "High School",
+    "prior_exposure": "scratch_or_blocks",
+    "writing_style": "verbose",
+    "start_stage": {
+      "prompting": 3,
+      "evaluation": 1,
+      "prompt_revision": 2
+    },
+    "learning_rate": "medium",
+    "attempts": 1,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-059",
+    "synthetic": true,
+    "grade": 10,
+    "grade_band": "High School",
+    "prior_exposure": "none",
+    "writing_style": "informal",
+    "start_stage": {
+      "prompting": 1,
+      "evaluation": 1,
+      "prompt_revision": 0
+    },
+    "learning_rate": "fast",
+    "attempts": 2,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-060",
+    "synthetic": true,
+    "grade": 9,
+    "grade_band": "High School",
+    "prior_exposure": "scratch_or_blocks",
+    "writing_style": "esl",
+    "start_stage": {
+      "prompting": 2,
+      "evaluation": 1,
+      "prompt_revision": 2
+    },
+    "learning_rate": "fast",
+    "attempts": 2,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-061",
+    "synthetic": true,
+    "grade": 10,
+    "grade_band": "High School",
+    "prior_exposure": "some_python",
+    "writing_style": "terse",
+    "start_stage": {
+      "prompting": 0,
+      "evaluation": 1,
+      "prompt_revision": 2
+    },
+    "learning_rate": "slow",
+    "attempts": 1,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-062",
+    "synthetic": true,
+    "grade": 10,
+    "grade_band": "High School",
+    "prior_exposure": "scratch_or_blocks",
+    "writing_style": "standard",
+    "start_stage": {
+      "prompting": 1,
+      "evaluation": 1,
+      "prompt_revision": 3
+    },
+    "learning_rate": "slow",
+    "attempts": 3,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-063",
+    "synthetic": true,
+    "grade": 12,
+    "grade_band": "High School",
+    "prior_exposure": "web_html_css",
+    "writing_style": "verbose",
+    "start_stage": {
+      "prompting": 2,
+      "evaluation": 2,
+      "prompt_revision": 0
+    },
+    "learning_rate": "medium",
+    "attempts": 2,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-064",
+    "synthetic": true,
+    "grade": 12,
+    "grade_band": "High School",
+    "prior_exposure": "some_python",
+    "writing_style": "informal",
+    "start_stage": {
+      "prompting": 1,
+      "evaluation": 2,
+      "prompt_revision": 2
+    },
+    "learning_rate": "slow",
+    "attempts": 1,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-065",
+    "synthetic": true,
+    "grade": 11,
+    "grade_band": "High School",
+    "prior_exposure": "none",
+    "writing_style": "esl",
+    "start_stage": {
+      "prompting": 3,
+      "evaluation": 0,
+      "prompt_revision": 1
+    },
+    "learning_rate": "slow",
+    "attempts": 3,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-066",
+    "synthetic": true,
+    "grade": 12,
+    "grade_band": "High School",
+    "prior_exposure": "scratch_or_blocks",
+    "writing_style": "terse",
+    "start_stage": {
+      "prompting": 2,
+      "evaluation": 1,
+      "prompt_revision": 1
+    },
+    "learning_rate": "slow",
+    "attempts": 3,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-067",
+    "synthetic": true,
+    "grade": 11,
+    "grade_band": "High School",
+    "prior_exposure": "none",
+    "writing_style": "standard",
+    "start_stage": {
+      "prompting": 0,
+      "evaluation": 3,
+      "prompt_revision": 0
+    },
+    "learning_rate": "medium",
+    "attempts": 1,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-068",
+    "synthetic": true,
+    "grade": 9,
+    "grade_band": "High School",
+    "prior_exposure": "some_python",
+    "writing_style": "verbose",
+    "start_stage": {
+      "prompting": 0,
+      "evaluation": 3,
+      "prompt_revision": 3
+    },
+    "learning_rate": "slow",
+    "attempts": 2,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-069",
+    "synthetic": true,
+    "grade": 12,
+    "grade_band": "High School",
+    "prior_exposure": "none",
+    "writing_style": "informal",
+    "start_stage": {
+      "prompting": 1,
+      "evaluation": 2,
+      "prompt_revision": 0
+    },
+    "learning_rate": "fast",
+    "attempts": 3,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-070",
+    "synthetic": true,
+    "grade": 10,
+    "grade_band": "High School",
+    "prior_exposure": "scratch_or_blocks",
+    "writing_style": "esl",
+    "start_stage": {
+      "prompting": 0,
+      "evaluation": 1,
+      "prompt_revision": 3
+    },
+    "learning_rate": "slow",
+    "attempts": 2,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-071",
+    "synthetic": true,
+    "grade": 12,
+    "grade_band": "High School",
+    "prior_exposure": "some_python",
+    "writing_style": "terse",
+    "start_stage": {
+      "prompting": 3,
+      "evaluation": 2,
+      "prompt_revision": 2
+    },
+    "learning_rate": "slow",
+    "attempts": 2,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-072",
+    "synthetic": true,
+    "grade": 9,
+    "grade_band": "High School",
+    "prior_exposure": "none",
+    "writing_style": "standard",
+    "start_stage": {
+      "prompting": 0,
+      "evaluation": 1,
+      "prompt_revision": 2
+    },
+    "learning_rate": "fast",
+    "attempts": 1,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-073",
+    "synthetic": true,
+    "grade": 11,
+    "grade_band": "High School",
+    "prior_exposure": "some_python",
+    "writing_style": "verbose",
+    "start_stage": {
+      "prompting": 0,
+      "evaluation": 0,
+      "prompt_revision": 3
+    },
+    "learning_rate": "medium",
+    "attempts": 1,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-074",
+    "synthetic": true,
+    "grade": 12,
+    "grade_band": "High School",
+    "prior_exposure": "scratch_or_blocks",
+    "writing_style": "informal",
+    "start_stage": {
+      "prompting": 0,
+      "evaluation": 2,
+      "prompt_revision": 1
+    },
+    "learning_rate": "slow",
+    "attempts": 1,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-075",
+    "synthetic": true,
+    "grade": 10,
+    "grade_band": "High School",
+    "prior_exposure": "scratch_or_blocks",
+    "writing_style": "esl",
+    "start_stage": {
+      "prompting": 0,
+      "evaluation": 1,
+      "prompt_revision": 1
+    },
+    "learning_rate": "fast",
+    "attempts": 3,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-076",
+    "synthetic": true,
+    "grade": 9,
+    "grade_band": "High School",
+    "prior_exposure": "some_python",
+    "writing_style": "terse",
+    "start_stage": {
+      "prompting": 1,
+      "evaluation": 1,
+      "prompt_revision": 0
+    },
+    "learning_rate": "fast",
+    "attempts": 3,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-077",
+    "synthetic": true,
+    "grade": 11,
+    "grade_band": "High School",
+    "prior_exposure": "web_html_css",
+    "writing_style": "standard",
+    "start_stage": {
+      "prompting": 2,
+      "evaluation": 2,
+      "prompt_revision": 0
+    },
+    "learning_rate": "medium",
+    "attempts": 1,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-078",
+    "synthetic": true,
+    "grade": 11,
+    "grade_band": "High School",
+    "prior_exposure": "none",
+    "writing_style": "verbose",
+    "start_stage": {
+      "prompting": 3,
+      "evaluation": 1,
+      "prompt_revision": 0
+    },
+    "learning_rate": "slow",
+    "attempts": 3,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-079",
+    "synthetic": true,
+    "grade": 9,
+    "grade_band": "High School",
+    "prior_exposure": "some_python",
+    "writing_style": "informal",
+    "start_stage": {
+      "prompting": 3,
+      "evaluation": 3,
+      "prompt_revision": 2
+    },
+    "learning_rate": "medium",
+    "attempts": 1,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-080",
+    "synthetic": true,
+    "grade": 9,
+    "grade_band": "High School",
+    "prior_exposure": "some_python",
+    "writing_style": "esl",
+    "start_stage": {
+      "prompting": 3,
+      "evaluation": 3,
+      "prompt_revision": 3
+    },
+    "learning_rate": "slow",
+    "attempts": 3,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-081",
+    "synthetic": true,
+    "grade": 10,
+    "grade_band": "High School",
+    "prior_exposure": "scratch_or_blocks",
+    "writing_style": "terse",
+    "start_stage": {
+      "prompting": 1,
+      "evaluation": 0,
+      "prompt_revision": 1
+    },
+    "learning_rate": "fast",
+    "attempts": 3,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-082",
+    "synthetic": true,
+    "grade": 11,
+    "grade_band": "High School",
+    "prior_exposure": "web_html_css",
+    "writing_style": "standard",
+    "start_stage": {
+      "prompting": 3,
+      "evaluation": 0,
+      "prompt_revision": 3
+    },
+    "learning_rate": "fast",
+    "attempts": 2,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-083",
+    "synthetic": true,
+    "grade": 11,
+    "grade_band": "High School",
+    "prior_exposure": "some_python",
+    "writing_style": "verbose",
+    "start_stage": {
+      "prompting": 3,
+      "evaluation": 0,
+      "prompt_revision": 2
+    },
+    "learning_rate": "fast",
+    "attempts": 1,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-084",
+    "synthetic": true,
+    "grade": 9,
+    "grade_band": "High School",
+    "prior_exposure": "scratch_or_blocks",
+    "writing_style": "informal",
+    "start_stage": {
+      "prompting": 3,
+      "evaluation": 3,
+      "prompt_revision": 3
+    },
+    "learning_rate": "fast",
+    "attempts": 1,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-085",
+    "synthetic": true,
+    "grade": 11,
+    "grade_band": "High School",
+    "prior_exposure": "none",
+    "writing_style": "esl",
+    "start_stage": {
+      "prompting": 0,
+      "evaluation": 2,
+      "prompt_revision": 1
+    },
+    "learning_rate": "slow",
+    "attempts": 1,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-086",
+    "synthetic": true,
+    "grade": 12,
+    "grade_band": "High School",
+    "prior_exposure": "scratch_or_blocks",
+    "writing_style": "terse",
+    "start_stage": {
+      "prompting": 2,
+      "evaluation": 2,
+      "prompt_revision": 1
+    },
+    "learning_rate": "fast",
+    "attempts": 1,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-087",
+    "synthetic": true,
+    "grade": 12,
+    "grade_band": "High School",
+    "prior_exposure": "web_html_css",
+    "writing_style": "standard",
+    "start_stage": {
+      "prompting": 1,
+      "evaluation": 1,
+      "prompt_revision": 1
+    },
+    "learning_rate": "medium",
+    "attempts": 1,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-088",
+    "synthetic": true,
+    "grade": 11,
+    "grade_band": "High School",
+    "prior_exposure": "web_html_css",
+    "writing_style": "verbose",
+    "start_stage": {
+      "prompting": 2,
+      "evaluation": 1,
+      "prompt_revision": 0
+    },
+    "learning_rate": "medium",
+    "attempts": 3,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-089",
+    "synthetic": true,
+    "grade": 10,
+    "grade_band": "High School",
+    "prior_exposure": "web_html_css",
+    "writing_style": "informal",
+    "start_stage": {
+      "prompting": 0,
+      "evaluation": 0,
+      "prompt_revision": 0
+    },
+    "learning_rate": "slow",
+    "attempts": 1,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-090",
+    "synthetic": true,
+    "grade": 12,
+    "grade_band": "High School",
+    "prior_exposure": "scratch_or_blocks",
+    "writing_style": "esl",
+    "start_stage": {
+      "prompting": 3,
+      "evaluation": 3,
+      "prompt_revision": 1
+    },
+    "learning_rate": "medium",
+    "attempts": 1,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-091",
+    "synthetic": true,
+    "grade": 9,
+    "grade_band": "High School",
+    "prior_exposure": "none",
+    "writing_style": "terse",
+    "start_stage": {
+      "prompting": 3,
+      "evaluation": 2,
+      "prompt_revision": 3
+    },
+    "learning_rate": "medium",
+    "attempts": 1,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-092",
+    "synthetic": true,
+    "grade": 12,
+    "grade_band": "High School",
+    "prior_exposure": "none",
+    "writing_style": "standard",
+    "start_stage": {
+      "prompting": 1,
+      "evaluation": 1,
+      "prompt_revision": 1
+    },
+    "learning_rate": "medium",
+    "attempts": 1,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-093",
+    "synthetic": true,
+    "grade": 9,
+    "grade_band": "High School",
+    "prior_exposure": "scratch_or_blocks",
+    "writing_style": "verbose",
+    "start_stage": {
+      "prompting": 1,
+      "evaluation": 1,
+      "prompt_revision": 3
+    },
+    "learning_rate": "fast",
+    "attempts": 2,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-094",
+    "synthetic": true,
+    "grade": 10,
+    "grade_band": "High School",
+    "prior_exposure": "scratch_or_blocks",
+    "writing_style": "informal",
+    "start_stage": {
+      "prompting": 3,
+      "evaluation": 0,
+      "prompt_revision": 1
+    },
+    "learning_rate": "medium",
+    "attempts": 1,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-095",
+    "synthetic": true,
+    "grade": 10,
+    "grade_band": "High School",
+    "prior_exposure": "scratch_or_blocks",
+    "writing_style": "esl",
+    "start_stage": {
+      "prompting": 2,
+      "evaluation": 1,
+      "prompt_revision": 0
+    },
+    "learning_rate": "medium",
+    "attempts": 3,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-096",
+    "synthetic": true,
+    "grade": 11,
+    "grade_band": "High School",
+    "prior_exposure": "none",
+    "writing_style": "terse",
+    "start_stage": {
+      "prompting": 1,
+      "evaluation": 0,
+      "prompt_revision": 3
+    },
+    "learning_rate": "slow",
+    "attempts": 1,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-097",
+    "synthetic": true,
+    "grade": 9,
+    "grade_band": "High School",
+    "prior_exposure": "none",
+    "writing_style": "standard",
+    "start_stage": {
+      "prompting": 1,
+      "evaluation": 1,
+      "prompt_revision": 3
+    },
+    "learning_rate": "fast",
+    "attempts": 3,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-098",
+    "synthetic": true,
+    "grade": 12,
+    "grade_band": "High School",
+    "prior_exposure": "web_html_css",
+    "writing_style": "verbose",
+    "start_stage": {
+      "prompting": 2,
+      "evaluation": 3,
+      "prompt_revision": 0
+    },
+    "learning_rate": "fast",
+    "attempts": 3,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-099",
+    "synthetic": true,
+    "grade": 11,
+    "grade_band": "High School",
+    "prior_exposure": "scratch_or_blocks",
+    "writing_style": "informal",
+    "start_stage": {
+      "prompting": 3,
+      "evaluation": 1,
+      "prompt_revision": 2
+    },
+    "learning_rate": "medium",
+    "attempts": 2,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
+  },
+  {
+    "student_id": "SIM-100",
+    "synthetic": true,
+    "grade": 10,
+    "grade_band": "High School",
+    "prior_exposure": "web_html_css",
+    "writing_style": "esl",
+    "start_stage": {
+      "prompting": 3,
+      "evaluation": 2,
+      "prompt_revision": 1
+    },
+    "learning_rate": "slow",
+    "attempts": 1,
+    "target_standard": "HS-PRO-RD-18",
+    "builds_on_standard": "MS-PRO-RD-17",
+    "start_weights": "uniform"
   }
 ]

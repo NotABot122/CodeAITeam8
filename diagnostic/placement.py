@@ -19,6 +19,7 @@ from engine.manifest import Manifest
 from . import game
 from .ai.parse import Advice
 from .content import Content
+from .contract import CONTRACT_VERSION
 from .models import MASTERED, ConceptEstimate, NodeState
 from .safety import check_student_text
 from .stance import choose_stance
@@ -54,7 +55,7 @@ class Route:
     stance: str
 
     def to_dict(self) -> Dict[str, Any]:
-        return dict(self.__dict__)
+        return {"contract_version": CONTRACT_VERSION, **self.__dict__}
 
 
 @dataclass
