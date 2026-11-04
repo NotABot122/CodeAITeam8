@@ -1,6 +1,6 @@
-# Weather Station readiness quest (grades 3-5)
+# Weather Station readiness check (grades 9-12)
 
-A tap-and-drag game that finds out where a young student stands on the four ideas the
+A short tap-and-drag check that finds out where a high school student stands on the four ideas the
 [Weather Station lesson](../projects/weather-station/) is built on: **finding information in a log**
 (`database_retrieval`), **if/else decisions** (`conditionals`), **repeating** (`loops`) and
 **reusable helpers** (`functions`). It scores answers by fixed rules, then (optionally) asks a
@@ -160,8 +160,7 @@ written to the event logs (apart from the short quotes the evaluation contract r
 
 ## Known limits
 
-- The Weather Station lesson itself is high-school level (SQL). The quest measures the *ideas underneath it*, so most grade 3-5 students
-  will place at stage 0-2; the placement is a readiness path, not a claim they are ready for the lesson.
+- The check and the lesson both target grades 9-12. The questions read SQL and Python the way the lesson writes it; reading level and timing are assumptions until a pilot with real students.
 - `seconds_per_item` and `seconds_per_explain` in `diagnostic.yaml` are assumptions. Time a real class and update them.
 - Stage estimates rest on 3-4 questions per concept, so adjacent-stage errors are expected; the confidence says how much to trust each one.
 - The question bank is a first draft (24 questions) written for review by Teaching & Learning staff; wording and misconception tags

@@ -207,20 +207,19 @@ def overview() -> dict:
     dl = _load("diag_lesson_summary.json")
     if dl:
         sm, checks = dl["summary"], dl["checks"]
-        low = {c: sm[c]["by_band"].get("low", {}).get("failed_on_levels") for c in ("no_diagnostic", "diagnostic_today", "diagnostic_proposed")}
+        low = {c: sm[c]["by_band"].get("low", {}).get("failed_on_levels") for c in ("no_diagnostic", "diagnostic", "diagnostic_intervention")}
         failing = [c for c in checks if not c["passed"]]
         items.append({
             "id": "diagnostic_handoff", "tab": "diagnostic",
             "requirement": "Any student can take the diagnostic and start the lesson at their own level.",
             "source": "Product goal; Vision: diagnostic placement (Exploratory)",
             "status": "met" if not failing else ("partial" if len(failing) < len(checks) else "not_met"),
-            "metric": f"Gaps that get practice before their level: {pc(sm['diagnostic_today']['gaps_practiced_first'])} today, "
-                      f"{pc(sm['diagnostic_proposed']['gaps_practiced_first'])} with the proposed handoff. Low-level students "
-                      f"fail {low['no_diagnostic']} times without a diagnostic, {low['diagnostic_today']} today, "
-                      f"{low['diagnostic_proposed']} with the proposed handoff.",
+            "metric": f"Diagnosed gaps that get practice before their level: {pc(sm['diagnostic']['gaps_practiced_first'])}. "
+                      f"Students who start low fail {low['no_diagnostic']} times on levels without a diagnostic, "
+                      f"{low['diagnostic']} with it, {low['diagnostic_intervention']} with in-lesson help on too.",
             "evidence": f"{dl['students']} simulated students through the real diagnostic, handoff and lesson.",
-            "caveat": f"{len(failing)} of {len(checks)} handoff checks fail, including: the student app cannot open a "
-                      "student who took the diagnostic." if failing else "",
+            "caveat": (f"{len(failing)} of {len(checks)} handoff checks still fail: "
+                       + "; ".join(c["requirement"].rstrip(".").lower() for c in failing) + ".") if failing else "",
         })
     order = {"not_met": 0, "partial": 1, "met": 2, "not_tested": 3}
     items.sort(key=lambda i: order.get(i["status"], 9))  # problems first: that is what to talk about

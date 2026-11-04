@@ -83,7 +83,7 @@ class WebApiTests(unittest.TestCase):
     def test_quest_runs_then_hands_over_to_the_lesson(self):
         q = self.svc.quest_start("cloud", "build_game")
         sid = q["student_id"]
-        self.assertTrue(sid.startswith("STU-"))
+        self.assertRegex(sid, r"^[0-9a-f]{32}$")  # one id format for quest, lesson and app
         self.assertEqual(self.svc.state(sid)["diagnostic"], "in_progress")
         step = q["first"]
         for _ in range(60):

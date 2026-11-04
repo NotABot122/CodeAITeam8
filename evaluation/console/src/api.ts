@@ -244,7 +244,7 @@ export interface RatingAgreement {
   between_raters: {raters: string[]; n: number; h2_exact: number} | null;
 }
 
-export type DiagCondition = 'no_diagnostic' | 'diagnostic_today' | 'diagnostic_proposed' | 'oracle';
+export type DiagCondition = 'no_diagnostic' | 'no_diagnostic_intervention' | 'diagnostic' | 'diagnostic_intervention' | 'oracle';
 
 export interface DiagCondSummary {
   n: number;
@@ -254,6 +254,8 @@ export interface DiagCondSummary {
   gaps: number;
   gaps_practiced_first: number | null;
   practice_unneeded: number;
+  struggle_practice: number;
+  diagnostic_mismatch: number;
   start_counts: Record<string, number>;
   by_band: Record<'low' | 'middle' | 'high', {n: number; completed: number; failed_on_levels: number; submissions: number}>;
 }

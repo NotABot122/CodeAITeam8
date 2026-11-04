@@ -4,8 +4,8 @@ Input (what students type):
   Flag names match evaluation/schemas/validate_submission.schema.json so the
   evaluation harness reads them unchanged: empty, too_short, gibberish,
   prompt_injection, inappropriate, personal_info.
-  Rules follow evaluation/harness/validator.py, tuned for grades 3-5:
-  a lower "too short" bar (kids write short answers) and a spelling-tolerant
+  Rules follow evaluation/harness/validator.py, tuned for short answers:
+  a lower "too short" bar (short answers are fine) and a spelling-tolerant
   gibberish check. The shared word lists come from engine.safety.
 
 Output (what the model wrote for students):

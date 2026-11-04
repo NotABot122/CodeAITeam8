@@ -57,6 +57,7 @@ class Catalog:
     revision: Dict[str, str]
     thresholds: dict
     diagnostic: dict = field(default_factory=lambda: {"min_confidence": 0.8, "use_borderline": False, "min_correct_answers": 2})
+    intervention: dict = field(default_factory=lambda: {"struggle_after": None})
 
     def topic(self, topic_id: str) -> Optional[Topic]:
         return next((t for t in self.topics if t.id == topic_id), None)
@@ -71,8 +72,10 @@ def load_catalog(projects_root: Path = PROJECTS_ROOT) -> Catalog:
               for t in data["topics"]]
     diagnostic = {"min_confidence": 0.8, "use_borderline": False, "min_correct_answers": 2}
     diagnostic.update(data.get("diagnostic") or {})
+    intervention = {"struggle_after": None}
+    intervention.update(data.get("intervention") or {})
     return Catalog(dict(data["concepts"]), topics, dict(data.get("revision") or {}), dict(data["thresholds"]),
-                   diagnostic)
+                   diagnostic, intervention)
 
 
 def seed_from_placement(placement: dict, rules: dict, correct: Optional[Dict[str, int]] = None) -> Dict[str, dict]:
@@ -255,9 +258,14 @@ class Course:
 
     def engine(self, student_id: str, project: Optional[Project] = None) -> Engine:
         kwargs = {"router": self.router} if self.router else {}
-        return Engine(project or self.project_for(student_id), self.store, self.events, grader=self.grader,
+        project = project or self.project_for(student_id)
+        planned = (self.store.profile(student_id).get("planned_practice") or {}) if student_id else {}
+        return Engine(project, self.store, self.events, grader=self.grader,
                       adaptive=self.adaptive, hint_provider=self.provider,
-                      initial_stages=self.stages(student_id), **kwargs)
+                      initial_stages=self.stages(student_id),
+                      planned_practice=planned.get("problems") if planned.get("project") == project.id else None,
+                      struggle_after=self.catalog.intervention.get("struggle_after"),
+                      **kwargs)
 
     def _require(self, student_id: str) -> None:
         if not self.store.student_exists(student_id):
@@ -431,6 +439,15 @@ class Course:
         profile["concepts"] = concepts
 
         project = self.default_project()
+        # Plan a practice problem before the level of every concept the diagnostic is confident is a gap.
+        planned = []
+        for concept, d in decisions.items():
+            if d["used"] and d["stage"] == 0:
+                practice = next((p for p in project.manifest.practice_problems
+                                 if p.concept == concept and p.target_stage == 1), None)
+                if practice is not None:
+                    planned.append(practice.id)
+        profile["planned_practice"] = {"project": project.id, "problems": planned}
         start = state.placement.get("route", {}).get("next_task_id")
         engine = self.engine(student_id, project)
         try:

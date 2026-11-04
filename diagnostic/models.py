@@ -198,7 +198,7 @@ class ItemResult:
 @dataclass(frozen=True)
 class ScoringRules:
     """Parameters of the guess-and-slip stage estimate (diagnostic.yaml `scoring`)."""
-    slip: float                        # chance a child who knows the idea still misses a question
+    slip: float                        # chance a student who knows the idea still misses a question
     prior: Tuple[float, ...]           # chance of true stage 0, 1, 2, 3 before any answers
     borderline_below: float            # confidence under this marks a concept as borderline
 

@@ -4,11 +4,12 @@ import {useState} from 'react';
 import {api, pct, type DiagCondition, type DiagLesson} from '../api';
 import {Bar, Caveat, Loading, Section, Stat, useLoad, Verdict} from '../ui';
 
-const CONDS: DiagCondition[] = ['no_diagnostic', 'diagnostic_today', 'diagnostic_proposed', 'oracle'];
+const CONDS: DiagCondition[] = ['no_diagnostic', 'no_diagnostic_intervention', 'diagnostic', 'diagnostic_intervention', 'oracle'];
 const SHORT: Record<DiagCondition, string> = {
   no_diagnostic: 'No diagnostic',
-  diagnostic_today: 'Diagnostic today',
-  diagnostic_proposed: 'Proposed handoff',
+  no_diagnostic_intervention: 'No diagnostic + help',
+  diagnostic: 'Diagnostic',
+  diagnostic_intervention: 'Diagnostic + help',
   oracle: 'Perfect knowledge',
 };
 const BANDS = [
@@ -81,8 +82,9 @@ function Body({d}: {d: DiagLesson}) {
   return (
     <>
       <Stack direction="row" spacing={2} sx={{mb: 2, flexWrap: 'wrap', rowGap: 2}}>
-        <Stat label="Gaps practiced before their level" value={pct(s.diagnostic_today.gaps_practiced_first)} hint={`proposed handoff: ${pct(s.diagnostic_proposed.gaps_practiced_first)}`} tone="bad" />
-        <Stat label="Failed tries, students who start low" value={`${low('no_diagnostic')} → ${low('diagnostic_today')}`} hint={`no diagnostic → today; proposed: ${low('diagnostic_proposed')}`} tone="warn" />
+        <Stat label="Gaps practiced before their level" value={pct(s.diagnostic.gaps_practiced_first)} hint={`perfect knowledge: ${pct(s.oracle.gaps_practiced_first)}`} tone="warn" />
+        <Stat label="Failed tries, students who start low" value={`${low('no_diagnostic')} → ${low('diagnostic')}`} hint={`no diagnostic → diagnostic; with in-lesson help: ${low('diagnostic_intervention')}`} tone="good" />
+        <Stat label="Diagnostic overrated, caught in the lesson" value={s.diagnostic_intervention.diagnostic_mismatch} hint={`in-lesson help given ${s.diagnostic_intervention.struggle_practice} times`} />
         <Stat label="Handoff checks passed" value={`${passed} of ${d.checks.length}`} tone={passed === d.checks.length ? 'good' : 'bad'} />
         {s.diagnostic_accuracy && <Stat label="Diagnostic finds the real gaps" value={pct(s.diagnostic_accuracy.gap_found)} hint={`right level ${pct(s.diagnostic_accuracy.exact)}, within one ${pct(s.diagnostic_accuracy.within_one)}`} />}
       </Stack>
@@ -103,7 +105,7 @@ function Body({d}: {d: DiagLesson}) {
                   <TableCell>{b.label}{s.no_diagnostic.by_band[b.k] && <Typography variant="caption" color="text.secondary"> ({s.no_diagnostic.by_band[b.k].n})</Typography>}</TableCell>
                   {CONDS.map(c => (
                     <TableCell key={c}>
-                      <Bar value={s[c].by_band[b.k]?.failed_on_levels ?? null} max={maxFail} label={String(s[c].by_band[b.k]?.failed_on_levels ?? '–')} color={c === 'diagnostic_today' ? 'warning' : c === 'diagnostic_proposed' ? 'success' : 'primary'} />
+                      <Bar value={s[c].by_band[b.k]?.failed_on_levels ?? null} max={maxFail} label={String(s[c].by_band[b.k]?.failed_on_levels ?? '–')} color={c.startsWith('no_') ? 'warning' : c === 'oracle' ? 'primary' : 'success'} />
                     </TableCell>
                   ))}
                 </TableRow>
@@ -118,9 +120,9 @@ function Body({d}: {d: DiagLesson}) {
           <Typography variant="subtitle2" sx={{mb: 1}}>What changes between the conditions</Typography>
           <Box component="ul" sx={{m: 0, pl: 2.5, '& li': {mb: 0.75}}}>
             <li><strong>No diagnostic:</strong> every student starts at Level 1 with nothing known.</li>
-            <li><strong>Diagnostic today:</strong> confident results set the starting level per concept, and the lesson may start with one practice problem.</li>
-            <li><strong>Proposed handoff:</strong> today's handoff, plus a practice problem before each level the diagnostic found a gap in.</li>
-            <li><strong>Perfect knowledge:</strong> the proposed handoff fed with each student's true level. The best a diagnostic could do.</li>
+            <li><strong>Diagnostic:</strong> confident results set the starting level per concept, and a practice problem is planned before each level the diagnostic found a gap in.</li>
+            <li><strong>+ help:</strong> during the lesson, after 3 failed tries on a level the student gets that concept's practice, then returns to the level. If the diagnostic had rated the concept higher, that rating is dropped.</li>
+            <li><strong>Perfect knowledge:</strong> the same, fed with each student's true level. The best a diagnostic could do.</li>
           </Box>
         </Paper>
       </Stack>
@@ -138,8 +140,8 @@ function Body({d}: {d: DiagLesson}) {
         </TableBody>
       </Table>
       <Caveat>
-        {d.students} simulated students; how fast they learn is our assumption, so compare the conditions rather than read the numbers as real. The proposed handoff only uses
-        parts that already exist. The engine and diagnostic teams decide how to build it.
+        {d.students} simulated students; how fast they learn is our assumption, so compare the conditions rather than read the numbers as real. In-lesson help is a
+        switch in projects/catalog.yaml (intervention.struggle_after), off by default until the team agrees on it.
       </Caveat>
     </>
   );

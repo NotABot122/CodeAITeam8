@@ -1,8 +1,8 @@
-# Configuration for the Weather Station readiness quest (grades 3-5).
+# Configuration for the Weather Station readiness check (grades 9-12, same audience as the lesson).
 # Everything a curriculum author may want to tune lives here, not in code.
 id: weather-station-readiness
-title: Storm Chaser Academy
-grade_band: "3-5"
+title: Weather Station Readiness Check
+grade_band: "9-12"
 version: 1
 
 # The tier ladder: a pass at tier N is evidence for Stage N.
@@ -12,13 +12,13 @@ limits:
   max_bonus_items: 3            # confirmation questions after all zones
   bonus_min_stage: 2            # only confirm stage claims at or above this
   bonus_confidence_target: 0.8  # confirm a claim whose confidence is below this
-  max_explain_prompts: 2        # typed "tell the guide" answers per quest: typing is the slowest part for young students
+  max_explain_prompts: 2        # typed "explain" answers per quest: typing is the slowest part
   explain_below_confidence: 0.85  # only ask when the answers alone leave a concept this unsure
   max_boosters: 2               # unscored "breather" questions
   misses_before_booster: 3      # consecutive misses that trigger a breather
-  # ASSUMPTIONS for the time estimate only. Measure real grade 3-5 timing in a pilot and update these.
-  seconds_per_item: 45
-  seconds_per_explain: 75
+  # ASSUMPTIONS for the time estimate only. Measure real grade 9-12 timing in a pilot and update these.
+  seconds_per_item: 40
+  seconds_per_explain: 70
   target_minutes: 15
 
 # Fraction of an answer that must be right to count as a pass.
@@ -36,17 +36,17 @@ thresholds:
 
 # How a stage is estimated from the answers (guess-and-slip model, see diagnostic/scoring.py).
 scoring:
-  slip: 0.08                       # chance a child who knows the idea still misses a question
+  slip: 0.08                       # chance a student who knows the idea still misses a question
   prior: [0.25, 0.30, 0.25, 0.20]  # chance of true stage 0, 1, 2, 3 before any answers
   borderline_below: 0.7            # confidence under this marks a concept "borderline"
 
-# Reading level for everything students read. Enforced by check-content.
+# Reading level for everything students read (high school). Enforced by check-content.
 readability:
-  max_sentence_words: 16
-  max_word_length: 12
+  max_sentence_words: 30
+  max_word_length: 16
 
-# Free-text answers ("tell the guide"). Kids write short answers, so the
-# too-short bar is much lower than the harness default of 8 words.
+# Free-text answers ("explain"). Short answers are fine, so the too-short bar
+# is lower than the harness default of 8 words.
 text:
   min_words: 3
   max_chars: 400
@@ -55,61 +55,61 @@ text:
 zones:
   - id: zone-log
     concept: database_retrieval
-    name: Weather Log Detective
-    story: "Nimbus keeps a big weather log. Help find the right pages fast!"
-    done_message: "You finished the Weather Log zone!"
+    name: Data Lookup
+    story: "The station stores one row per day in a table. Pull out the rows you need."
+    done_message: "Data Lookup done."
   - id: zone-decide
     concept: conditionals
-    name: Decision Storm
-    story: "Storm clouds are coming! Make quick if-this-then-that choices."
-    done_message: "You cleared the Decision Storm zone!"
+    name: Decision Point
+    story: "Read some if statements and predict what they do."
+    done_message: "Decision Point done."
   - id: zone-repeat
     concept: loops
-    name: Repeat Rangers
-    story: "The rain gauges need checking again and again. Let's repeat smartly."
-    done_message: "You finished the Repeat Rangers zone!"
+    name: Loop Lab
+    story: "Trace loops that count, total and track the largest value."
+    done_message: "Loop Lab done."
   - id: zone-helpers
     concept: functions
-    name: Helper Workshop
-    story: "Build little helpers that do one job well, then team them up."
-    done_message: "You finished the Helper Workshop zone!"
+    name: Function Workshop
+    story: "See how functions take inputs, return values and work together."
+    done_message: "Function Workshop done."
 
 # What the student wants to make. Emphasis says which concepts the goal leans on.
 goals:
-  - {id: weather_report, label: "Make my own weather report", emphasis: {database_retrieval: 1.0, conditionals: 0.8, loops: 0.8, functions: 0.6}}
-  - {id: build_game,     label: "Build a game",                emphasis: {database_retrieval: 0.2, conditionals: 1.0, loops: 1.0, functions: 0.7}}
-  - {id: find_facts,     label: "Find cool facts in data",     emphasis: {database_retrieval: 1.0, conditionals: 0.5, loops: 0.9, functions: 0.4}}
-  - {id: make_helpers,   label: "Make tools that help people", emphasis: {database_retrieval: 0.4, conditionals: 0.6, loops: 0.6, functions: 1.0}}
+  - {id: weather_report, label: "Build a weather report from real data", emphasis: {database_retrieval: 1.0, conditionals: 0.8, loops: 0.8, functions: 0.6}}
+  - {id: build_game,     label: "Make a game",                emphasis: {database_retrieval: 0.2, conditionals: 1.0, loops: 1.0, functions: 0.7}}
+  - {id: find_facts,     label: "Find patterns in data",     emphasis: {database_retrieval: 1.0, conditionals: 0.5, loops: 0.9, functions: 0.4}}
+  - {id: make_helpers,   label: "Build tools people can use", emphasis: {database_retrieval: 0.4, conditionals: 0.6, loops: 0.6, functions: 1.0}}
   - {id: not_sure,       label: "I'm not sure yet",            emphasis: {database_retrieval: 0.6, conditionals: 0.6, loops: 0.6, functions: 0.6}}
 
-# Choose-a-buddy list. Nicknames are picked from this list, never typed, so no names are collected.
+# Choose-an-avatar list. Picked from this list, never typed, so no names are collected.
 buddies:
-  - {id: cloud,   label: "Cloud Pup"}
-  - {id: bolt,    label: "Bolt Fox"}
-  - {id: drop,    label: "Raindrop Owl"}
-  - {id: sun,     label: "Sunny Gecko"}
+  - {id: cloud,   label: "Cumulus"}
+  - {id: bolt,    label: "Bolt"}
+  - {id: drop,    label: "Drizzle"}
+  - {id: sun,     label: "Solar"}
 
 game:
   guide:
     name: Nimbus
-    welcome: "Hi, I'm {guide}! Pick a buddy and a goal, then we go storm chasing."
+    welcome: "I'm {guide}. This short check finds where you should start the Weather Station project. It is not a test and nothing here is graded."
     right:
-      - "Nice one!"
-      - "You got it!"
-      - "Great thinking!"
-      - "Yes! Keep going!"
+      - "Correct."
+      - "Right."
+      - "Nice reasoning."
+      - "Yes, keep going."
     wrong:
-      - "Good try! Here is a tip."
-      - "Not quite, and that is okay. Here is a tip."
-      - "Close! Here is something to remember."
-    streak: "You are on a hot streak!"
-    booster_intro: "Quick breather! Here is an easy one."
-    explain_intro: "Tell {guide} in your own words. Short is fine."
-    explain_skip: "No problem. Let's keep going!"
-    bonus_intro: "Bonus round! One more to make sure."
-    flagged_text: "Let's keep our words kind and friendly. We will skip that one."
-    goal_flagged: "I will pick a goal for you. You can change it later with a grown-up."
-    finish: "You finished the quest, {buddy}! Great work today."
+      - "Not quite. Here is why."
+      - "Close. Here is the key idea."
+      - "Not this time. Here is what to remember."
+    streak: "Three in a row."
+    booster_intro: "Quick break question."
+    explain_intro: "Explain it in your own words. One or two sentences is fine."
+    explain_skip: "No problem. Moving on."
+    bonus_intro: "One more question to confirm."
+    flagged_text: "That answer was skipped. Please keep answers respectful and on topic."
+    goal_flagged: "A default goal was picked. You can change it later."
+    finish: "Check complete, {buddy}."
   xp:
     try: 5               # for every answer, so effort is rewarded
     correct: 5           # added when the answer was right

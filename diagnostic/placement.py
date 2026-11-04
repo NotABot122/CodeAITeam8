@@ -1,7 +1,7 @@
 """Turn the evidence (and optional model advice) into a placement.
 
 The deterministic stage from the answers is the floor. The model may move a stage by
-at most one, and only when the child's own words, quoted exactly, support the move.
+at most one, and only when the student's own words, quoted exactly, support the move.
 Its focus order, stance and wording are used only after they pass checks; otherwise
 rules and fixed text from the content files take over. The student always gets a
 placement, with or without a model.

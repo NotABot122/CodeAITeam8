@@ -1,4 +1,4 @@
-"""Gamified readiness diagnostic for the Weather Station lesson (grades 3-5).
+"""Gamified readiness diagnostic for the Weather Station lesson (grades 9-12, the same students as the lesson).
 
 The diagnostic is a tap-and-drag quest. It scores answers deterministically,
 then (optionally) asks a language model to read the evidence, the student's

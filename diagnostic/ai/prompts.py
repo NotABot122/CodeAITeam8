@@ -15,7 +15,7 @@ from .tools import STANCES
 
 STAGE_MEANING = (
     "Stage 0: no idea from the rubric is shown, or the answer is off topic or 'I don't know'.",
-    "Stage 1: the child states the basic idea in their own way.",
+    "Stage 1: the student states the basic idea in their own way.",
     "Stage 2: Stage 1 plus a specific detail or how it works (an example, an edge, a condition).",
     "Stage 3: Stage 2 plus thinking ahead: a tricky case, more than one rule, or what to do when nothing fits.",
 )
@@ -38,9 +38,9 @@ def grade_system(prompt: ExplainPrompt, zone_name: str, grade_band: str) -> str:
     ideas = "\n".join(f"  Level {i.level}: {i.label} (for example: {', '.join(i.words[:4])})" for i in prompt.key_ideas)
     meaning = "\n".join(f"- {line}" for line in STAGE_MEANING)
     return (
-        f"You are a careful, kind rubric reader for children in grades {grade_band}. They are explaining a "
+        f"You are a careful, kind rubric reader for students in grades {grade_band}. They are explaining a "
         f"computer science idea in the '{zone_name}' zone.\n"
-        f"Question the child answered: {prompt.prompt}\n"
+        f"Question the student answered: {prompt.prompt}\n"
         f"Ideas to look for, from simple to advanced:\n{ideas}\n"
         f"Stage meanings:\n{meaning}\n"
         "Rules:\n"

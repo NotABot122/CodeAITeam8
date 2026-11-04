@@ -35,6 +35,12 @@ diagnostic:
   use_borderline: false        # concepts the diagnostic marks "borderline" are not used
   min_correct_answers: 2       # a stage above 0 needs this many correct answers on the concept (no lucky guesses)
 
+# In-lesson intervention: after this many failed attempts on one level, insert that concept's practice
+# once, then return to the level. If the diagnostic had given the concept a stage above 0, the stage is
+# lowered to 0 and a diagnostic_mismatch event is logged. null = off (today's behaviour).
+intervention:
+  struggle_after: null
+
 # How a finished project is judged, per concept, from its problems' attempts and hints.
 # Change these after feedback; no code changes needed.
 thresholds:
