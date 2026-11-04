@@ -6,6 +6,8 @@ The backend already produces everything below; the student app and teacher view 
 
 Priority: **P0** for the demo, **P1** soon after.
 
+**Status (2026-11-04, zane-claude, branch `feat/ai-agents-diagnostic`):** items 6, 7, 8 and 9 are built (see collab.md Task 020). Items 1-5 (teacher view) are still open.
+
 ---
 
 ## Teacher view (`webapi/teacher.py`, `frontend/src/teacher/TeacherApp.tsx`)

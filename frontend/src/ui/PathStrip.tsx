@@ -10,15 +10,17 @@ import type {PathNode} from '@/api/types';
 function Circle({node}: {node: PathNode}) {
   const done = node.status === 'done';
   const current = node.status === 'current';
+  const paused = node.status === 'paused';
   return (
     <Box
       aria-hidden
       sx={{
         width: 38, height: 38, borderRadius: '50%', display: 'grid', placeItems: 'center', fontWeight: 700, flex: 'none',
         border: 2,
-        borderColor: done ? 'success.main' : current ? 'primary.main' : 'divider',
+        borderColor: done ? 'success.main' : current || paused ? 'primary.main' : 'divider',
+        borderStyle: paused ? 'dashed' : 'solid',
         bgcolor: done ? 'success.main' : 'background.paper',
-        color: done ? 'background.paper' : current ? 'primary.main' : 'text.disabled',
+        color: done ? 'background.paper' : current || paused ? 'primary.main' : 'text.disabled',
         '@keyframes pulse': {'0%': {boxShadow: '0 0 0 0 rgba(76,66,207,.45)'}, '100%': {boxShadow: '0 0 0 12px rgba(76,66,207,0)'}},
         animation: current ? 'pulse 1.6s ease-out infinite' : 'none',
         '@media (prefers-reduced-motion: reduce)': {animation: 'none'},
@@ -38,7 +40,7 @@ export default function PathStrip({path}: {path: PathNode[]}) {
         return (
           <Box key={level.id} sx={{display: 'flex', alignItems: 'flex-start'}}>
             <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', width: 84, textAlign: 'center'}}>
-              <Box role="img" aria-label={`Level ${level.number}: ${level.title}, ${level.status === 'todo' ? 'not started' : level.status === 'done' ? 'done' : 'in progress'}`} sx={{position: 'relative'}}>
+              <Box role="img" aria-label={`Level ${level.number}: ${level.title}, ${level.status === 'todo' ? 'not started' : level.status === 'done' ? 'done' : level.status === 'paused' ? 'paused, you come back to it after the practice' : 'in progress'}`} sx={{position: 'relative'}}>
                 <Circle node={level} />
                 {practice.map(p => (
                   <Box key={p.id} role="img" title={`Practice: ${p.title}`} aria-label={`Practice: ${p.title}, ${p.status === 'done' ? 'done' : 'in progress'}`}
@@ -51,6 +53,7 @@ export default function PathStrip({path}: {path: PathNode[]}) {
               <Typography variant="caption" sx={{mt: 0.5, lineHeight: 1.2, color: level.status === 'todo' ? 'text.disabled' : 'text.primary', fontWeight: level.status === 'current' ? 700 : 400}}>
                 {level.title}
               </Typography>
+              {level.status === 'paused' && <Typography variant="caption" color="primary" sx={{lineHeight: 1.2, fontStyle: 'italic'}}>Back after practice</Typography>}
             </Box>
             {i < levels.length - 1 && <Box aria-hidden sx={{width: 14, height: 2, bgcolor: 'divider', mt: '18px', flex: 'none'}} />}
           </Box>

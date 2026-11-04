@@ -175,6 +175,8 @@ class Teacher:
             "nextStep": (profile.get("next_step") or {}).get("reason"),
             "seededFromQuest": diag.get("seeded") or {},
             "quest": report,
+            # The Strands Decider 2B's choice, with the teacher-only fields (stance, note, evidence, fallback).
+            "pathway": profile.get("pathway"),
             "lastActive": _iso(self._last_active(sid)) if self._last_active(sid) else None,
         }
 

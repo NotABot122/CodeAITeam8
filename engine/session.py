@@ -306,6 +306,38 @@ class Engine:
         return SubmitOutcome(status, True, messages, stage_changes=changes,
                              next_problem=following, complete=record.complete, notices=notices)
 
+    def request_hint(self, student_id: str, submission_path=None) -> SubmitOutcome:
+        """The student asked for a hint without submitting. Reveals the next authored hint (counted in
+        hints_seen, like a hint after a failed run) and, for code problems with the AI on, lets the AI
+        tutor phrase it from the current code. The attempt count does not change.
+
+        status is "hint", "no_hints" (none left or none written) or "complete"."""
+        record, notices = self.open(student_id)
+        if record.complete:
+            return SubmitOutcome("complete", True, [], complete=True, notices=notices)
+        problem = self.project.problem(record.current_problem)
+        seen = record.hints_seen.get(problem.id, 0)
+        if seen >= len(problem.hints):
+            return SubmitOutcome("no_hints", False, [], next_problem=problem, notices=notices)
+        authored, record.hints_seen[problem.id] = next_hint(problem, seen)
+        hint, source = authored, "authored"
+        if not problem.is_quiz and submission_path is not None and self.hinter is not None:
+            messages: List[str] = []
+            try:
+                result = self.grader.grade(self.project, problem, submission_path)
+                if not result.ungraded and not result.passed:
+                    messages = messages_for(problem, result)
+            except Exception:  # a broken grader must not cost the student their hint
+                messages = []
+            if messages:
+                hint, source = self._ai_hint(record, problem, messages, submission_path, authored)
+        if source == "authored":
+            self.events.write("hint", student_id=student_id, project_id=self.project.id, problem_id=problem.id,
+                              source="authored", reason="requested")
+        notices.extend(self._save(record))
+        return SubmitOutcome("hint", False, [], hint=hint, next_problem=problem, notices=notices,
+                             hint_source=source)
+
     def _ai_hint(self, record: ProgressRecord, problem: Problem, messages: List[str], submission_path,
                  authored: Optional[str]) -> Tuple[Optional[str], str]:
         """Try an AI hint. Fall back to the pre-authored hint on any problem."""

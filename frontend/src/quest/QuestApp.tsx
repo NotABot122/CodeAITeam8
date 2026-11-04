@@ -1,3 +1,4 @@
+import FlagIcon from '@mui/icons-material/Flag';
 import StarIcon from '@mui/icons-material/Star';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
@@ -181,6 +182,17 @@ export default function QuestApp({client, resumeId, onStarted, onFinished, onSki
           <Paper variant="outlined" sx={{p: {xs: 2, sm: 4}, borderRadius: '12px', display: 'grid', gap: 2}}>
             <Typography ref={headingRef} tabIndex={-1} variant="h4" component="h1" sx={{outline: 0}}>Quest complete!</Typography>
             <Typography sx={{fontSize: 18}}>{phase.result.message}</Typography>
+            {phase.result.next_stop?.activity && (
+              <Paper variant="outlined" sx={{p: 2, borderRadius: '10px', borderColor: 'secondary.main', display: 'flex', gap: 1.5, alignItems: 'center'}}>
+                <FlagIcon color="secondary" aria-hidden />
+                <Box>
+                  <Typography variant="overline" color="secondary" sx={{fontWeight: 700, lineHeight: 1.4}}>You will start with</Typography>
+                  <Typography sx={{fontWeight: 700, fontSize: 18}}>{phase.result.next_stop.activity.title}</Typography>
+                  {phase.result.goal_connection && <Typography color="text.secondary">{phase.result.goal_connection}</Typography>}
+                </Box>
+              </Paper>
+            )}
+            {!phase.result.next_stop?.activity && phase.result.goal_connection && <Typography color="text.secondary">{phase.result.goal_connection}</Typography>}
             {game && <GameBar game={game} />}
             <Box>
               <Typography sx={{fontWeight: 700, mb: 1}}>Your skill map</Typography>
@@ -193,7 +205,7 @@ export default function QuestApp({client, resumeId, onStarted, onFinished, onSki
                 ))}
               </Box>
             </Box>
-            <Box><Button variant="contained" color="secondary" size="large" onClick={() => studentId && onFinished(studentId)}>Start my coding lesson</Button></Box>
+            <Box><Button variant="contained" color="secondary" size="large" onClick={() => studentId && onFinished(studentId)}>Find my pathway</Button></Box>
           </Paper>
         )}
       </Container>

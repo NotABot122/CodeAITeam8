@@ -8,6 +8,9 @@ import type {ExplainStep, ItemStep} from './types';
 export type Response = string | string[] | Record<string, string> | {text: string} | {skip: true};
 
 // What a child answers with. Taps for choices; up/down buttons for ordering; a box pick for sorting.
+// Order questions are lines of code (Python or SQL): keep their indentation and use the code font.
+const CODE_LINE = {fontFamily: 'var(--code-font)', whiteSpace: 'pre-wrap' as const};
+
 export function responseReady(step: ItemStep, value: unknown): boolean {
   if (step.type === 'order') return Array.isArray(value) && value.length === (step.cards?.length ?? 0);
   if (step.type === 'sort') return !!value && Object.keys(value as object).length === (step.cards?.length ?? 0);
@@ -32,7 +35,7 @@ export function ItemView({step, value, onChange, disabled}: {step: ItemStep; val
         {ids.map((id, i) => (
           <Box component="li" key={id} sx={{display: 'flex', alignItems: 'center', gap: 1, p: 1.25, border: 1, borderColor: 'divider', borderRadius: '10px', bgcolor: 'background.paper'}}>
             <Typography sx={{fontWeight: 700, width: 24, color: 'primary.main'}}>{i + 1}</Typography>
-            <Typography sx={{flex: 1}}>{text(id)}</Typography>
+            <Typography sx={{flex: 1, ...CODE_LINE}}>{text(id)}</Typography>
             <IconButton aria-label={`Move "${text(id)}" up`} disabled={disabled || i === 0} onClick={() => move(i, -1)}><ArrowUpwardIcon /></IconButton>
             <IconButton aria-label={`Move "${text(id)}" down`} disabled={disabled || i === ids.length - 1} onClick={() => move(i, 1)}><ArrowDownwardIcon /></IconButton>
           </Box>

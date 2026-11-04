@@ -291,6 +291,11 @@ class Course:
         engine = self.engine(student_id)
         return self._after(student_id, engine, engine.answer(student_id, answers))
 
+    def request_hint(self, student_id: str, submission_path=None) -> SubmitOutcome:
+        """Next hint for the current problem, on request. Changes no stage, so no profile update."""
+        self._require(student_id)
+        return self.engine(student_id).request_hint(student_id, submission_path)
+
     def _after(self, student_id: str, engine: Engine, outcome: SubmitOutcome) -> SubmitOutcome:
         record, _ = engine.open(student_id)
         profile = self.store.profile(student_id)
@@ -300,6 +305,7 @@ class Course:
         profile["concepts"] = concepts
         if outcome.passed and outcome.complete and outcome.status != "complete":
             recommendation = self._recommend(engine.project, record, profile)
+            self._continue_pathway(profile, engine.project, recommendation)
             profile.setdefault("completed", []).append({
                 "project_id": engine.project.id, "topic": engine.project.topic,
                 "revision_concept": engine.project.manifest.parameters.get("revision_concept"),
@@ -374,6 +380,144 @@ class Course:
         self._require(student_id)
         self.store.set_active_project(student_id, str(self.default_project().root))
         return self.state(student_id)
+
+    # Lesson pathway (Strands Decider 2B, engine/decider.py) -----------------------------------
+    # After the readiness check, the decider picks a pathway: rules decide which ones the student can get,
+    # Bedrock picks one using the evidence, grade and CSTA standards, and the rules' pick is the fallback.
+    def _readiness(self, student_id: str) -> Dict[str, "Readiness"]:
+        from diagnostic.store import DiagnosticStore
+        from .decider import Readiness
+        state = DiagnosticStore(self.data_dir).load(student_id)
+        if state is None or not state.placement:
+            raise CourseError("Finish the readiness check first.")
+        decisions = (self.store.profile(student_id).get("diagnostic") or {}).get("decisions") or {}
+        tree = self.diagnostic().content.tree
+        out: Dict[str, Readiness] = {}
+        for concept, est in state.placement.get("concepts", {}).items():
+            answers = [r for r in state.results if r.concept == concept]
+            times = sorted(r.elapsed_ms / 1000 for r in answers if r.elapsed_ms)
+            d = decisions.get(concept) or {}
+            codes: List[str] = []
+            for node in tree.nodes.values():
+                if node.concept == concept:
+                    codes += [c for c in node.csta if c not in codes]
+            out[concept] = Readiness(
+                concept=concept, name=self.catalog.name(concept), stage=int(est.get("stage", 0)),
+                confident_stage=int(d["stage"]) if d.get("used") else None,
+                confidence=float(est.get("confidence", 0.0)), borderline=bool(est.get("borderline")),
+                correct=sum(1 for r in answers if r.passed), answered=len(answers),
+                misconceptions=list(est.get("misconceptions") or []),
+                median_seconds=round(times[len(times) // 2], 1) if times else None, standards=codes)
+        return out
+
+    def decide_pathway(self, student_id: str, grade: int) -> dict:
+        """Pick and start the student's pathway. Safe to call again: the first decision is kept."""
+        from .curriculum import CurriculumError, load_curriculum
+        from .decider import GRADES, StrandsDecider, load_pathways
+        self._require(student_id)
+        if grade not in GRADES:
+            raise CourseError(f"Pick a grade from {GRADES[0]} to {GRADES[-1]}.")
+        profile = self.store.profile(student_id)
+        if profile.get("pathway"):
+            return profile["pathway"]
+        if not (profile.get("diagnostic") or {}).get("applied"):
+            self.apply_diagnostic(student_id)
+            profile = self.store.profile(student_id)
+        readiness = self._readiness(student_id)
+        try:
+            curriculum = load_curriculum()
+        except CurriculumError:
+            curriculum = None
+        from diagnostic.store import DiagnosticStore
+        state = DiagnosticStore(self.data_dir).load(student_id)
+        goal = self.diagnostic().content.goals.get(state.goal_id) if state.goal_id else None
+        pathways = load_pathways(self.projects_root / "catalog.yaml")
+        weakest = (state.placement.get("focus_order") or list(readiness))[0]
+
+        def resolve(pathway) -> List[dict]:
+            out = []
+            for step in pathway.steps:
+                folder = self.catalog.revision.get(weakest) if step.project == "revision" else step.project
+                if folder and (self.projects_root / folder).is_dir():
+                    out.append({"project": folder, "title": self._project(self.projects_root / folder).title,
+                                "start": step.start})
+            return out
+
+        decider = StrandsDecider(pathways, self.provider, curriculum)
+        decision = decider.decide(readiness, grade, goal.label if goal else "",
+                                  {p.id: [s["title"] for s in resolve(p)] for p in pathways})
+        steps = resolve(decision.pathway)
+        standards = [s.brief() for s in curriculum.lookup(decision.standards)] if curriculum else \
+            [{"id": c, "skill": c, "must_do": "", "skill_area": ""} for c in decision.standards]
+        record = {
+            "id": decision.pathway.id, "title": decision.pathway.title, "summary": decision.pathway.summary,
+            "stance": decision.stance, "student_message": decision.student_message,
+            "teacher_note": decision.teacher_note, "standards": standards, "steps": steps, "current": 0,
+            "grade": grade, "decided_by": decision.decided_by, "model_id": decision.model_id,
+            "latency_ms": decision.latency_ms, "fallback_reason": decision.fallback_reason,
+            "eligible": decision.eligible, "rules_pick": decision.rules_pick, "notes": decision.notes,
+            "decider": "Strands Decider 2B",
+            "at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
+        }
+        profile["grade"] = grade
+        profile["pathway"] = record
+        self.store.save_profile(student_id, profile)
+        self.events.write("pathway", student_id=student_id, selected=decision.pathway.id, reason=decision.stance,
+                          source=decision.decided_by, model_id=decision.model_id or None,
+                          latency_ms=decision.latency_ms or None, category="strands_decider_2b")
+        if decision.fallback_reason and self.provider is not None:
+            self.events.write("fallback", student_id=student_id, selected=decision.pathway.id,
+                              reason=f"pathway decider: {decision.fallback_reason}"[:300], category="strands_decider_2b")
+        if steps:
+            self._start_step(student_id, steps[0])
+        return record
+
+    def _start_step(self, student_id: str, step: dict) -> None:
+        project = self._project(self.projects_root / step["project"])
+        if project.root != self.default_project().root:
+            self._switch(student_id, project, f"Starting {project.title}.")
+            return
+        start = step.get("start")
+        if start in (None, "readiness") or not project.manifest.has_problem(start):
+            return      # the readiness check's placement (apply_diagnostic) already set the first problem
+        engine = self.engine(student_id, project)
+        try:
+            record = self.store.load(student_id, project.id)
+        except Exception:
+            return      # unreadable progress: leave it to the engine's own recovery
+        if record is not None and (record.attempts or record.passed_problems):
+            return      # never move a lesson the student has already started
+        record = record or engine._fresh_record(student_id)
+        record.current_problem, record.origin_level, record.return_to = start, None, None
+        record.routing_log.append({"selected": start, "reason": "pathway_start", "policy": "pathway",
+                                   "stages": record.stages(),
+                                   "timestamp": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")})
+        self.store.save(record)
+        self.store.set_active_project(student_id, str(project.root))
+
+    def _continue_pathway(self, profile: dict, finished: Project, recommendation: "Recommendation") -> None:
+        """When a pathway project is finished, offer the pathway's next project first.
+        A review the course recommends after a struggle still comes first."""
+        pathway = profile.get("pathway")
+        if not pathway:
+            return
+        steps = pathway.get("steps") or []
+        i = pathway.get("current", 0)
+        if i < len(steps) and steps[i]["project"] == finished.root.name:
+            pathway["current"] = i = i + 1
+        if i >= len(steps):
+            return
+        folder = steps[i]["project"]
+        option = Option(REVISION if folder in self.catalog.revision.values() else NEXT_TOPIC,
+                        f"Next on your pathway: {steps[i]['title']}", folder)
+        rest = [o for o in recommendation.options if o.project != folder and o.kind != ALL_DONE]
+        if recommendation.kind == REVISION and rest:
+            recommendation.options = [rest[0], option] + rest[1:]
+        else:
+            if not recommendation.options or recommendation.options[0].project != folder:
+                recommendation.reason = f"Nice work! Next on your pathway ({pathway['title']}): {steps[i]['title']}."
+            recommendation.options = [option] + rest
+            recommendation.kind = option.kind
 
     # Readiness diagnostic (diagnostic/) -------------------------------------------------------
     # The quest creates the student. When it's finished, its confident stages seed the profile
