@@ -8,6 +8,8 @@ type Props = {step: ItemStep; value: Placed; onChange: (v: Placed) => void; disa
 
 // Game skins for sort questions. Every one still answers {card id: bucket id}, so scoring is unchanged.
 // No timers, lives or speed: each has a plain tap path that works with a keyboard or a screen reader.
+const INK = {color: 'text.primary', borderColor: 'divider', '&:hover': {borderColor: 'primary.dark', bgcolor: 'rgba(255,201,51,0.2)'}};
+const ON = {bgcolor: 'primary.main', color: 'primary.contrastText', '&:hover': {bgcolor: 'primary.main'}};
 const CODE = {fontFamily: 'var(--code-font)', whiteSpace: 'pre-wrap' as const};
 
 /** Rows: tap the rows that belong in the first box. Untapped rows go in the last box. */
@@ -27,8 +29,8 @@ export function RowsGame({step, value, onChange, disabled}: Props) {
           const on = value[card.id] === yes.id;
           return (
             <Button key={card.id} aria-pressed={on} disabled={disabled} onClick={() => onChange({...value, [card.id]: on ? no.id : yes.id})}
-              variant={on ? 'contained' : 'outlined'} color="primary"
-              sx={{justifyContent: 'space-between', textTransform: 'none', py: 1.1, px: 2, textAlign: 'left', ...CODE}}>
+              variant="outlined"
+              sx={{...(on ? ON : INK), justifyContent: 'space-between', textTransform: 'none', py: 1.1, px: 2, textAlign: 'left', ...CODE}}>
               <span>{card.text}</span>
               <span aria-hidden>{on ? `✓ ${yes.text}` : ''}</span>
             </Button>
@@ -85,7 +87,7 @@ export function ChipsGame({step, value, onChange, disabled}: Props) {
   const cards = step.cards!;
   const free = cards.filter(c => !value[c.id]);
   const chip = (id: string, text: string, onClick: () => void, on = false) => (
-    <Button key={id} size="small" aria-pressed={on} disabled={disabled} onClick={onClick} variant={on ? 'contained' : 'outlined'} sx={{m: 0.25, textTransform: 'none', borderRadius: '999px', ...CODE}}>{text}</Button>
+    <Button key={id} size="small" aria-pressed={on} disabled={disabled} onClick={onClick} variant="outlined" sx={{...(on ? ON : INK), m: 0.25, textTransform: 'none', borderRadius: '999px', ...CODE}}>{text}</Button>
   );
   const drop = (bucket: string) => {
     if (!held) return;

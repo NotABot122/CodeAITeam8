@@ -43,7 +43,7 @@ items:
     type: sort
     display: rows
     nodes: [filter_rows]
-    prompt: "The query is: SELECT * FROM daily_readings WHERE station_id = 'ST-A' AND date >= '2026-01-01' AND date <= '2026-01-03'. Drag each row to Returned or Not returned."
+    prompt: "The query is: SELECT * FROM daily_readings WHERE station_id = 'ST-A' AND date >= '2026-01-01' AND date <= '2026-01-03'. Sort each row into Returned or Not returned."
     buckets:
       - {id: keep, text: "Returned"}
       - {id: skip, text: "Not returned"}

@@ -39,7 +39,7 @@ items:
     display: chips
     nodes: [inputs_outputs]
     misconception: mixes_input_output
-    prompt: "def add_rain(a, b): return a + b. Drag each item to Goes in (parameter) or Comes out (return value)."
+    prompt: "def add_rain(a, b): return a + b. Sort each item into Goes in (parameter) or Comes out (return value)."
     buckets:
       - {id: in, text: "Goes in"}
       - {id: out, text: "Comes out"}
