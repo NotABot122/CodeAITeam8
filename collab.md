@@ -33,7 +33,7 @@ Every autonomous agent or developer **MUST read this file before writing code** 
 | `Agent-Bootstrap` | Gemini 3.8 Flash | `idle` | Integrated curriculum database references, added post-project AI reteach loop, created COURSE_FLOW_GRAPH.md, initialized git repository and committed all files | 2026-11-03 15:21 PST |
 | `Pratheek-Claude` | Claude Sonnet 5.5 | `idle` | Wrapped the student UI and `webapi/` around `engine.course` (next step, review quizzes, six concepts) | 2026-11-04 11:35 PST |
 | `Agent-3` | Unassigned | `idle` | None | - |
-| `zane-claude` | Claude Opus 5.5 (Kiro) | `idle` | Renamed "Stance Decider 2B" to "Strands Decider 2B" in documentation/ | 2026-11-03 15:30 PST |
+| `zane-claude` | Claude Opus 5.5 (Kiro) | `working` | Text/Blocks editor toggle (Python ↔ Blockly via `webapi/blocks.py`) and per-problem function bank (`functions.yaml`) on branch `frontend`. Touches `frontend/src/App.tsx`, `frontend/src/ui/`, `webapi/`, `engine/project.py`, problem folders | 2026-11-04 11:42 PST |
 | `Kiro-Demo` | Claude Opus 5.5 (Kiro) | `idle` | Adaptive path across projects (`engine/course.py`, quizzes, revision projects, Lists & Dictionaries topic) on `proto-branch`; UI handoff in `docs/HANDOFF-adaptive-path.md` | 2026-11-04 10:40 PST |
 
 ---

@@ -18,6 +18,8 @@ from engine.project import Project
 from engine.session import SubmitOutcome, UnknownStudent
 from engine.stages import MAX_STAGE, STAGE_NAMES
 
+from .blocks import python_to_blocks
+
 # Ids become folder names under the data directory, so only this shape is accepted.
 STUDENT_ID = re.compile(r"^[0-9a-f]{32}$")
 MAX_CODE_CHARS = 20_000
@@ -47,6 +49,10 @@ def _problem_extras(project: Project, problem_id: str, record: ProgressRecord) -
         "hintCount": len(problem.hints),
         "hintsSeen": record.hints_seen.get(problem.id, 0),
         "attempts": record.attempts.get(problem.id, 0),
+        # Pre-authored, one per function the answer should use (functions.yaml).
+        # None when the problem has no bank; [] when the answer needs no functions.
+        "functions": None if problem.functions is None else
+        [{"call": f["call"], "summary": f["summary"], "example": f["example"]} for f in problem.functions],
     }
 
 
@@ -146,6 +152,15 @@ class Service:
                 raise ApiError(400, "bad_request", "The code has characters that can't be saved.") from None
             outcome = self._guard(lambda: self.course.submit(student_id, path))
             return {"outcome": self._outcome(outcome, project), "state": self._state(student_id)}
+
+    @staticmethod
+    def to_blocks(code: Any) -> Dict[str, Any]:
+        """Python -> block workspace for the editor's Blocks mode. Parses only; never runs the code."""
+        if not isinstance(code, str):
+            raise ApiError(400, "bad_request", "The code must be text.")
+        if len(code) > MAX_CODE_CHARS:
+            raise ApiError(400, "code_too_long", f"The code is longer than {MAX_CODE_CHARS:,} characters.")
+        return python_to_blocks(code)
 
     def answer(self, student_id: str, answers: Any) -> Dict[str, Any]:
         self._check_id(student_id)

@@ -1,0 +1,9 @@
+# Function bank for Level 2. Only what the answer should use.
+- call: my_list.append(item)
+  summary: |-
+    Adds one item to the end of a list. It changes the list itself and gives back nothing, so don't write my_list = my_list.append(...).
+  example: |-
+    colors = []
+    colors.append("red")
+    colors.append("blue")
+    # colors is now ["red", "blue"]

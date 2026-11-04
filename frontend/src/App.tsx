@@ -1,13 +1,18 @@
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import CodeIcon from '@mui/icons-material/Code';
+import ExtensionIcon from '@mui/icons-material/Extension';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import {Alert, Box, Button, CircularProgress, Container, Paper, Typography} from '@mui/material';
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {Alert, Box, Button, CircularProgress, Container, Paper, ToggleButton, ToggleButtonGroup, Typography, useTheme} from '@mui/material';
+import {lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 import {ApiError, createHttpClient, type ApiClient} from '@/api/client';
 import type {Health, Outcome, StudentState} from '@/api/types';
+import type {WorkspaceState} from '@/blocks/format';
+import type {Generated} from '@/blocks/python';
 
 import ConceptMeters from './ui/ConceptMeters';
 import CodeEditor from './ui/CodeEditor';
+import FunctionBank from './ui/FunctionBank';
 import {PracticeDialog, ThemeDialog} from './ui/Dialogs';
 import {Markdown} from './ui/markdown';
 import PathStrip from './ui/PathStrip';
@@ -22,6 +27,14 @@ const store = {
   clear: () => { try { localStorage.removeItem(KEY); } catch { /* private mode */ } },
 };
 const msg = (e: unknown) => (e instanceof Error ? e.message : 'Something went wrong. Try again.');
+
+// Blockly is large, so it only loads when a student first picks Blocks.
+const BlockEditor = lazy(() => import('./blocks/BlockEditor'));
+type Mode = 'text' | 'blocks';
+const MODE_KEY = 'codeai.editorMode';
+const savedMode = (): Mode => { try { return localStorage.getItem(MODE_KEY) === 'blocks' ? 'blocks' : 'text'; } catch { return 'text'; } };
+/** The block workspace to show: `workspace` null means start empty, and `problem` says why. */
+interface BlockLoad {key: number; loading: boolean; workspace: WorkspaceState | null; problem: string | null}
 
 export default function App({client: injected}: {client?: ApiClient}) {
   const client = useMemo(() => injected ?? createHttpClient(import.meta.env.VITE_API_BASE_URL ?? ''), [injected]);
@@ -40,11 +53,51 @@ export default function App({client: injected}: {client?: ApiClient}) {
   const [themeBusy, setThemeBusy] = useState(false);
   const [themeError, setThemeError] = useState<string | null>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const dark = useTheme().palette.mode === 'dark';
+  const [mode, setMode] = useState<Mode>(savedMode);
+  const [blocks, setBlocks] = useState<BlockLoad>({key: 0, loading: false, workspace: null, problem: null});
+  const [blockInfo, setBlockInfo] = useState<{emptySlots: number; looseBlocks: number}>({emptySlots: 0, looseBlocks: 0});
+  // Bumped whenever the code is replaced from the server (new problem, new project), so Blocks mode reloads.
+  const [codeEpoch, setCodeEpoch] = useState(0);
+  const codeRef = useRef(code);
+  codeRef.current = code;
+  const translation = useRef(0);
 
   const adopt = useCallback((s: StudentState, keepCode = false) => {
     setState(s);
-    if (!keepCode) setCode(s.code);
+    if (!keepCode) { setCode(s.code); setCodeEpoch(n => n + 1); }
     store.set(s.studentId);
+  }, []);
+
+  // Text -> blocks. If the code has an error, or uses something blocks can't show, the workspace
+  // starts empty and says why. The student's text stays as it is until they change the blocks.
+  const toBlocks = useCallback(async (source: string) => {
+    const ticket = ++translation.current;
+    setBlocks(b => ({...b, loading: true}));
+    let next: Omit<BlockLoad, 'key'>;
+    try {
+      const r = await client.toBlocks(source);
+      next = r.ok ? {loading: false, workspace: r.workspace, problem: null} : {loading: false, workspace: null, problem: r.message};
+    } catch (e) {
+      next = {loading: false, workspace: null, problem: `Couldn't turn the code into blocks: ${msg(e)}`};
+    }
+    if (ticket === translation.current) setBlocks(b => ({key: b.key + 1, ...next}));
+  }, [client]);
+
+  const isCode = state?.problem?.format === 'code';
+  useEffect(() => {
+    if (mode === 'blocks' && isCode) void toBlocks(codeRef.current);
+  }, [mode, isCode, codeEpoch, toBlocks]);
+
+  const switchMode = (next: Mode | null) => {
+    if (!next || next === mode) return;
+    setMode(next);
+    try { localStorage.setItem(MODE_KEY, next); } catch { /* private mode */ }
+  };
+
+  const onBlocks = useCallback((g: Generated, changed: boolean) => {
+    setBlockInfo({emptySlots: g.emptySlots, looseBlocks: g.looseBlocks});
+    if (changed) setCode(g.code);
   }, []);
 
   useEffect(() => {
@@ -154,7 +207,43 @@ export default function App({client: injected}: {client?: ApiClient}) {
                   <QuizPanel questions={quiz.questions!} answers={answers} onChange={setAnswers} results={outcome?.questionResults ?? []} disabled={running} />
                 </Box>
               ) : (
-                <CodeEditor value={code} onChange={setCode} onRun={run} disabled={running} />
+                <>
+                  <Box sx={{display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap'}}>
+                    <ToggleButtonGroup size="small" exclusive value={mode} onChange={(_, v: Mode | null) => switchMode(v)} aria-label="How to write your code">
+                      <ToggleButton value="text" sx={{px: 1.5, gap: 0.75}}><CodeIcon fontSize="small" />Text</ToggleButton>
+                      <ToggleButton value="blocks" sx={{px: 1.5, gap: 0.75}}><ExtensionIcon fontSize="small" />Blocks</ToggleButton>
+                    </ToggleButtonGroup>
+                    {mode === 'blocks' && !blocks.loading && (blockInfo.emptySlots > 0 || blockInfo.looseBlocks > 0) && (
+                      <Typography variant="caption" color="text.secondary" role="status">
+                        {[blockInfo.emptySlots && `${blockInfo.emptySlots} empty ${blockInfo.emptySlots === 1 ? 'slot runs' : 'slots run'} as None`,
+                          blockInfo.looseBlocks && `${blockInfo.looseBlocks} loose ${blockInfo.looseBlocks === 1 ? "block isn't" : "blocks aren't"} connected, so ${blockInfo.looseBlocks === 1 ? "it won't" : "they won't"} run`]
+                          .filter(Boolean).join(' · ')}
+                      </Typography>
+                    )}
+                  </Box>
+                  {mode === 'text' ? (
+                    <Box sx={{display: 'flex', flexDirection: {xs: 'column', sm: 'row'}, gap: 1.5, flex: '1 0 260px', minHeight: 0}}>
+                      {p.functions && <FunctionBank functions={p.functions} />}
+                      <Box sx={{flex: 1, minWidth: 0, display: 'flex'}}>
+                        <CodeEditor value={code} onChange={setCode} onRun={run} disabled={running} />
+                      </Box>
+                    </Box>
+                  ) : blocks.loading ? (
+                    <Box sx={{flex: '1 0 360px', display: 'grid', placeItems: 'center'}}><CircularProgress aria-label="Turning your code into blocks" /></Box>
+                  ) : (
+                    <>
+                      {blocks.problem && (
+                        <Alert severity="warning">
+                          {blocks.problem} So the block workspace starts empty. Your text code is unchanged until you add blocks here,
+                          and adding blocks replaces it. To keep it, switch back to Text and fix it there.
+                        </Alert>
+                      )}
+                      <Suspense fallback={<Box sx={{flex: '1 0 360px', display: 'grid', placeItems: 'center'}}><CircularProgress aria-label="Loading blocks" /></Box>}>
+                        <BlockEditor key={blocks.key} initial={blocks.workspace} onChange={onBlocks} dark={dark} />
+                      </Suspense>
+                    </>
+                  )}
+                </>
               )}
               {quiz ? (
                 <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
@@ -163,10 +252,10 @@ export default function App({client: injected}: {client?: ApiClient}) {
                 </Box>
               ) : (
               <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
-                <Button variant="contained" color="secondary" size="large" startIcon={running ? <CircularProgress size={18} color="inherit" /> : <PlayArrowIcon />} disabled={running} onClick={run}>
+                <Button variant="contained" color="secondary" size="large" startIcon={running ? <CircularProgress size={18} color="inherit" /> : <PlayArrowIcon />} disabled={running || (mode === 'blocks' && blocks.loading)} onClick={run}>
                   {running ? 'Checking…' : 'Run'}
                 </Button>
-                <Typography variant="caption" color="text.secondary">Ctrl/⌘ + Enter</Typography>
+                {mode === 'text' && <Typography variant="caption" color="text.secondary">Ctrl/⌘ + Enter</Typography>}
                 <Typography variant="caption" color="text.secondary" sx={{ml: 'auto'}}>Attempts: {p.attempts}</Typography>
               </Box>
               )}

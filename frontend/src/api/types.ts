@@ -51,6 +51,14 @@ export interface ProblemView {
   hintCount: number;
   hintsSeen: number;
   attempts: number;
+  /** The functions this problem's answer should use. [] means it needs none; null means no bank was written. */
+  functions: FunctionInfo[] | null;
+}
+
+export interface FunctionInfo {
+  call: string;
+  summary: string;
+  example: string | null;
 }
 
 export interface StudentState {
@@ -110,3 +118,6 @@ export interface Health {ok: boolean; project: string; ai: boolean; aiReason: st
 export interface SubmitResult {outcome: Outcome; state: StudentState}
 export interface StartResult {message: string; built: boolean; state: StudentState}
 export interface ThemeResult {built: boolean; message: string; state: StudentState}
+export type BlocksResult =
+  | {ok: true; workspace: import('../blocks/format').WorkspaceState; blockCount: number}
+  | {ok: false; reason: 'syntax_error' | 'unsupported' | 'too_long' | 'too_complex'; message: string; line: number | null};

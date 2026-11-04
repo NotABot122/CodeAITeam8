@@ -1,0 +1,15 @@
+# Function bank for Level 2: Total by Station.
+- call: my_dict.get(key, default)
+  summary: |-
+    Looks up a key in a dictionary. If the key isn't there yet, it gives back the default instead of causing an error.
+    Useful for running totals: start from 0 the first time you see a key.
+  example: |-
+    scores = {"Ada": 3}
+    scores.get("Ada", 0)    # 3
+    scores.get("Grace", 0)  # 0
+- call: round(number, 1)
+  summary: |-
+    Rounds a number to a number of decimal places. The second value is how many places to keep.
+  example: |-
+    round(7.25 + 0.1, 1)
+    # 7.3

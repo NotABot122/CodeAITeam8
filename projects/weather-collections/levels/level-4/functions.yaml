@@ -1,0 +1,22 @@
+# Function bank for Level 4: Station Summary. The first three are the student's own functions.
+- call: rain_by_station(rows)
+  summary: |-
+    Your function from Level 2. Gives back a dictionary of total rain for each station. Call it once, on all the rows. Its keys are also the list of stations.
+- call: hot_dates(rows, threshold)
+  summary: |-
+    Your function from Level 1. Gives back the list of dates at or above the threshold. Call it once per station, on that station's rows.
+- call: days_by_month(rows)
+  summary: |-
+    Your function from Level 3. Gives back a dictionary with one key per month. Call it once per station, on that station's rows.
+- call: len(x)
+  summary: |-
+    Counts the items in a list, or the keys in a dictionary.
+  example: |-
+    len(["a", "b", "c"])   # 3
+    len({"x": 1, "y": 2})  # 2
+- call: my_list.append(item)
+  summary: |-
+    Adds one item to the end of a list. Use it to collect one station's rows.
+  example: |-
+    mine = []
+    mine.append({"name": "Ada"})
