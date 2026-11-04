@@ -66,3 +66,16 @@
   - [x] 8.5 CLI `theme` command, per-student active project, `--ai` switch, `engine.theme_demo`
     - _Requirements: 20.9, 21.8_
   - [x] 8.6 Tests with a scripted model (spec, filter, builder, themed grading, AI hints) and live Bedrock runs
+
+- [x] 9. Adaptive path across projects
+  - [x] 9.1 Quiz problem format: manifest `format`, `questions.yaml` validation, `engine/quiz.py`, `Engine.answer`
+    - _Requirements: 24.2–24.4_
+  - [x] 9.2 `engine/rubric.py`: rubric grading through the Model_Provider, filtered, fails open to ungraded
+    - _Requirements: 10.1–10.4, 24.5, 24.6_
+  - [x] 9.3 Profile in the progress store; projects start at profile stages
+    - _Requirements: 22.1–22.4_
+  - [x] 9.4 `engine/course.py`: catalog, `assess`, `decide`, Course API
+    - _Requirements: 23.1–23.8_
+  - [x] 9.5 Content: `weather-collections`, six revision projects, `catalog.yaml`; content check runs quiz snippets
+    - _Requirements: 24.1, 24.7, 24.8_
+  - [x] 9.6 CLI `answer` and `next`, `engine.path_demo`, tests, and the UI handoff (`docs/HANDOFF-adaptive-path.md`)

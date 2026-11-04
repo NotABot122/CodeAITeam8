@@ -54,6 +54,31 @@ When a check fails, Bedrock writes one hint about the student's actual mistake. 
 
 Settings: `--ai off` (or `CODEAI_AI=off`) turns both AI features off. `CODEAI_MODEL_ID` changes the model (default `us.anthropic.claude-haiku-4-5-20251001-v1:0`). `CODEAI_AWS_REGION` changes the region (default `us-west-2`). Needs `pip install --user boto3` and AWS credentials. Each hint or theme event is logged in `.codeai-data/logs/events.jsonl` with its source and model.
 
+## What comes next: the adaptive path
+
+When a student finishes a project, the Course looks at how each concept went (attempts, hints, practice problems) and picks the next step. Anyone can sit down and follow it, with no teacher setup.
+
+| How it went | What's next |
+|---|---|
+| **Aced it**: every problem in 2 tries or fewer, with 1 hint or fewer | The next topic where they have the least mastery |
+| **Struggled** on a concept: 4 or more tries, 2 or more hints, or a practice problem | A **revision project** for the weakest concept: a review quiz, then a scaffolded coding task |
+| **In between** | The same topic in a new theme they choose (needs AI), or the next topic |
+
+- **Stages carry across projects.** A new project starts each concept at the student's current stage.
+- **Quizzes:** "predict the output" questions are checked automatically. A wrong answer shows why, and the student can retry. One "explain it in your own words" question is scored 0 to 3 against a rubric by Bedrock, as feedback only, so it doesn't change stages yet.
+- **Content:** a second topic, **Lists and Dictionaries** (`projects/weather-collections`), and six revision projects, one per concept (`projects/revision-*`).
+- **Thresholds and topics** are in `projects/catalog.yaml`, so they can be changed without code.
+- **Content check:** it also runs every quiz snippet, to confirm the marked answer is what the code really prints.
+
+```bash
+python3 -m engine.path_demo --offline                 # two students: one aces it, one struggles
+python3 -m engine.cli next   --student ID             # after a project: see what's next
+python3 -m engine.cli next   --student ID --choose 1  # start it
+python3 -m engine.cli answer --student ID             # answer a quiz step
+```
+
+For the UI: `docs/HANDOFF-adaptive-path.md` describes the `Course` API and its JSON.
+
 ## The lesson
 
 | Level | Function | Concept |
@@ -82,7 +107,8 @@ Expected answers are computed by a separate SQL checker (`reference/independent_
 
 - AI rubric grading of written answers and the grader-agreement benchmark (requirements 10 and 11).
 - Bedrock Guardrails. The content filter is local rules plus a model moderation call; AI hints get the local rules only.
-- Stages don't carry over between projects: a themed project starts every concept at Stage 0.
+- Themes apply only to the first topic. Lists and Dictionaries and the revision projects use the weather data.
+- Rubric scores on written answers are feedback only. They should affect stages once the grader is checked against human scores.
 - Student code runs in a separate process with a time limit and its own database copy, but not in a security sandbox. It's fine for a demo, but not for untrusted code in production.
 
 The spec is in `.kiro/specs/weather-station-adaptive-lesson/`.

@@ -1,0 +1,3 @@
+- "Make an empty list before the loop: dates = []. Each time a row is hot enough, add its date to the list."
+- "\"threshold or more\" means >=. Inside for row in rows:, check row[\"temp_high_c\"] >= threshold, then dates.append(row[\"date\"])."
+- "After the loop, call dates.sort() so the oldest date comes first, then return the list."

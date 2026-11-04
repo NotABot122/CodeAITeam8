@@ -1,0 +1,40 @@
+# What the Course offers, and how it decides what comes next.
+# Topics are core projects. Revision projects review one concept each.
+concepts:
+  database_retrieval: Database Retrieval
+  conditionals: Conditionals
+  loops: Loops
+  functions: Functions
+  lists: Lists
+  dictionaries: Dictionaries
+
+topics:
+  - id: data-logic
+    title: Data, Decisions, and Loops
+    project: weather-station
+    themeable: true            # students can ask for this one in their own theme
+    concepts: [database_retrieval, conditionals, loops, functions]
+  - id: collections
+    title: Lists and Dictionaries
+    project: weather-collections
+    themeable: false
+    concepts: [lists, dictionaries, functions]
+
+revision:
+  database_retrieval: revision-database-retrieval
+  conditionals: revision-conditionals
+  loops: revision-loops
+  functions: revision-functions
+  lists: revision-lists
+  dictionaries: revision-dictionaries
+
+# How a finished project is judged, per concept, from its problems' attempts and hints.
+# Change these after feedback; no code changes needed.
+thresholds:
+  strong:                      # every problem for the concept met both limits
+    max_attempts: 2
+    max_hints: 1
+  struggled:                   # any problem for the concept hit one of these
+    min_attempts: 4
+    min_hints: 2
+    practice_counts: true      # being sent to a practice problem counts as struggling

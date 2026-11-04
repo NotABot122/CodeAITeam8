@@ -1,0 +1,2 @@
+- "Work from the inside out: run the innermost function call first, then use its result in the outer one."
+- "For the explain question, think about your build_report: what would it look like as one giant function?"

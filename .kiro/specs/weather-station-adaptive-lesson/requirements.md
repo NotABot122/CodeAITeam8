@@ -383,3 +383,44 @@ Assumptions made for this draft (please confirm or correct):
 6. THE Engine SHALL count an AI hint as a hint seen for stage criteria, the same as a pre-authored hint.
 7. WHEN a hint is shown, THE Engine SHALL log its source (ai or authored), the Problem identifier, and for AI hints the model identifier and latency, identifying the student only by Student_Id.
 8. WHERE AI features are turned off in configuration, THE Engine SHALL use only pre-authored hints and make no model calls.
+
+### Requirement 22: Cross-project student profile
+
+**User Story:** As a student, I want what I've already shown to carry into my next project, so that I don't start from zero every time.
+
+#### Acceptance Criteria
+
+1. THE Engine SHALL keep one profile per Student_Id with a Stage for every Concept in the catalog, the active project, the completed projects with their evidence, and the current next step.
+2. WHEN a Problem is graded, THE Engine SHALL set each Concept's profile Stage to the higher of its profile Stage and its Stage in the current project.
+3. WHEN a student starts a project, THE Engine SHALL start each of its Concepts at the student's profile Stage.
+4. IF a profile can't be read, THEN THE Engine SHALL treat it as empty and continue.
+
+### Requirement 23: Next step after a project
+
+**User Story:** As a student, I want the lesson to pick what I do after a project, so that I'm challenged when I'm ready and supported when I'm not.
+
+#### Acceptance Criteria
+
+1. WHEN a student completes a project, THE Engine SHALL judge each Concept the student worked on as strong, struggled, or steady, using thresholds from the catalog file. The defaults are: strong means every Problem for the Concept passed in 2 attempts or fewer with 1 hint or fewer; struggled means any Problem took 4 or more attempts or 2 or more hints, or the student was assigned a Practice_Problem for that Concept.
+2. IF any Concept is struggled, THEN THE Engine SHALL recommend the revision project for the struggled Concept with the most attempts and hints, and SHALL also offer the next topic.
+3. IF the struggled Concept's revision project is the one just completed, THEN THE Engine SHALL recommend the next topic and SHALL offer the revision project again.
+4. IF every Concept is strong, THEN THE Engine SHALL recommend the uncompleted topic whose Concepts have the lowest average profile Stage, with ties broken by catalog order.
+5. IF the result is steady, the topic is themeable, and AI features are on, THEN THE Engine SHALL recommend the same topic in a new theme and SHALL also offer the next topic. Otherwise it SHALL recommend the next topic.
+6. IF no uncompleted topic remains, THEN THE Engine SHALL report that every topic is finished.
+7. THE Engine SHALL give every recommendation a plain-language reason and the evidence used, and SHALL log it with the Student_Id only.
+8. WHEN a student starts a recommended option, THE Engine SHALL make that project active with a fresh progress record.
+
+### Requirement 24: Revision projects and check-for-understanding quizzes
+
+**User Story:** As a student who found a concept hard, I want a short review with questions and a guided task, so that I understand it before moving on.
+
+#### Acceptance Criteria
+
+1. THE catalog SHALL map every Concept to a revision project made of a review quiz followed by a scaffolded coding task on the same Concept.
+2. A quiz SHALL contain "predict the output" questions with choices and one correct answer, and "explain" questions with a rubric descriptor for each Stage from 0 to 3.
+3. THE Engine SHALL send no answers, explanations, or rubrics to the student before grading.
+4. WHEN a student answers a "predict" question wrongly, THE Engine SHALL fail the attempt and show that question's explanation. Attempts are unlimited.
+5. WHEN a student answers an "explain" question, THE Engine SHALL screen the text with the Content_Filter, score it with the Rubric_Grader, and show the score and feedback. IF grading fails, THEN THE Engine SHALL save the answer as ungraded and SHALL not block the student.
+6. THE explain score SHALL NOT change Stages until the Rubric_Grader meets the agreement benchmark in Requirement 11.
+7. THE content check SHALL run every "predict" snippet and fail when its output doesn't match exactly one choice, the one marked correct.
+8. A scaffolded starter file SHALL fail its coding task's checks until the student completes it.

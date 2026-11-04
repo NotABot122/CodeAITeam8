@@ -1,0 +1,3 @@
+- "The WHERE clause needs two conditions joined with AND: one for the station and one for the rain. Each value is a ?."
+- "The tuple after the SQL lists the values in the same order as the ? marks: (station_id, min_rain)."
+- "Each row from fetchall() is a tuple like (\"2026-01-14\",). row[0] is the date."

@@ -1,0 +1,2 @@
+- "average_high: if not rows: return None. Otherwise add up every temp_high_c and divide by how many rows there are."
+- "station_average is two lines: rows = get_readings(conn, station_id, start_date, end_date), then return average_high(rows)."

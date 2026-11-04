@@ -1,0 +1,2 @@
+- "You need two accumulators: the most rain so far, and the date it fell on. Both start as None."
+- "Inside the loop, replace both when most_rain is None or row[\"rain_mm\"] > most_rain. Using > (not >=) keeps the first day in a tie."

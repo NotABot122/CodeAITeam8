@@ -320,3 +320,43 @@ flowchart LR
 ### Measured
 
 18 live builds across varied themes. 17 passed the first time. One failed because a value was out of range, and adding bounds to the tool schema fixed it (10 of 10 passed afterward). Builds take 4 to 16 seconds and 2 to 4 model calls. Hints take about 1 second.
+
+## Addendum: Adaptive Path Across Projects (Requirements 22 to 24)
+
+### Decisions
+
+1. **The Course is the single entry point** (`engine/course.py`) for the CLI and the web API. `Engine` still runs one project. The Course adds the profile, the next-step decision, and project switching.
+2. **The profile is a stage per concept,** carried by starting each project at the profile's stages. A project still raises a stage by at most one per passed problem, so across projects a strong student climbs from Beginning toward Exceeding.
+3. **The judgment is evidence-based and configurable.** `assess()` turns a finished project into strong, steady, or struggled per concept. `decide()` turns that into a recommendation. Both are pure functions, and the thresholds are in `projects/catalog.yaml`.
+4. **"A different topic with less mastery"** means the uncompleted topic with the lowest average profile stage. The catalog has two topics now.
+5. **Revision projects end at Meeting.** Their manifests set no Stage 3 criterion, because scaffolded work doesn't show Exceeding.
+6. **Explain scores are feedback only** until the rubric grader is benchmarked (Requirement 11).
+7. **The quiz is a new problem format** (`format: quiz` in the manifest, `questions.yaml` in the folder). Quiz problems use the same attempts, hints, stage, and routing logic as code problems.
+8. **Projects can share data** through manifest dataset paths such as `../weather-station/dataset/...`. The loader no longer needs a `dataset/` folder in every project.
+
+### Flow
+
+```mermaid
+flowchart TD
+    C[Project complete] --> A[assess: strong / steady / struggled per concept]
+    A --> S{Any struggled?}
+    S -- yes, revision not just done --> R[Revision project: quiz, then scaffolded task]
+    S -- yes, same revision just done --> N
+    S -- no --> T{All strong?}
+    T -- yes --> N[Next topic: lowest average stage]
+    T -- no, themeable and AI on --> TH[Same topic, new theme]
+    T -- no, otherwise --> N
+    N -- none left --> D[All done]
+```
+
+### Content
+
+| Folder | What |
+|---|---|
+| `projects/weather-collections` | Topic 2: `hot_dates`, `rain_by_station`, `days_by_month`, `station_summary`, plus 2 practice problems |
+| `projects/revision-<concept>` | Six reviews. Level 1 is a quiz (2 predict, 1 explain); Level 2 is a scaffolded task |
+| `projects/catalog.yaml` | Topics, revision map, concept names, thresholds |
+
+### Verification
+
+All 8 projects pass the content check, including the quiz snippet checks. Each scaffolded starter fails its task. 87 unit tests pass, including full journeys for strong, struggling, steady, and repeat-revision students. The live run scored a written answer at rubric stage 3 with appropriate feedback.

@@ -1,0 +1,29 @@
+- id: q1
+  type: predict
+  prompt: What does this code print?
+  code: |
+    temps = []
+    for t in [30, 36, 38]:
+        if t >= 35:
+            temps.append(t)
+    print(temps)
+  choices: ["[36, 38]", "[30, 36, 38]", "[38]"]
+  answer: 0
+  explanation: "Only 36 and 38 are 35 or more, so only they're appended, in the order the loop visits them."
+- id: q2
+  type: predict
+  prompt: What does this code print?
+  code: |
+    days = ["mon", "tue", "wed", "thu"]
+    print(days[0], days[-1], len(days))
+  choices: ["mon thu 4", "mon wed 4", "tue thu 3"]
+  answer: 0
+  explanation: "days[0] is the first item, days[-1] is the last, and len gives 4 items."
+- id: q3
+  type: explain
+  prompt: In your own words, when is a list more useful than separate variables? Give an example from the weather data.
+  rubric:
+    0: No reason given, or the answer is off topic.
+    1: Says lists hold many values, with no reason or example.
+    2: Explains that a list keeps any number of values in order under one name, so a loop can build or use it.
+    3: Gives that explanation with a weather example, such as a list of every hot day's date, and why separate variables wouldn't work for it.

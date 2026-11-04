@@ -1,0 +1,2 @@
+- "Inside the loop, check row[\"temp_high_c\"] >= threshold."
+- "When it's true, temps.append(row[\"temp_high_c\"]). Return temps after the loop."

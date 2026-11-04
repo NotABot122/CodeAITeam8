@@ -1,0 +1,2 @@
+- "Start with the strictest band: if rain_mm >= 20.0 returns \"heavy\". Then work down."
+- "After heavy, check >= 5.0 for moderate, then > 0 for light. The else is \"none\"."
