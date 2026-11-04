@@ -20,6 +20,8 @@ Remove `--ai off` (and install `boto3`, set AWS creds) to get AI hints and the "
 
 ## What's here
 
+- `src/quest/` – the readiness quest, which is the front page (Storm Chaser Academy). Taps for choices, up/down buttons for ordering, a box pick for sorting. "Skip to coding" goes straight to the lesson.
+
 - `src/api/` – typed client and response shapes (mirror `webapi/service.py`)
 - `src/ui/PathStrip` – compact level path; an assigned practice problem shows as a badge on its level
 - `src/ui/QuizPanel`, `src/ui/NextStepPanel` – review quizzes and the "what's next" screen (from `engine.course`)

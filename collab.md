@@ -31,7 +31,7 @@ Every autonomous agent or developer **MUST read this file before writing code** 
 | Agent ID | Current Model | Status (`idle` / `working`) | Current Task / Focus Area | Started At (Timestamp) |
 |---|---|---|---|---|
 | `Agent-Bootstrap` | Gemini 3.8 Flash | `idle` | Integrated curriculum database references, added post-project AI reteach loop, created COURSE_FLOW_GRAPH.md, initialized git repository and committed all files | 2026-11-03 15:21 PST |
-| `Pratheek-Claude` | Claude Sonnet 5.5 | `idle` | Wrapped the student UI and `webapi/` around `engine.course` (next step, review quizzes, six concepts) | 2026-11-04 11:35 PST |
+| `Pratheek-Claude` | Claude Sonnet 5.5 | `idle` | Readiness quest as the front page of the student UI (`frontend/src/quest/`, quest routes in `webapi/`) | 2026-11-04 12:40 PST |
 | `Agent-3` | Unassigned | `idle` | None | - |
 | `zane-claude` | Claude Opus 5.5 (Kiro) | `idle` | Renamed "Stance Decider 2B" to "Strands Decider 2B" in documentation/ | 2026-11-03 15:30 PST |
 | `Kiro-Demo` | Claude Opus 5.5 (Kiro) | `idle` | Merged `diagnosis` into `proto-branch` and connected the readiness quest to `Course` (confident stages seed the profile; placement sets the first problem) | 2026-11-04 12:05 PST |
@@ -45,6 +45,11 @@ Every autonomous agent or developer **MUST read this file before writing code** 
 
 > *Most recent on top. Maximum 10 items.*
 
+1. **[Task 017] Readiness Quest as the Front Page of the Student UI**
+   - **Model:** Claude Sonnet 5.5
+   - **Agent:** `Pratheek-Claude`
+   - **Timestamp:** 2026-11-04 12:40 PST
+   - **Summary:** Merged `main` into `frontend`. The site now opens on the readiness quest (buddy and goal picks, zone bar, XP/rank/badges, tap, order and sort questions, optional typed "explain" step, feedback with tips, skill map at the end). A "Skip to coding" link starts a lesson-only student. When the quest ends, its result is applied through `Course` and the student lands in the lesson at the placement. A refresh resumes a half-finished quest. New `webapi/` routes: `GET /api/quest/options`, `POST /api/quest`, `GET /api/quest/<id>/next`, `POST /api/quest/<id>/answer`, `POST /api/quest/<id>/finish`. Ordering and sorting use buttons, not drag. The free-text goal is not offered. Seeded stages show in the concept meters, still an open design question (see the handoff doc). Engine and `diagnostic/` untouched. Browser run: full quest, hand-off, reload.
 1. **[Task 017] Gamified Grade 3-5 Readiness Diagnostic for the Weather Station Lesson**
    - **Model:** Claude Sonnet 5.5 (Kiro)
    - **Agent:** `Kiro-Diagnostic`
@@ -90,8 +95,3 @@ Every autonomous agent or developer **MUST read this file before writing code** 
    - **Agent:** Lead-Antigravity
    - **Timestamp:** 2026-11-03 15:47 PST
    - **Summary:** Added documentation/resources/code_dot_org_architecture_reference.md extracting patterns from code-dot-org/code-dot-org (UserLevel, TeacherFeedback, Activity, S3 project storage, Aurora read replicas, and feature vector extraction for Strands Decider 2B).
-10. **[Task 008] Vision Document Ingestion & Intra-Lesson Adaptivity Invariant**
-   - **Model:** Gemini 3.8 Flash (Authoritative)
-   - **Agent:** Lead-Antigravity
-   - **Timestamp:** 2026-11-03 15:33 PST
-   - **Summary:** Integrated the official CodeAI AWS Imagine Grant Vision Document into documentation/VISION.md, aligning the architecture with intra-lesson adaptivity, consistent objectives with variable depth, static fallbacks, and bidirectional content filtering.

@@ -16,10 +16,13 @@ from engine.course import Course, CourseError
 from engine.progress import ProgressRecord
 from engine.project import Project
 from engine.session import SubmitOutcome, UnknownStudent
+from diagnostic.engine import NothingPending, NotFinished, UnknownQuest
+from diagnostic.models import InvalidResponse
+from diagnostic.store import InvalidStudentId
 from engine.stages import MAX_STAGE, STAGE_NAMES
 
 # Ids become folder names under the data directory, so only this shape is accepted.
-STUDENT_ID = re.compile(r"^[0-9a-f]{32}$")
+STUDENT_ID = re.compile(r"^([0-9a-f]{32}|STU-[0-9a-f]{16,32})$")  # lesson-only students, or ones made by the readiness quest
 MAX_CODE_CHARS = 20_000
 MAX_THEME_CHARS = 300
 
@@ -192,14 +195,53 @@ class Service:
             self._guard(lambda: self.course.reset_theme(student_id))
             return self._state(student_id)
 
+    # Readiness quest ---------------------------------------------------------
+    def quest_options(self) -> Dict[str, Any]:
+        return self.course.diagnostic_options()
+
+    def quest_start(self, buddy: Any, goal: Any) -> Dict[str, Any]:
+        for value in (buddy, goal):
+            if value is not None and (not isinstance(value, str) or len(value) > 40):
+                raise ApiError(400, "bad_request", "Pick a buddy and a goal from the lists.")
+        options = self.course.diagnostic_options()
+        if buddy is not None and buddy not in {b["id"] for b in options["buddies"]}:
+            raise ApiError(400, "bad_request", "Pick a buddy from the list.")
+        if goal is not None and goal not in {g["id"] for g in options["goals"]}:
+            raise ApiError(400, "bad_request", "Pick a goal from the list.")
+        # The free-text goal is left out on purpose: the screen only offers taps.
+        return self._guard(lambda: self.course.diagnostic_start(buddy, goal, None))
+
+    def quest_next(self, student_id: str) -> Dict[str, Any]:
+        self._check_id(student_id)
+        with self._lock(student_id):
+            return self._guard(lambda: self.course.diagnostic_next(student_id))
+
+    def quest_answer(self, student_id: str, response: Any, elapsed_ms: Any) -> Dict[str, Any]:
+        self._check_id(student_id)
+        if elapsed_ms is not None and (not isinstance(elapsed_ms, int) or isinstance(elapsed_ms, bool) or not 0 <= elapsed_ms <= 3_600_000):
+            elapsed_ms = None
+        if isinstance(response, dict) and isinstance(response.get("text"), str) and len(response["text"]) > 1000:
+            raise ApiError(400, "bad_request", "That answer is too long.")
+        with self._lock(student_id):
+            return self._guard(lambda: self.course.diagnostic_answer(student_id, response, elapsed_ms))
+
+    def quest_finish(self, student_id: str) -> Dict[str, Any]:
+        self._check_id(student_id)
+        with self._lock(student_id):
+            return self._guard(lambda: self.course.diagnostic_finish(student_id))
+
     @staticmethod
     def _guard(fn):
         try:
             return fn()
         except CourseError as err:
             raise ApiError(400, "course_error", str(err)) from None
-        except UnknownStudent:
+        except (UnknownStudent, UnknownQuest, InvalidStudentId):
             raise ApiError(404, "unknown_student", "No student with that id.") from None
+        except InvalidResponse as err:
+            raise ApiError(422, "invalid_answer", str(err)) from None
+        except (NothingPending, NotFinished) as err:
+            raise ApiError(409, "quest_state", str(err)) from None
 
     # Serialising ------------------------------------------------------------
     @staticmethod

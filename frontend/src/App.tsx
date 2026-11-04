@@ -11,6 +11,7 @@ import CodeEditor from './ui/CodeEditor';
 import {PracticeDialog, ThemeDialog} from './ui/Dialogs';
 import {Markdown} from './ui/markdown';
 import PathStrip from './ui/PathStrip';
+import QuestApp from './quest/QuestApp';
 import NextStepPanel from './ui/NextStepPanel';
 import QuizPanel, {quizReady, SubmitQuiz, type QuizAnswers} from './ui/QuizPanel';
 import Results from './ui/Results';
@@ -26,6 +27,8 @@ const msg = (e: unknown) => (e instanceof Error ? e.message : 'Something went wr
 export default function App({client: injected}: {client?: ApiClient}) {
   const client = useMemo(() => injected ?? createHttpClient(import.meta.env.VITE_API_BASE_URL ?? ''), [injected]);
   const [state, setState] = useState<StudentState | null>(null);
+  // The first screen is the readiness quest. 'resume' continues one that was started; 'lesson' is the coding screen.
+  const [mode, setMode] = useState<'loading' | 'quest' | 'resume' | 'lesson'>('loading');
   const [health, setHealth] = useState<Health | null>(null);
   const [code, setCode] = useState('');
   const [outcome, setOutcome] = useState<Outcome | null>(null);
@@ -54,10 +57,15 @@ export default function App({client: injected}: {client?: ApiClient}) {
         setHealth(await client.health());
         const saved = store.get();
         if (saved) {
-          try { if (!off) adopt(await client.getState(saved)); return; }
-          catch (e) { if (!(e instanceof ApiError && e.status === 404)) throw e; store.clear(); }
+          try {
+            const st = await client.getState(saved);
+            if (off) return;
+            adopt(st);
+            setMode(st.diagnostic === 'in_progress' ? 'resume' : 'lesson');
+            return;
+          } catch (e) { if (!(e instanceof ApiError && e.status === 404)) throw e; store.clear(); }
         }
-        if (!off) adopt(await client.newStudent());
+        if (!off) setMode('quest');
       } catch (e) { if (!off) setLoadError(msg(e)); }
     })();
     return () => { off = true; };
@@ -105,13 +113,24 @@ export default function App({client: injected}: {client?: ApiClient}) {
     catch (e) { setThemeError(msg(e)); } finally { setThemeBusy(false); }
   };
 
-  const restart = async () => {
-    store.clear(); setOutcome(null); setLoadError(null);
-    try { adopt(await client.newStudent()); } catch (e) { setLoadError(msg(e)); }
+  const restart = () => {
+    store.clear(); setOutcome(null); setLoadError(null); setState(null); setMode('quest');
+  };
+
+  const skipQuest = async () => {
+    try { adopt(await client.newStudent()); setMode('lesson'); } catch (e) { setLoadError(msg(e)); }
+  };
+
+  const finishedQuest = async (id: string) => {
+    try { adopt(await client.getState(id)); setOutcome(null); setMode('lesson'); } catch (e) { setLoadError(msg(e)); }
   };
 
   if (loadError) return <Container sx={{py: 6}}><Alert severity="error" action={<Button color="inherit" onClick={() => location.reload()}>Retry</Button>}>{loadError}</Alert></Container>;
-  if (!state) return <Box sx={{display: 'grid', placeItems: 'center', minHeight: '60vh'}}><CircularProgress aria-label="Loading" /></Box>;
+  if (mode === 'quest' || (mode === 'resume' && state)) {
+    return <QuestApp client={client} resumeId={mode === 'resume' ? state!.studentId : null}
+      onStarted={id => store.set(id)} onFinished={id => { store.set(id); void finishedQuest(id); }} onSkip={() => void skipQuest()} />;
+  }
+  if (!state || mode === 'loading') return <Box sx={{display: 'grid', placeItems: 'center', minHeight: '60vh'}}><CircularProgress aria-label="Loading" /></Box>;
 
   const p = state.problem;
   const themed = state.themed;

@@ -4,7 +4,12 @@
 
 Routes (JSON):
     GET  /api/health
-    POST /api/students                      -> new student + state
+    POST /api/students                      -> new student + state (skips the readiness quest)
+    GET  /api/quest/options                 -> buddies, goals, zones
+    POST /api/quest                         {"buddy", "goal"} -> {student_id, welcome, first}
+    GET  /api/quest/<id>/next               -> next step, or {done: true, ...} (result is applied)
+    POST /api/quest/<id>/answer             {"response", "elapsedMs"} -> feedback
+    POST /api/quest/<id>/finish             -> end early (result is applied)
     GET  /api/students/<id>                 -> state
     POST /api/students/<id>/submit          {"code": "..."} -> {outcome, state}
     POST /api/students/<id>/answer          {"answers": {"q1": 1, "q3": "text"}} -> {outcome, state}
@@ -37,6 +42,11 @@ ID = r"([^/]+)"
 ROUTES = [
     ("GET", re.compile(r"^/api/health$"), lambda s, m, b: s.health()),
     ("POST", re.compile(r"^/api/students$"), lambda s, m, b: s.new_student()),
+    ("GET", re.compile(r"^/api/quest/options$"), lambda s, m, b: s.quest_options()),
+    ("POST", re.compile(r"^/api/quest$"), lambda s, m, b: s.quest_start(b.get("buddy"), b.get("goal"))),
+    ("GET", re.compile(rf"^/api/quest/{ID}/next$"), lambda s, m, b: s.quest_next(m[1])),
+    ("POST", re.compile(rf"^/api/quest/{ID}/answer$"), lambda s, m, b: s.quest_answer(m[1], b.get("response"), b.get("elapsedMs"))),
+    ("POST", re.compile(rf"^/api/quest/{ID}/finish$"), lambda s, m, b: s.quest_finish(m[1])),
     ("GET", re.compile(rf"^/api/students/{ID}$"), lambda s, m, b: s.state(m[1])),
     ("POST", re.compile(rf"^/api/students/{ID}/submit$"), lambda s, m, b: s.submit(m[1], b.get("code"))),
     ("POST", re.compile(rf"^/api/students/{ID}/answer$"), lambda s, m, b: s.answer(m[1], b.get("answers"))),
