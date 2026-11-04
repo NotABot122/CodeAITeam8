@@ -1,5 +1,5 @@
 import type {AnswerResult, QuestNext, QuestOptions, QuestStart} from '@/quest/types';
-import type {BlocksResult, ChooseResult, Health, PathwayResult, ProjectChoices, StartResult, StudentState, SubmitResult, ThemeResult} from './types';
+import type {BlocksResult, ChooseResult, CourseView, Health, PathwayResult, ProjectChoices, StartResult, StudentState, SubmitResult, ThemeResult} from './types';
 
 export class ApiError extends Error {
   constructor(message: string, readonly code: string, readonly status: number) {
@@ -16,6 +16,7 @@ export interface ApiClient {
   questAnswer(id: string, response: unknown, elapsedMs: number | null): Promise<AnswerResult>;
   questFinish(id: string): Promise<unknown>;
   getState(id: string): Promise<StudentState>;
+  getCourse(id: string): Promise<CourseView>;
   submit(id: string, code: string): Promise<SubmitResult>;
   /** The projects the student can learn the first topic in, and whether the choice is still open. */
   projectChoices(id: string): Promise<ProjectChoices>;
@@ -67,6 +68,7 @@ export function createHttpClient(base = ''): ApiClient {
     questAnswer: (id, response, elapsedMs) => call('POST', `/api/quest/${encodeURIComponent(id)}/answer`, {response, elapsedMs}),
     questFinish: id => call('POST', `/api/quest/${encodeURIComponent(id)}/finish`, {}),
     getState: id => call('GET', s(id)),
+    getCourse: id => call('GET', `${s(id)}/course`),
     submit: (id, code) => call('POST', `${s(id)}/submit`, {code}),
     projectChoices: id => call('GET', `${s(id)}/projects`),
     chooseProject: (id, project) => call('POST', `${s(id)}/project`, {project}),

@@ -46,7 +46,7 @@ class RealContent(unittest.TestCase):
     def test_student_view_never_contains_the_answer_key(self):
         import random
 
-        allowed = {"id", "type", "prompt", "options", "cards", "buckets"}
+        allowed = {"id", "type", "prompt", "options", "cards", "buckets", "display"}
         for item in content().items.values():
             payload = item.public(random.Random(1))
             self.assertLessEqual(set(payload), allowed, item.id)

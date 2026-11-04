@@ -14,6 +14,8 @@ ORDER = "order"            # drag cards into the right order
 SORT = "sort"              # drag cards into buckets
 CHOICE_LIKE = (CHOICE, SPOT, TRACE)
 ITEM_TYPES = CHOICE_LIKE + (ORDER, SORT)
+# How a sort item is drawn. The answer model is the same: every card goes in one bucket.
+DISPLAYS = ("rows", "belt", "chips")   # tap table rows | sorting belt | word chips into boxes
 
 # The point vector from the project spec (P_node). Every item feeds one facet.
 CONCEPTUAL, SYNTAX, PROBLEM_SOLVING = "conceptual", "syntax", "problem_solving"
@@ -72,6 +74,7 @@ class Item:
     feedback_right: Optional[str] = None
     feedback_wrong: Optional[str] = None
     pass_credit: float = 1.0
+    display: Optional[str] = None   # sort items only: a game skin; never changes how it is scored
 
     @property
     def guess_chance(self) -> float:
@@ -107,6 +110,8 @@ class Item:
             payload["cards"] = shuffled
             if self.type == SORT:
                 payload["buckets"] = [{"id": b.id, "text": b.text} for b in self.buckets]
+                if self.display:
+                    payload["display"] = self.display
         return payload
 
 
