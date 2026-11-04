@@ -12,7 +12,7 @@ The data is in a SQLite table called `library_books`:
 | `pages` | Number of pages (pages) |
 | `checkouts` | Times checked out this year (checkouts) |
 
-The names are real, but the numbers are made up for practice.
+The names and the numbers are made up for practice.
 
 ## Your task
 

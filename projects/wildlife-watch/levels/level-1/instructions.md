@@ -12,7 +12,7 @@ The data is in a SQLite table called `tagged_animals`:
 | `weight_kg` | Body weight (kg) |
 | `daily_km` | Distance moved in a day (km) |
 
-The names are real, but the numbers are made up for practice.
+The species are real, but the tags, parks and numbers are made up for practice.
 
 ## Your task
 

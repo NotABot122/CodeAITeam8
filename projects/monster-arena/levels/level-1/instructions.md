@@ -12,7 +12,7 @@ The data is in a SQLite table called `monsters`:
 | `power` | Attack power (points) |
 | `speed` | Movement speed (points) |
 
-The names are real, but the numbers are made up for practice.
+The names and the numbers are made up for practice.
 
 ## Your task
 
