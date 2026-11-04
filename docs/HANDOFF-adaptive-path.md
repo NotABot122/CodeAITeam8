@@ -93,6 +93,28 @@ Show `reason` and a button per option, with `options[0]` highlighted. For a `new
 | `GET /api/students/<id>/next` | `course.next_step` |
 | `POST /api/students/<id>/next {option, theme}` | `course.start` |
 
+## Readiness quest first (optional)
+
+The readiness diagnostic from the `diagnosis` branch (`diagnostic/`, by Kiro-Diagnostic) is merged into `proto-branch` and runs through `Course`. A new student can take the quest first. Or skip it with `course.new_student()`, which starts everyone at Stage 0 as before.
+
+```python
+course.diagnostic_options()                       # buddies, goals, zones for the start screen
+s = course.diagnostic_start(buddy, goal, goal_text)   # creates the student: s["student_id"], first step in s["first"]
+course.diagnostic_answer(sid, response, elapsed_ms)   # -> feedback for the child
+course.diagnostic_next(sid)                       # next step; when it returns {"done": True} the result is applied
+course.diagnostic_finish(sid)                     # end early; also applies the result
+course.state(sid)["diagnostic"]                   # "none" | "in_progress" | "finished" | "applied"
+```
+
+Step and answer payloads are the diagnostic's own. See `diagnostic/README.md` and `diagnostic/views.py`. The diagnostic checks that they never show stages or scores to the child.
+
+**What "applied" does:**
+- Each concept the quest is confident about (confidence 0.8 or higher, and not marked borderline) seeds the profile with the quest's stage. Concepts below the bar start at 0. The rules are in `projects/catalog.yaml` under `diagnostic`.
+- The lesson starts at the quest's placement, with those stages. Seeded stages also affect later decisions, such as skipping practice problems and choosing the next topic.
+- If the student already started the lesson, it keeps its place, and only the profile is updated.
+
+**Note:** the diagnostic hides stages from children, but our concept meters show them. Once a student is placed, seeded stages appear in the meters. Decide whether the meters should wait until the student has done some lesson work.
+
 ## Not done yet
 
 - Revision projects and Lists and Dictionaries use the weather data. Themes still apply only to the first topic.

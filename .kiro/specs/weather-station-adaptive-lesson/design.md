@@ -360,3 +360,13 @@ flowchart TD
 ### Verification
 
 All 8 projects pass the content check, including the quiz snippet checks. Each scaffolded starter fails its task. 87 unit tests pass, including full journeys for strong, struggling, steady, and repeat-revision students. The live run scored a written answer at rubric stage 3 with appropriate feedback.
+
+## Addendum: Readiness Diagnostic Integration (Requirement 25)
+
+The `diagnosis` branch (Kiro-Diagnostic) is merged into `proto-branch`. Its quest engine is unchanged. `Course` wraps it, through `diagnostic_options`, `diagnostic_start`, `diagnostic_answer`, `diagnostic_next`, and `diagnostic_finish`, and applies the result with `apply_diagnostic`.
+
+- **Seeding rule** (`seed_from_placement`): use a concept's stage only when confidence is at least `min_confidence` (0.8) and it isn't borderline. This changes the diagnostic's own handoff rule ("never seed a stage"), at the user's request. The diagnostic's `handoff.py` is left as it was, and the seeding lives in `Course`.
+- **Placement:** the lesson record starts at the seeded stages and the quest's `next_task_id`. Placement on a practice problem sets its origin level, as `handoff.py` does.
+- **Started lessons** are never moved, and their stages are never rewritten. Only the profile learns the quest's stages.
+
+Measured with the diagnostic's simulated students (strong, middle, mixed, struggling, guesser), the 0.8 bar kept a lucky-guess Stage 1 from being seeded, along with most borderline concepts. No used stage was above the simulated student's true level. 237 tests pass in the merged branch: 87 engine, 145 diagnostic, and 5 for this integration.

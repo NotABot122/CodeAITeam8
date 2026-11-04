@@ -79,6 +79,18 @@ python3 -m engine.cli answer --student ID             # answer a quiz step
 
 For the UI: `docs/HANDOFF-adaptive-path.md` describes the `Course` API and its JSON.
 
+### Readiness quest
+
+New students can start with the readiness quest (`diagnostic/`, merged from the `diagnosis` branch). It's a short game that estimates a stage and a confidence for each lesson concept. When it ends, every concept the quest is confident about (confidence 0.8 or higher, not borderline) becomes the student's starting stage, and the lesson starts at the quest's placement. Less certain concepts start at Stage 0. The rule is in `projects/catalog.yaml`.
+
+```bash
+python3 -m diagnostic.cli play                         # take the quest (prints your STU-... id)
+python3 -m engine.cli placement --student STU-...      # apply it: starting stages and first problem
+python3 -m engine.cli show --student STU-...           # then work as usual
+```
+
+The quest was written for grades 3 to 5, while these lessons target grades 9 to 12. Its questions and wording may need an older version.
+
 ## The lesson
 
 | Level | Function | Concept |

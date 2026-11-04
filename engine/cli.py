@@ -9,6 +9,7 @@
   python -m engine.cli progress --student ID            stages for every concept, and position
   python -m engine.cli theme    --student ID "pokemon"  build this project in your own theme (Bedrock)
   python -m engine.cli theme    --student ID --reset    go back to the standard project
+  python -m engine.cli placement --student STU-...      after the readiness quest: set starting stages and problem
   python -m engine.cli check-content [--project DIR]    check a project's tests, answers, and quizzes
   python -m engine.cli generate-data                    rebuild the dataset from its seed
   python -m engine.cli generate-expected                recompute expected reports (marks them unreviewed)
@@ -152,6 +153,8 @@ def main(argv=None) -> int:
     theme.add_argument("--student", required=True)
     theme.add_argument("request", nargs="*", help='what you want your project to be about, e.g. "pokemon"')
     theme.add_argument("--reset", action="store_true", help="go back to the standard project")
+    placement = sub.add_parser("placement", help="use a finished readiness quest (python -m diagnostic.cli play)")
+    placement.add_argument("--student", required=True)
     sub.add_parser("check-content")
     sub.add_parser("generate-data")
     sub.add_parser("generate-expected")
@@ -200,6 +203,15 @@ def main(argv=None) -> int:
             print(result["message"])
             if not result.get("built"):
                 return 1
+            return show_start(course, data_dir, student)
+
+        if args.command == "placement":
+            summary = course.apply_diagnostic(student)
+            for concept, d in summary["decisions"].items():
+                used = "starts at Stage %d" % d["stage"] if d["used"] else "not used (%s)" % d["reason"]
+                print(f"  {course.catalog.name(concept):<20} {used}")
+            note = " (your lesson had already started, so it keeps its place)" if summary["lesson_already_started"] else ""
+            print(f"First problem: {summary['start_problem']}{note}")
             return show_start(course, data_dir, student)
 
         if args.command == "next":
