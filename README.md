@@ -128,6 +128,18 @@ A project is a folder under `projects/` with `manifest.yaml`, `dataset/`, `level
 
 Expected answers are computed by a separate SQL checker (`reference/independent_checker.py`) and are marked `teacher_reviewed: false` until a teacher checks them.
 
+## Hosted on AgentCore Runtime (inbound OAuth)
+
+The diagnostic's `validate_submission` tool can run on Amazon Bedrock AgentCore Runtime. An inbound JWT authorizer (AgentCore Identity, with Amazon Cognito as the identity provider) rejects any call that lacks a valid access token.
+
+```bash
+python3 -m deploy.agentcore deploy     # Cognito, IAM role, S3, runtime (needs boto3 and AWS credentials)
+python3 -m deploy.agentcore demo       # no token -> 401, forged token -> 403, SigV4 -> denied, valid token -> 200
+python3 -m deploy.agentcore destroy
+```
+
+See [`deploy/agentcore/README.md`](deploy/agentcore/README.md).
+
 ## Not in this demo yet
 
 - AI rubric grading of written answers and the grader-agreement benchmark (requirements 10 and 11).
