@@ -12,10 +12,10 @@ export default function ConceptMeters({state, highlight, row}: {state: StudentSt
         sx={row ? {display: 'flex', gap: 1, overflowX: 'auto', scrollSnapType: 'x proximity', pb: 0.75,
           scrollbarWidth: 'thin', '&:focus-visible': {outline: '2px solid #1aa6a6', outlineOffset: 2}} : undefined}>
       {state.concepts.map(c => (
-        <Box key={c.id} sx={{...(row ? {flex: '0 0 215px', scrollSnapAlign: 'start'} : {}), opacity: c.inProject || c.stage > 0 ? 1 : 0.55, mt: row ? 0 : 1.25, p: 1, borderRadius: 1, bgcolor: highlight.includes(c.id) ? 'action.hover' : 'transparent'}}>
+        <Box key={c.id} sx={{...(row ? {flex: '0 0 184px', scrollSnapAlign: 'start'} : {}), opacity: c.inProject || c.stage > 0 ? 1 : 0.55, mt: row ? 0 : 1.25, p: 1, borderRadius: 1, bgcolor: highlight.includes(c.id) ? 'action.hover' : 'transparent'}}>
           <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 0.5, }}>
-            <Typography variant="body2" sx={{fontWeight: 600}}>{c.name}</Typography>
-            <Typography variant="caption" sx={{color: COLORS[c.stage], fontWeight: 700}}>{c.stageName}</Typography>
+            <Typography variant="body2" noWrap title={c.name} sx={{fontWeight: 600, fontSize: row ? 13 : undefined, minWidth: 0}}>{c.name}</Typography>
+            <Typography variant="caption" sx={{color: COLORS[c.stage], fontWeight: 700, flex: 'none', fontSize: row ? 11 : undefined}}>{c.stageName}</Typography>
           </Box>
           <Box role="meter" aria-label={`${c.name}: ${c.stageName}`} aria-valuemin={0} aria-valuemax={state.maxStage} aria-valuenow={c.stage}
             sx={{display: 'flex', gap: 0.5, mt: 0.5}}>

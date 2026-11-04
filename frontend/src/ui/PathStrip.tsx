@@ -14,7 +14,7 @@ function Circle({node}: {node: PathNode}) {
     <Box
       aria-hidden
       sx={{
-        width: 40, height: 40, borderRadius: '50%', display: 'grid', placeItems: 'center', fontWeight: 700, flex: 'none',
+        width: 38, height: 38, borderRadius: '50%', display: 'grid', placeItems: 'center', fontWeight: 700, flex: 'none',
         border: 2,
         borderColor: done ? 'success.main' : current ? 'primary.main' : 'divider',
         bgcolor: done ? 'success.main' : 'background.paper',
@@ -32,33 +32,27 @@ function Circle({node}: {node: PathNode}) {
 export default function PathStrip({path}: {path: PathNode[]}) {
   const levels = path.filter(n => n.kind === 'level');
   return (
-    <Box component="nav" aria-label="Your path" sx={{display: 'flex', alignItems: 'flex-start', gap: 0.5, overflowX: 'auto', py: 1}}>
+    <Box component="nav" aria-label="Your path" sx={{minWidth: 0, display: 'flex', alignItems: 'flex-start', gap: 0.5, overflowX: 'auto', py: 1}}>
       {levels.map((level, i) => {
         const practice = path.filter(p => p.kind === 'practice' && p.afterLevelId === level.id);
         return (
           <Box key={level.id} sx={{display: 'flex', alignItems: 'flex-start'}}>
-            <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', width: 96, textAlign: 'center'}}>
-              <Box role="img" aria-label={`Level ${level.number}: ${level.title}, ${level.status === 'todo' ? 'not started' : level.status === 'done' ? 'done' : 'in progress'}`}>
+            <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', width: 84, textAlign: 'center'}}>
+              <Box role="img" aria-label={`Level ${level.number}: ${level.title}, ${level.status === 'todo' ? 'not started' : level.status === 'done' ? 'done' : 'in progress'}`} sx={{position: 'relative'}}>
                 <Circle node={level} />
+                {practice.map(p => (
+                  <Box key={p.id} role="img" title={`Practice: ${p.title}`} aria-label={`Practice: ${p.title}, ${p.status === 'done' ? 'done' : 'in progress'}`}
+                    sx={{position: 'absolute', top: -4, right: -8, width: 20, height: 20, borderRadius: '50%', display: 'grid', placeItems: 'center', border: 2, borderColor: 'background.default',
+                      bgcolor: p.status === 'done' ? 'success.main' : 'secondary.main', color: '#fff'}}>
+                    {p.status === 'done' ? <CheckIcon sx={{fontSize: 12}} /> : <FitnessCenterIcon sx={{fontSize: 12}} />}
+                  </Box>
+                ))}
               </Box>
               <Typography variant="caption" sx={{mt: 0.5, lineHeight: 1.2, color: level.status === 'todo' ? 'text.disabled' : 'text.primary', fontWeight: level.status === 'current' ? 700 : 400}}>
                 {level.title}
               </Typography>
             </Box>
-            {practice.map(p => (
-              <Box key={p.id} sx={{display: 'flex', alignItems: 'center', height: 40, mx: 0.5}}>
-                <Box
-                  role="img"
-                  aria-label={`Practice: ${p.title}, ${p.status === 'done' ? 'done' : 'in progress'}`}
-                  sx={{display: 'flex', alignItems: 'center', gap: 0.5, px: 1.25, py: 0.4, borderRadius: 99, border: 1, fontSize: 12, whiteSpace: 'nowrap',
-                    borderColor: p.status === 'done' ? 'success.main' : 'secondary.main', color: p.status === 'done' ? 'success.main' : 'secondary.main'}}
-                >
-                  {p.status === 'done' ? <CheckIcon sx={{fontSize: 14}} /> : <FitnessCenterIcon sx={{fontSize: 14}} />}
-                  {p.title}
-                </Box>
-              </Box>
-            ))}
-            {i < levels.length - 1 && <Box aria-hidden sx={{width: 20, height: 2, bgcolor: 'divider', mt: '19px', flex: 'none'}} />}
+            {i < levels.length - 1 && <Box aria-hidden sx={{width: 14, height: 2, bgcolor: 'divider', mt: '18px', flex: 'none'}} />}
           </Box>
         );
       })}
