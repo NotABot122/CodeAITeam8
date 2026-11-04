@@ -1,0 +1,2 @@
+- "You need two loops: one over the lists, and one inside it over the labels in each list."
+- "counts[label] = counts.get(label, 0) + 1 adds one to a label's count, starting from 0 the first time."

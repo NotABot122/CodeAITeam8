@@ -10,9 +10,13 @@ from typing import Dict, List, Optional
 import yaml
 
 from .manifest import Manifest, ManifestError, parse_manifest
+from .quiz import QuizError, validate_questions
 
-REQUIRED_ITEMS = ("manifest.yaml", "dataset", "levels", "reference")
+# A project's data can live in its own dataset/ folder or be shared from another project
+# (manifest dataset paths such as ../weather-station/dataset/...). The generator check below covers both.
+REQUIRED_ITEMS = ("manifest.yaml", "levels", "reference")
 PROBLEM_FILES = ("instructions.md", "hints.yaml", "checks.py")
+QUIZ_FILES = ("instructions.md", "hints.yaml", "questions.yaml")
 REFERENCE_SOLUTION = "reference/solution.py"
 INDEPENDENT_CHECKER = "reference/independent_checker.py"
 EXPECTED_REPORTS = "reference/expected_reports.json"
@@ -38,6 +42,12 @@ class Problem:
     advance_at_stage: Optional[int] = None
     target_stage: Optional[int] = None
     loop_check: Optional[str] = None
+    format: str = "code"
+    questions: List[dict] = field(default_factory=list)
+
+    @property
+    def is_quiz(self) -> bool:
+        return self.format == "quiz"
 
     @property
     def label(self) -> str:
@@ -55,6 +65,11 @@ class Project:
     @property
     def title(self) -> str:
         return self.manifest.title
+
+    @property
+    def topic(self) -> str:
+        """Catalog topic id, from manifest parameters (themed projects inherit data-logic)."""
+        return self.manifest.parameters.get("topic", "data-logic")
 
     @property
     def database_path(self) -> Path:
@@ -143,11 +158,20 @@ def load_project(path) -> Project:
         if not folder.is_dir():
             errors.append(f"{label}: folder {entry.folder} does not exist")
             continue
-        absent = [name for name in PROBLEM_FILES if not (folder / name).is_file()]
+        problem_format = getattr(entry, "format", "code")
+        needed = QUIZ_FILES if problem_format == "quiz" else PROBLEM_FILES
+        absent = [name for name in needed if not (folder / name).is_file()]
         if absent:
             errors.append(f"{label}: folder {entry.folder} is missing {', '.join(absent)}")
             continue
         hints = _read_hints(folder / "hints.yaml", label, errors)
+        questions: List[dict] = []
+        if problem_format == "quiz":
+            try:
+                questions = validate_questions(yaml.safe_load((folder / "questions.yaml").read_text()), label)
+            except (QuizError, yaml.YAMLError) as exc:
+                errors.append(str(exc))
+                continue
         problems[entry.id] = Problem(
             id=entry.id,
             kind=kind,
@@ -161,6 +185,8 @@ def load_project(path) -> Project:
             advance_at_stage=entry.advance_at_stage if kind == "level" else None,
             target_stage=entry.target_stage if kind == "practice" else None,
             loop_check=entry.loop_check,
+            format=problem_format,
+            questions=questions,
         )
 
     if not (root / REFERENCE_SOLUTION).is_file():

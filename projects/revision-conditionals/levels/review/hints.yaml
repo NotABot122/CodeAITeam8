@@ -1,0 +1,2 @@
+- "Go through the conditions from the top. Stop at the first one that's True; that branch is the only one that runs in an if/elif chain."
+- "For the explain question, try a value that matches more than one condition, like 40 degrees."

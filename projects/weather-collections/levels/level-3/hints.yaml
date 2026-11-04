@@ -1,0 +1,3 @@
+- "For each row, work out its month with row[\"date\"][:7]. That's the key."
+- "The first time you see a month, set months[month] = [] to start its list. Then months[month].append(row[\"date\"])."
+- "After the loop, go through the dictionary and call .sort() on each list."

@@ -1,0 +1,31 @@
+- id: q1
+  type: predict
+  prompt: What does this code print?
+  code: |
+    total = 0
+    for n in [4, 1, 3]:
+        total += n
+    print(total)
+  choices: ["3", "8", "413"]
+  answer: 1
+  explanation: "total goes 0 -> 4 -> 5 -> 8. The numbers are added, not joined like text."
+- id: q2
+  type: predict
+  prompt: What does this code print?
+  code: |
+    biggest = None
+    for n in [7, 12, 5]:
+        if biggest is None or n > biggest:
+            biggest = n
+    print(biggest)
+  choices: ["7", "12", "5"]
+  answer: 1
+  explanation: "biggest starts as None, becomes 7, then 12. 5 isn't bigger than 12, so it stays 12."
+- id: q3
+  type: explain
+  prompt: In your own words, what is an accumulator variable, and why do you set it up before the loop instead of inside it?
+  rubric:
+    0: No explanation, or the answer is off topic.
+    1: Describes an accumulator vaguely (for example "a variable in a loop") without saying where to set it up.
+    2: Explains that it builds up an answer across passes and must start before the loop so it isn't reset each pass.
+    3: Gives that explanation plus an example (a total, a count, or the biggest so far) and what goes wrong if it starts inside the loop.

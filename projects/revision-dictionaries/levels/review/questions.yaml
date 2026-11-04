@@ -1,0 +1,30 @@
+- id: q1
+  type: predict
+  prompt: What does this code print?
+  code: |
+    counts = {}
+    for word in ["sun", "rain", "sun"]:
+        counts[word] = counts.get(word, 0) + 1
+    print(counts["sun"])
+  choices: ["1", "2", "3"]
+  answer: 1
+  explanation: "\"sun\" appears twice. The first time get gives 0, so it becomes 1; the second time it becomes 2."
+- id: q2
+  type: predict
+  prompt: What does this code print?
+  code: |
+    totals = {"ST-A": 5.0}
+    totals["ST-B"] = 2.5
+    totals["ST-A"] = totals["ST-A"] + 1.0
+    print(totals)
+  choices: ["{'ST-A': 6.0, 'ST-B': 2.5}", "{'ST-A': 5.0, 'ST-B': 2.5}", "{'ST-A': 1.0, 'ST-B': 2.5}"]
+  answer: 0
+  explanation: "ST-B is added with 2.5, and ST-A is updated from 5.0 to 6.0. Updating a key replaces its old value."
+- id: q3
+  type: explain
+  prompt: In your own words, how does a dictionary help you count or total things by category? Use an example.
+  rubric:
+    0: No explanation, or the answer is off topic.
+    1: Says dictionaries store keys and values, without connecting it to counting or totals.
+    2: Explains using each category as a key and updating its value as you loop, for example with .get(key, 0).
+    3: Gives that explanation with a concrete example, such as totaling rain per station, and why one dictionary is better than a separate variable for each category.

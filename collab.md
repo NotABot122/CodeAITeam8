@@ -34,7 +34,7 @@ Every autonomous agent or developer **MUST read this file before writing code** 
 | `Agent-2` | Unassigned | `idle` | None | - |
 | `Agent-3` | Unassigned | `idle` | None | - |
 | `zane-claude` | Claude Opus 5.5 (Kiro) | `idle` | Renamed "Stance Decider 2B" to "Strands Decider 2B" in documentation/ | 2026-11-03 15:30 PST |
-| `Kiro-Demo` | Claude Opus 5.5 (Kiro) | `idle` | Added student-chosen themes and Bedrock AI tutor hints to the demo (`engine/themes/`, `engine/ai.py`, `engine/hints.py`, `engine/safety.py`) on `proto-branch` | 2026-11-04 09:39 PST |
+| `Kiro-Demo` | Claude Opus 5.5 (Kiro) | `idle` | Adaptive path across projects (`engine/course.py`, quizzes, revision projects, Lists & Dictionaries topic) on `proto-branch`; UI handoff in `docs/HANDOFF-adaptive-path.md` | 2026-11-04 10:40 PST |
 
 ---
 
@@ -42,7 +42,12 @@ Every autonomous agent or developer **MUST read this file before writing code** 
 
 > *Most recent on top. Maximum 10 items.*
 
-1. **[Task 012] Student-Chosen Themes & Bedrock AI Tutor Hints**
+1. **[Task 013] Adaptive Path Across Projects (Profile, Next Step, Revision Quizzes)**
+   - **Model:** Claude Opus 5.5 (Kiro)
+   - **Agent:** `Kiro-Demo`
+   - **Timestamp:** 2026-11-04 10:40 PST
+   - **Summary:** After each project, `engine/course.py` judges every concept as strong, steady, or struggled from attempts, hints, and practice problems. The thresholds are in `projects/catalog.yaml`. Struggled sends the student to a revision project for the weakest concept: a quiz with predict-the-output questions checked automatically, an explain answer scored by the Bedrock rubric, then a scaffolded coding task. All strong sends them to the topic with the lowest mastery. Steady offers a new theme or the next topic. A per-student profile carries concept stages across projects. New content: topic 2 `projects/weather-collections` (Lists & Dictionaries) and six `projects/revision-*`. The content check also runs every quiz snippet. CLI: `next`, `answer`. Demo: `python3 -m engine.path_demo [--offline]`. 87 tests pass. **@Pratheek:** UI handoff in `docs/HANDOFF-adaptive-path.md`. The current `webapi/service.py` still works unchanged (verified). Route it through `Course` for the new screens.
+2. **[Task 012] Student-Chosen Themes & Bedrock AI Tutor Hints**
    - **Model:** Claude Opus 5.5 (Kiro)
    - **Agent:** `Kiro-Demo`
    - **Timestamp:** 2026-11-04 09:39 PST
@@ -87,8 +92,3 @@ Every autonomous agent or developer **MUST read this file before writing code** 
    - **Agent:** `Agent-Bootstrap`
    - **Timestamp:** 2026-11-03 14:58 PST
    - **Summary:** Updated `documentation/PROJECT_SPEC.md` to classify nodes like While Loops under both Conditionals and Loops (poly-hierarchy), removed the `documentation/prompts/` folder, and prepared the teammate handoff prompt targeting `https://github.com/NotABot122/CodeAITeam8`.
-3. **[Task 001] Documentation Foundation & Architecture Spec**
-   - **Model:** Gemini 3.8 Flash
-   - **Agent:** `Agent-Bootstrap`
-   - **Timestamp:** 2026-11-03 14:52 PST
-   - **Summary:** Initialized `/documentation` directory structure (`must familiarise/`, `roadmaps/`), created `collab.md`, and drafted the complete system spec in `documentation/PROJECT_SPEC.md`.

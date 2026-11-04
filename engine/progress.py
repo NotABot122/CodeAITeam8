@@ -33,6 +33,7 @@ class ProgressRecord:
     on_fallback: bool = False
     complete: bool = False
     routing_log: List[dict] = field(default_factory=list)
+    quiz_scores: Dict[str, Dict[str, Optional[int]]] = field(default_factory=dict)
 
     def stages(self) -> Dict[str, int]:
         return {cid: state.stage for cid, state in self.concepts.items()}
@@ -50,6 +51,7 @@ class ProgressRecord:
             "on_fallback": self.on_fallback,
             "complete": self.complete,
             "routing_log": list(self.routing_log),
+            "quiz_scores": {k: dict(v) for k, v in self.quiz_scores.items()},
         }
 
     @classmethod
@@ -69,6 +71,7 @@ class ProgressRecord:
             on_fallback=bool(data["on_fallback"]),
             complete=bool(data["complete"]),
             routing_log=list(data["routing_log"]),
+            quiz_scores={k: dict(v) for k, v in (data.get("quiz_scores") or {}).items()},  # optional: added later
         )
 
 
@@ -101,6 +104,14 @@ class ProgressStore(ABC):
 
     @abstractmethod
     def set_active_project(self, student_id: str, project_folder: Optional[str]) -> None:
+        ...
+
+    @abstractmethod
+    def profile(self, student_id: str) -> dict:
+        """Cross-project profile: active project, concept stages, completed projects."""
+
+    @abstractmethod
+    def save_profile(self, student_id: str, data: dict) -> None:
         ...
 
 
@@ -149,13 +160,27 @@ class JsonProgressStore(ProgressStore):
     def _profile(self, student_id: str) -> Path:
         return self.root / student_id / "profile.json"
 
-    def active_project(self, student_id: str) -> Optional[str]:
+    def profile(self, student_id: str) -> dict:
+        """The student's cross-project profile. Missing or unreadable profiles start empty."""
         try:
-            return json.loads(self._profile(student_id).read_text()).get("active_project")
-        except (OSError, ValueError, AttributeError):
-            return None
+            data = json.loads(self._profile(student_id).read_text())
+            return data if isinstance(data, dict) else {}
+        except (OSError, ValueError):
+            return {}
 
-    def set_active_project(self, student_id: str, project_folder: Optional[str]) -> None:
+    def save_profile(self, student_id: str, data: dict) -> None:
         path = self._profile(student_id)
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps({"active_project": project_folder}))
+        fd, tmp = tempfile.mkstemp(dir=str(path.parent), prefix=".profile-", suffix=".json")
+        with os.fdopen(fd, "w") as handle:
+            json.dump(data, handle, indent=2)
+        os.replace(tmp, path)
+
+    def active_project(self, student_id: str) -> Optional[str]:
+        value = self.profile(student_id).get("active_project")
+        return value if isinstance(value, str) else None
+
+    def set_active_project(self, student_id: str, project_folder: Optional[str]) -> None:
+        data = self.profile(student_id)
+        data["active_project"] = project_folder
+        self.save_profile(student_id, data)

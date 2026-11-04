@@ -1,0 +1,3 @@
+- "Start with an empty dictionary, totals = {}. For each row, add its rain to the entry for its station."
+- "totals.get(station, 0.0) gives the total so far, or 0.0 the first time you see a station. Store totals.get(station, 0.0) + row[\"rain_mm\"] back in totals[station]."
+- "After the loop, go through totals and replace each value with round(value, 1)."

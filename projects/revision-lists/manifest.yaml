@@ -1,0 +1,18 @@
+title: "Review: Lists"
+streak_length: 1
+concepts:
+  - {id: lists, name: Lists}
+stage_criteria:
+  1: {max_attempts: 3, max_hints: null}
+  2: {max_attempts: 2, max_hints: null}
+  # No Stage 3: scaffolded review work shows Meeting, not Exceeding.
+levels:
+  - {id: level-1, number: 1, title: Review Quiz, folder: levels/review, concepts: [lists], format: quiz}
+  - {id: level-2, number: 2, title: "Try It: Temperatures Above", folder: levels/try-it, concepts: [lists]}
+fallback_path: [level-1, level-2]
+dataset:
+  generator: ../weather-station/dataset/generate.py
+  database: ../weather-station/dataset/weather.db
+parameters:
+  topic: revision
+  revision_concept: lists
