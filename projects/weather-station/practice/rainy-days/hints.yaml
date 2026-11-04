@@ -1,0 +1,2 @@
+- "Start with count = 0 before the loop."
+- "Inside for row in rows:, add 1 to count when row[\"rain_mm\"] > 0. Return count after the loop."

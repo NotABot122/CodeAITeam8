@@ -1,0 +1,75 @@
+title: Weather Station Project
+# Each concept has one level in this project, so one qualifying result moves
+# a concept up a stage. The engine default is 3.
+streak_length: 1
+concepts:
+  - {id: database_retrieval, name: Database Retrieval}
+  - {id: conditionals, name: Conditionals}
+  - {id: loops, name: Loops}
+  - {id: functions, name: Functions}
+# A passing result counts as evidence for Stage N when it meets criterion N.
+# null means no limit.
+stage_criteria:
+  1: {max_attempts: 3, max_hints: null}
+  2: {max_attempts: 2, max_hints: null}
+  3: {max_attempts: 1, max_hints: 0}
+levels:
+  - id: level-1
+    number: 1
+    title: Retrieve Data from the Database
+    folder: levels/level-1
+    concepts: [database_retrieval]
+    advance_at_stage: 1
+    loop_check: null
+  - id: level-2
+    number: 2
+    title: Make Decisions
+    folder: levels/level-2
+    concepts: [conditionals]
+    advance_at_stage: 1
+    loop_check: null
+  - id: level-3
+    number: 3
+    title: Process Every Record
+    folder: levels/level-3
+    concepts: [loops]
+    advance_at_stage: 1
+    loop_check: summarize
+  - id: level-4
+    number: 4
+    title: Solve the Full Problem
+    folder: levels/level-4
+    concepts: [functions]
+    advance_at_stage: null
+    loop_check: null
+practice_problems:
+  - id: practice-db-count
+    title: "Practice: Count a Station's Readings"
+    folder: practice/db-count
+    concept: database_retrieval
+    target_stage: 1
+    loop_check: null
+  - id: practice-temp-band
+    title: "Practice: Temperature Bands"
+    folder: practice/temp-band
+    concept: conditionals
+    target_stage: 1
+    loop_check: null
+  - id: practice-rainy-days
+    title: "Practice: Count Rainy Days"
+    folder: practice/rainy-days
+    concept: loops
+    target_stage: 1
+    loop_check: count_rainy_days
+fallback_path: [level-1, level-2, level-3, level-4]
+dataset:
+  generator: dataset/generate.py
+  database: dataset/weather.db
+parameters:
+  # Value summarize must return for max_temp_c when it gets no readings.
+  empty_max_temp_c: null
+  # Station and date ranges with stored expected Level 4 reports.
+  expected_report_args:
+    - {station_id: ST-A, start_date: '2026-01-01', end_date: '2026-01-31'}
+    - {station_id: ST-B, start_date: '2026-07-01', end_date: '2026-07-14'}
+    - {station_id: ST-C, start_date: '2026-03-01', end_date: '2026-03-31'}
