@@ -114,87 +114,95 @@ def _status(value, good, ok):
 
 
 def overview() -> dict:
+    """Customer requirements in plain language, with the measured result. No internal test codes."""
     e01, e07, e08, e12 = (_load(f) for f in ("E01_proto_validation_summary.json", "E07_proto_fallback_summary.json",
                                               "E08_proto_safety_summary.json", "E12_proto_hint_summary.json"))
+    pc = lambda x: "-" if x is None else f"{round(x * 100)}%"
     items = []
 
     base = next((s for s in (e07 or {}).get("scenarios", []) if s["scenario"] == "baseline adaptive"), None)
     items.append({
         "id": "lesson_end_to_end", "tab": "fallback",
-        "requirement": "A student completes one adaptive lesson end to end, through at least three tasks chosen by routing.",
+        "requirement": "A student can finish one adaptive lesson, with the order of at least three tasks chosen by the engine.",
         "source": "Vision: MVP success criteria",
         "status": _status(base and base["completed"] and len(base["path"]) >= 3, bool, bool),
-        "metric": f"{len(base['path'])} tasks, completed" if base else None,
-        "evidence": "Scripted student on proto's Engine (E07 baseline). Practice routing shown in proto's demo.",
-        "caveat": "Scripted students only; no real cohort yet.",
+        "metric": f"A test student finished all {len(base['path'])} levels." if base else None,
+        "evidence": "Test student run through the engine.",
+        "caveat": "Tested with scripted students, not a real class.",
     })
 
     agree = (e01 or {}).get("agreement")
     items.append({
         "id": "validation_agreement", "tab": "validation",
-        "requirement": "The validation service produces a mastery signal that agrees with a human rater on a small benchmark set.",
-        "source": "Vision: MVP success criteria + Definition of Done",
+        "requirement": "The grader agrees with a teacher on a small set of student answers.",
+        "source": "Vision: MVP success criteria and Definition of Done",
         "status": _status(agree, lambda v: v >= 0.95 and not e01["false_pass"], lambda v: v >= 0.8),
-        "metric": (f"agreement {agree}, kappa {e01['cohens_kappa']}, {len(e01['false_pass'])} false pass, "
-                   f"{len(e01['false_fail'])} false fail") if e01 else None,
-        "evidence": f"E01: {e01['n_scored']} hand-written submissions vs. a draft key." if e01 else "E01 not run.",
-        "caveat": "Key is a draft by the evaluation team, not teacher-reviewed. Stage (mastery) comes from attempt "
-                  "counts, not from code quality; rubric scoring is not built.",
+        "metric": (f"Same decision as the teacher on {pc(agree)} of {e01['n_scored']} answers; "
+                   f"{len(e01['false_pass'])} wrong answers accepted, {len(e01['false_fail'])} correct answers rejected.")
+                  if e01 else None,
+        "evidence": "Hand-written answers for every level.",
+        "caveat": "The teacher decisions are our draft and still need a real teacher. Progress (stage) comes from the "
+                  "number of tries, not from how good the code is.",
     })
 
     items.append({
         "id": "routing", "tab": "fallback",
-        "requirement": "Routing selects the next skill from accumulated evidence and delivers pre-authored content.",
+        "requirement": "The engine picks the next step from what the student has shown, using content written and approved in advance.",
         "source": "Vision: MVP success criteria",
         "status": "met" if base and base["completed"] else "not_tested",
-        "metric": "stage rules from manifest.yaml; practice assigned below Stage 1",
-        "evidence": "Proto router is deterministic; all routed content is authored in projects/weather-station/.",
-        "caveat": "Themes generate content at runtime (Exploratory); not human-reviewed per student.",
+        "metric": "Students below the target level get a practice problem before moving on.",
+        "evidence": "Rules in the lesson's settings file; all routed content is written by people.",
+        "caveat": "The optional student-chosen themes are generated on the fly and not reviewed per student.",
     })
 
     if e07:
+        failing = [s for s in e07["scenarios"] if not s["completed"]]
         items.append({
             "id": "fallback", "tab": "fallback",
-            "requirement": "When validation or routing fails, the student falls back to a working non-adaptive path.",
-            "source": "Vision: MVP success criteria + Definition of Done",
+            "requirement": "If grading or the next-step choice fails, the student continues on the standard path instead of getting stuck.",
+            "source": "Vision: MVP success criteria and Definition of Done",
             "status": _status(e07["passed"] / e07["n"], lambda v: v == 1, lambda v: v >= 0.5),
-            "metric": f"{e07['passed']}/{e07['n']} failure scenarios end with the student finishing",
-            "evidence": "E07: faults injected into routing, grading, progress storage and AI hints.",
-            "caveat": "Failing: " + "; ".join(s["scenario"] for s in e07["scenarios"] if not s["completed"]),
+            "metric": f"The student finished in {e07['passed']} of {e07['n']} failure cases.",
+            "evidence": "We broke one part of the engine at a time.",
+            "caveat": ("Not handled: unexpected errors in grading or in the AI tutor, and grading that stays down."
+                       if failing else ""),
         })
 
     if e08:
         i, o = e08["input"]["proto"], e08["output"]["proto"]
         items.append({
             "id": "filtering", "tab": "safety",
-            "requirement": "Content filtering runs on both student input and model output.",
-            "source": "Vision: Business constraints, Must Have, Definition of Done",
+            "requirement": "Content is filtered both on what students type and on what the AI writes.",
+            "source": "Vision: business constraints, Must Have and Definition of Done",
             "status": _status(min(i["catch_rate"] or 0, o["catch_rate"] or 0), lambda v: v >= 0.95, lambda v: v >= 0.5),
-            "metric": f"input: catch {i['catch_rate']}, false block {i['false_block_rate']}; output: catch {o['catch_rate']}",
-            "evidence": f"E08: {len(e08['input_rows'])} theme requests, {len(e08['output_rows'])} hint outputs.",
-            "caveat": "Hints do not get the moderation call; prose answers and unkind wording pass the output check.",
+            "metric": f"Student requests: {pc(i['catch_rate'])} of harmful ones stopped, but {pc(i['false_block_rate'])} of "
+                      f"harmless ones stopped too. Tutor hints: {pc(o['catch_rate'])} of problem hints stopped.",
+            "evidence": f"{len(e08['input_rows'])} student requests and {len(e08['output_rows'])} tutor hints.",
+            "caveat": "Hints that give the answer in plain words, or are unkind, are not stopped.",
         })
 
     if e12:
         a, t = e12["ai_raw"], e12["authored"]
         items.append({
             "id": "content_signoff", "tab": "hints",
-            "requirement": "Teaching & Learning sign-off on all student-facing content (incl. hints).",
+            "requirement": "The curriculum team signs off on everything students see, including hints.",
             "source": "Vision: Definition of Done",
             "status": "not_met",
-            "metric": f"teacher hints give the answer {t['give_away_rate_H2_0']}; AI hints {a['give_away_rate_H2_0']}",
-            "evidence": "E12 judge on 36 AI and 36 teacher hints; expected answers marked teacher_reviewed: false.",
-            "caveat": "Judge not yet validated against human raters (use the Rating tab).",
+            "metric": f"{pc(a['give_away_rate_H2_0'])} of AI hints and {pc(t['give_away_rate_H2_0'])} of teacher-written "
+                      "hints give the answer away.",
+            "evidence": f"{a['n']} AI and {t['n']} teacher-written hints, rated by an AI reviewer and AWS AgentCore.",
+            "caveat": "No sign-off yet. The AI reviewer still needs checking by teachers.",
         })
         items.append({
             "id": "cost_latency", "tab": "hints",
-            "requirement": "Cost and latency stay bounded during high-traffic events.",
-            "source": "Vision: Business constraints",
+            "requirement": "Cost and response time stay under control when many students use it at once.",
+            "source": "Vision: business constraints",
             "status": "partial",
-            "metric": f"AI hint P50 {e12['ai_latency_p50_ms']} ms / P95 {e12['ai_latency_p95_ms']} ms, "
-                      f"~${e12['ai_cost_usd_per_hint']} per hint",
-            "evidence": "E12 run; tokens from Bedrock usage.",
-            "caveat": "No load test; proto does not log tokens or cost.",
+            "metric": f"An AI hint takes about {round((e12['ai_latency_p50_ms'] or 0) / 1000, 1)} s "
+                      f"(slowest 5%: {round((e12['ai_latency_p95_ms'] or 0) / 1000, 1)} s) and costs about "
+                      f"${e12['ai_cost_usd_per_hint']}.",
+            "evidence": "Measured on real AWS Bedrock calls.",
+            "caveat": "Not tested under load yet.",
         })
     return {"items": items, "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")}
 
@@ -301,11 +309,11 @@ def live_filter(body: dict) -> dict:
     layers = []
     t = time.time()
     local = screen_text(text)
-    layers.append({"layer": "Proto local rules", "blocked": local.blocked, "detail": local.category,
+    layers.append({"layer": "Word list", "blocked": local.blocked, "detail": local.category,
                    "ms": int((time.time() - t) * 1000)})
     if direction == "output":
         reason = check_hint(text, pa.reference_source())
-        layers.append({"layer": "Proto hint check (code / reference / length)", "blocked": reason is not None,
+        layers.append({"layer": "Hint check (code, copied answer, length)", "blocked": reason is not None,
                        "detail": reason or "ok", "ms": 0})
     ai = _ai_ok()
     if direction == "input":
@@ -313,26 +321,26 @@ def live_filter(body: dict) -> dict:
             from engine.ai import BedrockProvider
             t = time.time()
             res = ContentFilter(BedrockProvider()).screen_request(text)
-            layers.append({"layer": "Proto default (local, then Bedrock moderation)", "blocked": res.blocked,
+            layers.append({"layer": "Word list, then AI moderation (engine default)", "blocked": res.blocked,
                            "detail": res.category, "ms": int((time.time() - t) * 1000),
-                           "note": "Moderation is skipped when local rules already block." if local.blocked else None})
+                           "note": "The AI moderation step is skipped when the word list already blocks." if local.blocked else None})
         else:
-            layers.append({"layer": "Proto default (local, then Bedrock moderation)", "blocked": None,
-                           "detail": "AWS not available", "ms": None})
+            layers.append({"layer": "Word list, then AI moderation (engine default)", "blocked": None,
+                           "detail": "live AI is off", "ms": None})
     if ai:
         from .proto_safety_eval import _guardrail, _guardrail_id
         gid = _guardrail_id()
         if gid:
             blocked, hits, ms = _guardrail(gid, text, "INPUT" if direction == "input" else "OUTPUT")
-            layers.append({"layer": "Bedrock Guardrail (evaluation baseline)", "blocked": blocked,
+            layers.append({"layer": "AWS Bedrock Guardrails (for comparison)", "blocked": blocked,
                            "detail": ", ".join(hits) or "ok", "ms": ms})
-    proto_layers = [l for l in layers if l["layer"].startswith("Proto") and l["blocked"] is not None]
+    proto_layers = [l for l in layers if l["layer"] in ("Word list", "Hint check (code, copied answer, length)") and l["blocked"] is not None]
     if direction == "input":
-        default = next((l for l in layers if l["layer"].startswith("Proto default")), None)
+        default = next((l for l in layers if l["layer"].startswith("Word list, then")), None)
         blocked = default["blocked"] if default and default["blocked"] is not None else local.blocked
-        student_sees = "blocked" if blocked else "allowed"
+        student_sees = "a message that the request is blocked" if blocked else "the project they asked for"
     else:
-        student_sees = "teacher hint (AI hint rejected)" if any(l["blocked"] for l in proto_layers) else "AI hint shown"
+        student_sees = "the teacher-written hint (AI hint not shown)" if any(l["blocked"] for l in proto_layers) else "the AI hint"
     return {"direction": direction, "layers": layers, "proto_outcome": student_sees}
 
 
@@ -345,8 +353,8 @@ def run_suite(name: str) -> dict:
         elif name == "e07":
             from . import proto_fallback_eval as m
         else:
-            raise ApiError(400, "Only e01 and e07 can be re-run from the console (no model calls). "
-                                "Run E08 / E12 from the command line.")
+            raise ApiError(400, "Only the grading and failure tests can be re-run here. "
+                                "The filter and hint tests call AI models; run them from the command line.")
         t = time.time()
         m.main([])
         return {"suite": name, "seconds": round(time.time() - t, 1), "result": results(name)}

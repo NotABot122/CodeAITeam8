@@ -1,14 +1,15 @@
 import {Alert, Box, Button, Chip, FormControlLabel, MenuItem, Paper, Stack, Switch, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography} from '@mui/material';
 import {useState, type ReactNode} from 'react';
-import {api, num, pct, type AgentCoreScore, type E12, type HintBlock, type HintResult, type Judge, type Presets} from '../api';
+import {api, pct, type AgentCoreScore, type E12, type HintBlock, type HintResult, type Judge, type Presets} from '../api';
 import {Bar, Caveat, CodeInput, Loading, Section, Stat, useLoad} from '../ui';
 
-const ITEMS: {k: keyof HintBlock; label: string; max: number}[] = [
-  {k: 'H1', label: 'H1 accurate', max: 1},
-  {k: 'H2', label: 'H2 Socratic', max: 2},
-  {k: 'H3', label: 'H3 strength fits attempt', max: 2},
-  {k: 'H4', label: 'H4 grade-appropriate', max: 1},
-  {k: 'H5', label: 'H5 safe and kind', max: 1},
+// The five questions every hint is rated on (same wording as the Teacher review page).
+export const QUESTIONS: {k: 'H1' | 'H2' | 'H3' | 'H4' | 'H5'; label: string; max: number}[] = [
+  {k: 'H1', label: 'Points at the real mistake', max: 1},
+  {k: 'H2', label: 'Lets the student work it out', max: 2},
+  {k: 'H3', label: 'Right amount of help for this try', max: 2},
+  {k: 'H4', label: 'Easy to read for grades 9-12', max: 1},
+  {k: 'H5', label: 'Safe and kind', max: 1},
 ];
 
 export default function Hints({ai}: {ai: boolean}) {
@@ -17,8 +18,8 @@ export default function Hints({ai}: {ai: boolean}) {
   return (
     <>
       <Section
-        title="Are the hints helping students think, or giving the answer?"
-        subtitle="12 seeded bugs × attempts 1-3. Proto's AIHinter writes a hint from the real check messages; the teacher-written hint is what proto shows otherwise. Both are scored on the E12 sheet by an LLM judge and by AgentCore Evaluations (custom H2 evaluator + Builtin.Harmfulness)."
+        title="Do the hints help students think, or give the answer away?"
+        subtitle="For 12 common mistakes we asked for a hint on the first, second and third try. We compare the AI tutor's hint with the teacher-written hint the engine shows otherwise. An AI reviewer and AWS AgentCore Evaluations rate each hint."
       >
         <Loading error={res.error} loading={res.loading && !res.data} />
         {res.data && <Summary d={res.data} />}
@@ -35,52 +36,41 @@ function Summary({d}: {d: E12}) {
   return (
     <>
       <Stack direction="row" spacing={2} sx={{mb: 2, flexWrap: 'wrap', rowGap: 2}}>
-        <Stat label="AI hints that give the answer" value={pct(a.give_away_rate_H2_0)} hint={`AgentCore: ${pct(a.agentcore_give_away_rate)}`} tone="bad" />
-        <Stat label="Teacher hints that give the answer" value={pct(t.give_away_rate_H2_0)} hint={`AgentCore: ${pct(t.agentcore_give_away_rate)}`} tone="warn" />
-        <Stat label="AI hint accurate" value={pct(a.H1)} hint={`teacher ${pct(t.H1)}`} tone="good" />
-        <Stat label="Rejected by proto's guard" value={`${d.ai_rejected}/${d.ai_calls}`} hint={d.rejection_reasons.join(', ') || 'none'} />
-        <Stat label="Latency / cost" value={`${d.ai_latency_p50_ms ?? '–'} ms`} hint={`P95 ${d.ai_latency_p95_ms ?? '–'} ms · ~$${d.ai_cost_usd_per_hint ?? '–'} per hint`} />
+        <Stat label="AI hints that give the answer" value={pct(a.give_away_rate_H2_0)} hint={`AgentCore agrees: ${pct(a.agentcore_give_away_rate)}`} tone="bad" />
+        <Stat label="Teacher hints that give the answer" value={pct(t.give_away_rate_H2_0)} hint={`AgentCore agrees: ${pct(t.agentcore_give_away_rate)}`} tone="warn" />
+        <Stat label="AI hints that find the real mistake" value={pct(a.H1)} hint={`teacher hints ${pct(t.H1)}`} tone="good" />
+        <Stat label="Time and cost per AI hint" value={`${((d.ai_latency_p50_ms ?? 0) / 1000).toFixed(1)} s`} hint={`about $${d.ai_cost_usd_per_hint ?? '–'}`} />
       </Stack>
       <Stack direction={{xs: 'column', lg: 'row'}} spacing={2}>
-        <Paper variant="outlined" sx={{p: 2, flex: 1}}>
-          <Typography variant="subtitle2" sx={{mb: 1}}>E12 sheet, mean score (LLM judge)</Typography>
+        <Paper variant="outlined" sx={{p: 2, flex: 1, borderRadius: '12px'}}>
+          <Typography variant="subtitle2" sx={{mb: 1}}>Average rating</Typography>
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell>Item</TableCell>
-                <TableCell>AI hint</TableCell>
-                <TableCell>Teacher hint</TableCell>
+                <TableCell />
+                <TableCell>AI tutor</TableCell>
+                <TableCell>Teacher-written</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {ITEMS.map(i => (
-                <TableRow key={i.k}>
-                  <TableCell>{i.label} (0-{i.max})</TableCell>
-                  <TableCell><Bar value={a[i.k] as number | null} max={i.max} /></TableCell>
-                  <TableCell><Bar value={t[i.k] as number | null} max={i.max} color="secondary" /></TableCell>
+              {QUESTIONS.map(q => (
+                <TableRow key={q.k}>
+                  <TableCell>{q.label}</TableCell>
+                  <TableCell><Bar value={a[q.k as keyof HintBlock] as number | null} max={q.max} /></TableCell>
+                  <TableCell><Bar value={t[q.k as keyof HintBlock] as number | null} max={q.max} color="secondary" /></TableCell>
                 </TableRow>
               ))}
-              <TableRow>
-                <TableCell>AgentCore H2 (0-2)</TableCell>
-                <TableCell><Bar value={a.agentcore_H2_mean} max={2} /></TableCell>
-                <TableCell><Bar value={t.agentcore_H2_mean} max={2} color="secondary" /></TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>AgentCore Harmfulness (1 = safe)</TableCell>
-                <TableCell><Bar value={a.agentcore_harmfulness_mean} /></TableCell>
-                <TableCell><Bar value={t.agentcore_harmfulness_mean} color="secondary" /></TableCell>
-              </TableRow>
             </TableBody>
           </Table>
         </Paper>
-        <Paper variant="outlined" sx={{p: 2, flex: 1}}>
-          <Typography variant="subtitle2" sx={{mb: 1}}>Does help get stronger with each attempt?</Typography>
+        <Paper variant="outlined" sx={{p: 2, flex: 1, borderRadius: '12px'}}>
+          <Typography variant="subtitle2" sx={{mb: 1}}>Share of hints that give the fix, by try</Typography>
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell>Attempt</TableCell>
-                <TableCell>AI: gives the fix</TableCell>
-                <TableCell>Teacher: gives the fix</TableCell>
+                <TableCell>Try</TableCell>
+                <TableCell>AI tutor</TableCell>
+                <TableCell>Teacher-written</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -94,55 +84,37 @@ function Summary({d}: {d: E12}) {
             </TableBody>
           </Table>
           <Typography variant="body2" color="text.secondary" sx={{mt: 1.5}}>
-            AI hints give the fix about equally on every attempt: there is no hint ladder, the model decides the strength. Teacher hints start light and get specific. Help
-            stays the same or grows from attempt 1 to 3 for {d.escalation_ai_raw.monotonic}/{d.escalation_ai_raw.bugs} bugs (AI) and {d.escalation_authored.monotonic}/
-            {d.escalation_authored.bugs} (teacher).
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{mt: 1}}>
-            Judge vs. AgentCore on H2: exact {pct(a.judge_vs_agentcore_H2?.exact)}, kappa {num(a.judge_vs_agentcore_H2?.kappa)}.
+            The AI tutor gives the fix about as often on the first try as on the third. Teacher hints start light and get more specific.
           </Typography>
         </Paper>
       </Stack>
-      <Caveat>
-        Hint model <code>{d.hint_model}</code>, judge <code>{d.judge_model}</code>. Neither judge is validated against teachers yet; that is what the Human rating tab is for. Seeded bugs
-        and repeated code on attempts 2-3, not real students.
-      </Caveat>
+      <Caveat>The AI reviewer has not yet been checked against teachers. That is what the Teacher review step is for.</Caveat>
     </>
   );
 }
 
-function JudgeCard({title, text, judge, ac, extra}: {title: string; text: string | null | undefined; judge?: Judge; ac?: AgentCoreScore; extra?: ReactNode}) {
+function Rated({title, text, judge, ac, extra}: {title: string; text: string | null | undefined; judge?: Judge; ac?: AgentCoreScore; extra?: ReactNode}) {
   return (
-    <Paper variant="outlined" sx={{p: 2, flex: 1}}>
+    <Paper variant="outlined" sx={{p: 2, flex: 1, borderRadius: '12px'}}>
       <Typography variant="subtitle2">{title}</Typography>
       {extra}
       <Typography sx={{my: 1}}>{text ?? '–'}</Typography>
       {judge && !judge.error && (
         <>
-          <Stack direction="row" spacing={0.5} sx={{flexWrap: 'wrap', rowGap: 0.5}}>
-            {(['H1', 'H2', 'H3', 'H4', 'H5'] as const).map(k => (
-              <Chip key={k} size="small" variant="outlined" label={`${k} ${judge[k]}`} color={k === 'H2' ? (judge.H2 === 0 ? 'error' : judge.H2 === 2 ? 'success' : 'warning') : 'default'} />
+          <Chip size="small" color={judge.gives_fix ? 'error' : 'success'} label={judge.gives_fix ? 'Gives the answer away' : 'Lets the student work it out'} />
+          <Box component="ul" sx={{m: 0, mt: 1, pl: 2.5}}>
+            {QUESTIONS.map(q => (
+              <Typography key={q.k} component="li" variant="body2">{q.label}: {judge[q.k]} / {q.max}</Typography>
             ))}
-            <Chip size="small" color={judge.gives_fix ? 'error' : 'success'} label={judge.gives_fix ? 'gives the fix' : 'leaves the fix to the student'} />
-          </Stack>
-          <Typography variant="body2" color="text.secondary" sx={{mt: 1}}>
-            Judge: {judge.rationale}
-          </Typography>
+          </Box>
+          <Typography variant="body2" color="text.secondary" sx={{mt: 1}}>{judge.rationale}</Typography>
         </>
       )}
-      {judge?.error && <Alert severity="warning">Judge: {judge.error}</Alert>}
+      {judge?.error && <Alert severity="warning">The AI reviewer could not rate this hint.</Alert>}
       {ac && (
-        <Box sx={{mt: 1}}>
-          <Stack direction="row" spacing={0.5}>
-            <Chip size="small" label={`AgentCore H2 ${ac.h2 ?? '–'} (${ac.h2_label ?? ''})`} />
-            <Chip size="small" label={`Harmfulness ${ac.harmfulness ?? '–'} (${ac.harmfulness_label ?? ''})`} />
-          </Stack>
-          {ac.h2_explanation && (
-            <Typography variant="caption" color="text.secondary" sx={{display: 'block', mt: 0.5}}>
-              {ac.h2_explanation.slice(0, 300)}
-            </Typography>
-          )}
-        </Box>
+        <Typography variant="body2" sx={{mt: 1}}>
+          AgentCore: {ac.h2_label ?? '–'} · {ac.harmfulness_label ?? '–'}
+        </Typography>
       )}
     </Paper>
   );
@@ -184,25 +156,20 @@ function TryHint({presets, ai}: {presets: Presets; ai: boolean}) {
   };
 
   return (
-    <Section title="Try it: a hint for this student, scored live" subtitle="Pick a seeded bug or edit the code. The console grades it with proto, asks proto's AI tutor for a hint, and scores both the AI and the teacher hint. About 5 s; 15 s with AgentCore.">
-      {!ai && <Alert severity="warning" sx={{mb: 1}}>Bedrock is off. Set AWS credentials and restart console_server.</Alert>}
+    <Section title="Try it" subtitle="Pick a mistake (or edit the code), choose which try it is, and ask the tutor for a hint. Both hints are rated as soon as they arrive.">
+      {!ai && <Alert severity="warning" sx={{mb: 1}}>Live AI is off. Ask the team to restart the console with AWS access.</Alert>}
       <Stack direction={{xs: 'column', md: 'row'}} spacing={2}>
         <Box sx={{flex: 1}}>
           <Stack direction="row" spacing={1} sx={{mb: 1, flexWrap: 'wrap', rowGap: 1}}>
-            <TextField select size="small" label="Seeded bug" value={bugId} onChange={e => load(e.target.value)} sx={{minWidth: 220}}>
-              {presets.bugs.map(b => (
-                <MenuItem key={b.bug_id} value={b.bug_id}>{b.bug_id}</MenuItem>
-              ))}
+            <TextField select size="small" label="Mistake" value={bugId} onChange={e => load(e.target.value)} sx={{minWidth: 280, maxWidth: 360}}>
+              {presets.bugs.map(b => <MenuItem key={b.bug_id} value={b.bug_id}>{b.level.replace('level-', 'Level ')}: {b.gap}</MenuItem>)}
             </TextField>
-            <TextField select size="small" label="Attempt" value={attempt} onChange={e => setAttempt(Number(e.target.value))} sx={{width: 110}}>
+            <TextField select size="small" label="Try" value={attempt} onChange={e => setAttempt(Number(e.target.value))} sx={{width: 90}}>
               {[1, 2, 3].map(a => <MenuItem key={a} value={a}>{a}</MenuItem>)}
             </TextField>
-            <FormControlLabel control={<Switch checked={agentcore} onChange={e => setAgentcore(e.target.checked)} />} label="AgentCore scores" />
-            <Button variant="contained" color="secondary" onClick={run} disabled={busy || !ai}>
-              {busy ? 'Asking the tutor…' : 'Get hint'}
-            </Button>
+            <FormControlLabel control={<Switch checked={agentcore} onChange={e => setAgentcore(e.target.checked)} />} label="Also rate with AgentCore" />
+            <Button variant="contained" color="secondary" onClick={run} disabled={busy || !ai}>{busy ? 'Asking…' : 'Get hint'}</Button>
           </Stack>
-          <TextField fullWidth size="small" label="Actual mistake (for the judge only, never sent to the tutor)" value={gap} onChange={e => setGap(e.target.value)} sx={{mb: 1}} />
           <CodeInput value={code} onChange={v => { setCode(v); setResult(null); }} rows={16} />
         </Box>
         <Box sx={{flex: 1}}>
@@ -211,27 +178,15 @@ function TryHint({presets, ai}: {presets: Presets; ai: boolean}) {
           {result && !result.passed && (
             <Stack spacing={1.5}>
               <Box>
-                <Typography variant="subtitle2">Check messages the student sees</Typography>
-                {result.messages.map((m, i) => (
-                  <Typography key={i} variant="body2" sx={{fontFamily: 'var(--code-font)'}}>• {m}</Typography>
-                ))}
+                <Typography variant="subtitle2">What the student is told</Typography>
+                {result.messages.map((m, i) => <Typography key={i} variant="body2">• {m.replace(/^Level \d: /, '')}</Typography>)}
               </Box>
-              <JudgeCard
-                title="AI tutor hint (proto AIHinter)"
-                text={result.ai?.raw}
-                judge={result.ai?.judge}
-                ac={result.agentcore?.ai}
-                extra={
-                  <Stack direction="row" spacing={0.5} sx={{mt: 0.5}}>
-                    <Chip size="small" color={result.ai?.served ? 'primary' : 'warning'} label={result.ai?.served ? 'shown to student' : `rejected: ${result.ai?.rejected}`} />
-                    <Chip size="small" variant="outlined" label={`${result.ai?.latency_ms ?? '–'} ms · ${result.ai?.tokens_in ?? '–'}/${result.ai?.tokens_out ?? '–'} tokens`} />
-                  </Stack>
-                }
-              />
-              <JudgeCard title={`Teacher-written hint for attempt ${attempt}`} text={result.authored?.text} judge={result.authored?.judge} ac={result.agentcore?.authored} />
+              <Rated title="AI tutor" text={result.ai?.raw} judge={result.ai?.judge} ac={result.agentcore?.ai}
+                extra={!result.ai?.served && <Chip size="small" color="warning" sx={{mt: 0.5}} label="Not shown: the engine replaced it with the teacher hint" />} />
+              <Rated title="Teacher-written" text={result.authored?.text} judge={result.authored?.judge} ac={result.agentcore?.authored} />
             </Stack>
           )}
-          {!result && !error && <Typography color="text.secondary">The hint and its scores appear here.</Typography>}
+          {!result && !error && <Typography color="text.secondary">The hints and their ratings appear here.</Typography>}
         </Box>
       </Stack>
     </Section>
@@ -241,19 +196,19 @@ function TryHint({presets, ai}: {presets: Presets; ai: boolean}) {
 function GiveAways({d}: {d: E12}) {
   const rows = d.rows.filter(r => r.source === 'ai_raw' && r.judge?.H2 === 0);
   return (
-    <Section title={`AI hints rated "gives the answer" (${rows.length}/${d.ai_calls})`} subtitle="Proto's output guard blocks code blocks, def lines and full SQL; these state the fix in words, so they reach the student.">
+    <Section title={`AI hints that gave the answer away (${rows.length} of ${d.ai_calls})`} subtitle="The engine stops hints that contain code. These say the fix in plain words, so they still reach the student.">
       <Table size="small">
         <TableHead>
           <TableRow>
-            <TableCell>Bug</TableCell>
-            <TableCell>Attempt</TableCell>
+            <TableCell>Mistake</TableCell>
+            <TableCell>Try</TableCell>
             <TableCell>Hint</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {rows.map((r, i) => (
             <TableRow key={i}>
-              <TableCell sx={{whiteSpace: 'nowrap'}}>{r.bug_id}</TableCell>
+              <TableCell sx={{maxWidth: 260}}>{r.gap}</TableCell>
               <TableCell>{r.attempt}</TableCell>
               <TableCell>{r.hint}</TableCell>
             </TableRow>
