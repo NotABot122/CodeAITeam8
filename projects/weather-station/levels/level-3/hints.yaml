@@ -1,0 +1,3 @@
+- "Before the loop, set up a variable for each answer: counters at 0, total rain at 0.0, max temperature at None, and an empty list for flagged dates."
+- "Inside the loop, write for row, labels in readings: and use if \"heat_wave\" in labels: to add 1 to a counter. Add row[\"rain_mm\"] to the total on every pass."
+- "For the highest temperature, replace max_temp when it is None or when the new temperature is bigger. After the loop, call flagged_dates.sort() and round the total with round(total, 1)."

@@ -1,0 +1,239 @@
+﻿Concepts & Concept Learning Trajectories
+AI Foundations: Designing and Building with AI Unit 1 - AI-Generated Design  Link
+
+Unit Overview
+In this unit, students learn to think and work like designers, using AI as a creative and technical partner to build a multi-page web app. Rather than starting with code, the unit starts with people: who uses digital products, what they need, and how intentional design decisions shape every interaction a user has with a website. Students move through the full design process, developing a brand identity, creating personas and problem statements, mapping site structure, wireframing pages, and generating HTML and CSS with AI tools, while examining how AI learns from existing design patterns and what that means for accessibility, representation, and who gets included or left out of the digital world. The unit culminates in a complete digital magazine: a portfolio-ready web app with a defined user, a consistent visual identity, and a design process students can speak to and reflect on.
+
+Learning Outcomes grouped and ordered: 
+1. Understand the User
+* Explain how intentional design decisions shape user behavior and interaction in web apps.
+* Apply human-centered design principles to identify user needs and define design problems.
+2. Define the Design Problem
+* Create personas and problem statements that ground design decisions in a specific user's needs.
+* Develop a brand identity, including a cohesive color palette, typography, and visual style.
+3. Plan the Structure
+* Plan and communicate site structure using site maps and low-fidelity wireframes.
+4. Build with AI
+* Use prompt engineering to generate and refine AI-produced HTML and CSS.
+* Reflect critically on AI output, identifying when and how to redirect, correct, or override it.
+5. Evaluate and Refine
+* Evaluate AI-generated designs for accessibility using the POUR framework.
+* Test and refine layouts for responsiveness across different screen sizes and devices.
+6. Synthesize
+* Design and build a complete multi-page web app that demonstrates design thinking, technical skill, and intentional decision-making for a defined user.
+
+
+
+
+Concept 1: Human-Centered Design Reasoning
+Interpret a specific user's needs and translate them into justified design decisions persona, brand, structure while distinguishing personal preference from user need.
+
+Concept 2: Computational Design Structuring
+Break a multi-page digital product into structural components and represent it through site maps and wireframes, planning organization and navigation before building.
+
+Concept 3: AI Collaboration and Iterative Prompting
+Write purposeful, structured prompts, evaluate whether AI output aligns with intent and requirements, and refine prompts/iterate when it doesn't.
+
+Concept 4: Accessible & Inclusive Design Evaluation
+Apply accessibility standards (POUR) and inclusive-design criteria to evaluate whether a design — including AI-generated output — works for the full range of users, and explain how AI reproduces patterns of exclusion from its training data.
+Concept 1: Human-Centered Design Reasoning 
+HS-ALG-IM-09: Design a computing technology using human-centered design principles.
+
+
+Interpret a specific user's needs and translate them into justified design decisions — persona, brand, structure — while distinguishing personal preference from user need.
+
+
+Stage 0 → Stage 1: L2, L4 
+Stage 1 → Stage 2: L5, L7, L8 
+Stage 2 → Stage 3: L13
+
+
+Stage 0 (Missing)
+	Stage 1 (Beginning)
+	Stage 2 (Meeting)
+	Stage 3 (Exceeding)
+	Evaluates designs on personal taste ("I like the colors") rather than a user's needs.
+	Identifies a user's explicit stated preferences or frustrations when given directly (e.g., in a profile).
+	Independently interprets a user's frustration and goal from open-ended context and writes a problem statement naming a need, not a solution.
+	Anticipates needs a user hasn't stated and proactively adjusts design to address them.
+	Cannot separate own preferences from a user's likely experience.
+	Completes a persona/problem statement from a template, but the "need" often collapses into a feature ("needs an app that...") rather than an underlying need.
+	Justifies design decisions (brand, layout, wording) by referencing the specific user's context or constraints.
+	Weighs trade-offs between decisions that help one user while creating friction for another.
+	Persona or problem statement, if produced, is generic and interchangeable with any user.
+	Notices obvious usability issues in an interface when prompted with a checklist.
+	Evaluates an interface for whether it serves a particular persona, citing which details support or undermine that.
+	Evaluates a finished product against the originally defined user with specific evidence ("because..."), not general impression.
+	Design choices aren't connected to any stated need.
+	Connects some design choices to a user, but reasoning is generic ("this would help users").
+	Distinguishes "I don't like this" from "this doesn't work for this user because...".
+	Recognizes when a personal aesthetic preference is being smuggled in as a "user need" and corrects for it.
+	
+
+
+
+
+
+________________
+
+
+Concept 2: Computational Design Structuring (Decomposition & Abstraction)
+Break a multi-page digital product into structural components and represent it through site maps and wireframes, planning organization and navigation before building.
+
+
+⚠️ Standards gap, flagged rather than forced: This reasoning doesn't map cleanly onto any single Algorithms & Design content standard in the validated CSTA alignment for this course — site maps and wireframes are a visual/structural planning practice, not an algorithm. The closest connections are two cross-cutting Practices rather than content standards: CT7 ("Develop and use abstractions") and HCD11 ("Use iterative design processes: start with simple prototypes and continuously test and refine"). If this concept matters enough to report on independently, it may be worth citing those practice codes alongside it rather than forcing a content-standard match — flagging this for you rather than picking one that doesn't really fit.
+
+
+Stage 0 → Stage 1: L1, L8 
+Stage 1 → Stage 2: L8, L10, L11 
+Stage 2 → Stage 3: L13
+
+
+Stage 0 (Missing)
+	Stage 1 (Beginning)
+	Stage 2 (Meeting)
+	Stage 3 (Exceeding)
+	Treats a digital product as a single flat idea rather than a set of connected pages/sections.
+	Identifies basic structural components in an existing web app when prompted (nav bar, hero section, cards, footer).
+	Breaks a multi-page product into logical pages and components with a clear hierarchy.
+	Anticipates navigation needs the task didn't spell out and designs structure to accommodate them.
+	Sketches or diagrams are literal/decorative rather than structural.
+	Produces a wireframe or site map using a heavily scaffolded template; structure is present but inconsistent.
+	Uses abstraction deliberately — strips out color/detail to represent structure only — and can explain why.
+	Shifts fluidly between high-level structure (site map) and detailed structure (wireframe) depending on what a decision requires.
+	Cannot identify recurring structural components even when pointed out.
+	Organizes pages/sections in a site map without clear hierarchy or reasoning for placement.
+	Designs a site map or wireframe that supports a plausible user flow from one page to the next.
+	Selects or adapts a layout pattern intentionally to improve clarity or consistency, rather than defaulting to the first idea.
+	
+
+	
+
+	Applies structural patterns consistently across multiple pages of the same product.
+	
+
+	
+
+Note: the unit doesn't have a task that clearly isolates Stage 3 for this concept beyond the culminating project (L13) — worth keeping in mind if you want cleaner mid-unit evidence.
+
+
+________________
+
+
+Concept 3: AI Collaboration and Iterative Prompting 
+HS-PRO-RD-18: Evaluate AI-generated code for accuracy, reliability, and alignment with program requirements.
+
+
+Write purposeful, structured prompts, evaluate whether AI output aligns with intent and requirements, and refine prompts/iterate when it doesn't.
+
+
+Stage 0 → Stage 1: L3, L6 
+Stage 1 → Stage 2: L6, L8, L9, L11 
+Stage 2 → Stage 3: L12, L13
+
+
+Stage 0 (Missing)
+	Stage 1 (Beginning)
+	Stage 2 (Meeting)
+	Stage 3 (Exceeding)
+	Accepts AI output without checking whether it matches what was intended.
+	Writes a prompt stating a basic goal, but constraints and edge cases are missing or an afterthought.
+	Writes a structured prompt naming a goal, at least one constraint, and at least one edge case before generating.
+	Anticipates likely points of AI misinterpretation before generating (e.g., ambiguous wireframe elements) and pre-empts them in the prompt.
+	Prompts are vague, a single sentence, with no goal, constraint, or edge case specified.
+	Notices an obvious mismatch between intent and output only when it's pointed out or highly visible.
+	Compares AI output against original intent and identifies specific matches and mismatches.
+	Iterates in stages — testing one change at a time — rather than layering multiple untested changes.
+	Cannot say what in the prompt caused a particular result.
+	Revises by asking AI to broadly "fix" or "make it better" rather than naming the specific problem.
+	Revises a prompt with a targeted, specific change (naming the exact element, spacing, or behavior) rather than a generic request.
+	Evaluates whether an AI-generated result is reliable enough to keep, needs a prompt revision, or needs a manual override, and justifies the choice.
+	
+
+	
+
+	Explains why the AI likely produced a particular result given what the prompt did or didn't specify.
+	
+
+	
+
+Moving from Stage 0 (Missing) → Stage 1 (Beginning)
+* Skill 1 Prompting: The student moves from writing vague, single-sentence prompts (with no specified goal, constraint, or edge case) to writing a prompt that states at least a basic goal, even if constraints or edge cases are missing or an afterthought.
+   * Level/Step
+   * Step/task have rubrics
+* Evaluation: The student moves from blindly accepting AI output regardless of intent to noticing obvious mismatches between their intent and the AI's output, particularly when the issue is highly visible or pointed out to them.
+* Prompt Revision: Instead of being unable to articulate why a prompt produced a specific result, the student begins to engage with the tool, though revision remains broad (e.g., asking the AI to "fix it" or "make it better" rather than identifying a specific problem).
+Moving from Stage 1 (Beginning) → Stage 2 (Meeting)
+* Prompting: The student shifts from basic goal-setting to writing structured prompts that explicitly name a goal, at least one constraint, and at least one edge case before generating content.
+* Evaluation: The student begins to actively compare AI output against their original intent, systematically identifying specific matches and mismatches rather than just noticing obvious errors.
+* Prompt Revision: The student moves from generic "fix it" requests to targeted, specific revisions that name the exact element, spacing, or behavior needing adjustment. Additionally, they begin to explain why the AI likely produced a specific result based on what was (or wasn't) specified in the prompt.
+
+
+
+
+
+
+________________
+
+
+Concept 4: Accessible & Inclusive Design Evaluation
+HS-ALG-PS-05: Evaluate AI-generated output to assess bias, accuracy, and potential harms. Stage 3 also reaches into [CSTA HS-ALG-ML-07]: Evaluate training data by examining its source, quality, representativeness, potential biases, and privacy implications.
+
+
+Apply accessibility standards (POUR) and inclusive-design criteria to evaluate whether a design — including AI-generated output — works for the full range of users, and explain how AI reproduces patterns of exclusion from its training data.
+
+
+Stage 0 → Stage 1: L3, L5 
+Stage 1 → Stage 2: L5, L9 
+Stage 2 → Stage 3: L9, L12
+
+
+Stage 0 (Missing)
+	Stage 1 (Beginning)
+	Stage 2 (Meeting)
+	Stage 3 (Exceeding) [HS-ALG-ML-07]
+	Evaluates a design only for personal usability ("I can use it fine"), without considering other users.
+	Identifies an accessibility issue when using a checklist or framework (POUR) as a guide.
+	Independently applies POUR to audit a design or AI output and names specific issues tied to a specific principle.
+	Proactively audits a design for accessibility/inclusion before being asked, anticipating likely gaps.
+	Cannot name a specific accessibility issue (contrast, missing labels, keyboard access) even when shown one.
+	Names an issue in general terms ("hard to read") without connecting it to a specific user impact.
+	Connects an accessibility or responsiveness issue to a concrete user impact (e.g., "small text is hard to read for a user with low vision on mobile").
+	Evaluates training-data-level causes of an AI's default output (what's over/under-represented), not just the symptom in front of them.
+	Assumes AI output is neutral or "correct by default."
+	Recognizes, when told, that AI can reproduce accessibility problems from its training data.
+	Explains, without prompting, that AI reproduces the most common patterns in its training data and may underrepresent less common needs.
+	Weighs trade-offs between accessibility, brand consistency, and responsiveness rather than treating them as separate checklists.
+	
+
+	
+
+	Revises a brand or layout choice to be more inclusive and can say who it now serves better.
+	Names, with a specific example, who is excluded by a given default and what would need to change in the design (not just the training data) to include them.
+	
+
+Note: Stage 3 evidence for this concept is thinner across the unit than for the others — L9 and L12 raise the training-data-causation question in discussion, but no task asks students to build an artifact that demonstrates reasoning at the training-data level across multiple examples. Worth knowing if this concept becomes a graded target.
+
+
+________________
+
+
+Summary
+#
+	Concept
+	Primary CSTA Standard
+	1
+	Human-Centered Design Reasoning
+	HS-ALG-IM-09
+	2
+	Computational Design Structuring
+	no clean content-standard match — see note
+	3
+	AI Collaboration and Iterative Prompting
+	HS-PRO-RD-18
+	4
+	Accessible & Inclusive Design Evaluation
+	HS-ALG-PS-05 (+ HS-ALG-ML-07 at Stage 3)
+	
+
+Ready for rubrics whenever you want to move to a specific lesson.

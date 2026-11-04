@@ -1,0 +1,2 @@
+- "Test the highest band first. Python stops at the first if or elif that is true."
+- "Use >= for both edges: if temp_high_c >= 35.0, then elif temp_high_c >= 20.0, then else."

@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+.codeai-data/
+projects/*/dataset/*.db
+projects/*/dataset/.weather-*.db

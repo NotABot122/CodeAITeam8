@@ -1,0 +1,74 @@
+{
+  "seed": 2026,
+  "teacher_reviewed": false,
+  "generated_by": "independent_checker",
+  "reports": [
+    {
+      "args": {
+        "station_id": "ST-A",
+        "start_date": "2026-01-01",
+        "end_date": "2026-01-31"
+      },
+      "report": {
+        "heat_wave_days": 13,
+        "heavy_rain_days": 2,
+        "normal_days": 17,
+        "total_rain_mm": 82.2,
+        "max_temp_c": 41.7,
+        "flagged_dates": [
+          "2026-01-01",
+          "2026-01-02",
+          "2026-01-09",
+          "2026-01-10",
+          "2026-01-12",
+          "2026-01-13",
+          "2026-01-14",
+          "2026-01-16",
+          "2026-01-17",
+          "2026-01-18",
+          "2026-01-19",
+          "2026-01-22",
+          "2026-01-26",
+          "2026-01-31"
+        ]
+      }
+    },
+    {
+      "args": {
+        "station_id": "ST-B",
+        "start_date": "2026-07-01",
+        "end_date": "2026-07-14"
+      },
+      "report": {
+        "heat_wave_days": 1,
+        "heavy_rain_days": 2,
+        "normal_days": 12,
+        "total_rain_mm": 64.9,
+        "max_temp_c": 35.5,
+        "flagged_dates": [
+          "2026-07-05",
+          "2026-07-10"
+        ]
+      }
+    },
+    {
+      "args": {
+        "station_id": "ST-C",
+        "start_date": "2026-03-01",
+        "end_date": "2026-03-31"
+      },
+      "report": {
+        "heat_wave_days": 0,
+        "heavy_rain_days": 3,
+        "normal_days": 28,
+        "total_rain_mm": 192.9,
+        "max_temp_c": 23.5,
+        "flagged_dates": [
+          "2026-03-02",
+          "2026-03-05",
+          "2026-03-22"
+        ]
+      }
+    }
+  ]
+}
