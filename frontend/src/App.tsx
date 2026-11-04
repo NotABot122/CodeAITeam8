@@ -131,7 +131,7 @@ export default function App({client: injected}: {client?: ApiClient}) {
         <Box sx={{display: 'flex', flexDirection: {xs: 'column', lg: 'row'}, gap: 2, alignItems: {lg: 'center'}, justifyContent: 'space-between'}}>
           <PathStrip path={state.path} />
           {!state.complete && p && (
-            <Box sx={{flex: 'none', width: {xs: '100%', lg: 'auto'}, minWidth: {lg: 520}}}>
+            <Box sx={{flex: 'none', width: {xs: '100%', lg: 'min(900px, 60vw)'}}}>
               <ConceptMeters state={state} highlight={p.concepts} row />
             </Box>
           )}
