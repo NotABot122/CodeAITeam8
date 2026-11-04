@@ -18,7 +18,7 @@ Build an intelligent, personalized learning engine designed for K-12 students le
 ### 1.3 Core Pillars
 1. **Holistic Diagnostic Profiling**: Evaluates prior knowledge, school grade, and cognitive coding readiness through dynamic multiple-choice, open-ended conceptual explanations, and automated follow-up questioning.
 2. **Gamified Skill-Tree Mastery & Poly-Hierarchy**: Represents curriculum progress as an interactive node graph (like an RPG skill tree). Skills can belong to multiple categories (e.g. `While Loops` belongs to both `Conditionals / Boolean Logic` and `Iteration / Loops`).
-3. **Deterministic & Stance Decider 2B Routing**: Combines strict prerequisite logic trees with a 2B SLM (Stance Decider 2B) and Amazon Bedrock to decide the optimal next learning step, project branch, or remediation path.
+3. **Deterministic & Strands Decider 2B Routing**: Combines strict prerequisite logic trees with a 2B SLM (Strands Decider 2B) and Amazon Bedrock to decide the optimal next learning step, project branch, or remediation path.
 4. **Project-Based Culmination**: Students don't just solve isolated puzzles—they synthesize their unlocked node skills into an end-to-end final project.
 5. **Post-Project Growth Diagnostics**: Compares pre- and post-project diagnostic metrics across individual sub-skills to quantify actual student learning gains for teachers.
 
@@ -35,7 +35,7 @@ Derived from the official CodeAI AWS Imagine Grant technical environment:
 | **Database (System of Record)** | **Amazon Aurora (SQL)** | Curriculum definitions, `UserLevel` progress records, sections, skill trees |
 | **State & Cache** | **Amazon SimpleDB / DynamoDB / ElastiCache** | Fast routing flags, session caches, transient quiz state |
 | **AI & LLM Services** | **Amazon Bedrock (Flexible Model Abstraction)** | Socratic hint generation, diagnostic evaluation, rubric grading |
-| **SLM Routing** | **Stance Decider 2B** | Lightweight routing classifier for student learning stances |
+| **SLM Routing** | **Strands Decider 2B** | Lightweight routing classifier for student learning stances |
 | **Evaluation & Observability** | **Langfuse & Bedrock Evals** | Model scoring, prompt latency, curriculum rubric compliance |
 | **Cloud Hosting** | **AWS (Serverless / Containers)** | Native AWS cloud deployment |
 
@@ -49,7 +49,7 @@ flowchart TD
     PreDiag --> SkillTreeInit[Skill Tree Calibration\nGrade & Skill Level Baseline]
     
     subgraph LearningLoop["The Adaptive Learning Cycle"]
-        SkillTreeInit --> RecEngine{Recommendation Engine\n- Deterministic Pre-reqs\n- Stance Decider 2B\n- Bedrock Routing}
+        SkillTreeInit --> RecEngine{Recommendation Engine\n- Deterministic Pre-reqs\n- Strands Decider 2B\n- Bedrock Routing}
         RecEngine --> LessonNode[Adaptive AI Lesson\nInteractive Socratic Instruction]
         LessonNode --> SkillMasteryCheck{Skill Mastered?}
         SkillMasteryCheck -- No --> Remediation[Targeted AI Hint & Scaffold]
@@ -102,14 +102,14 @@ flowchart TD
   - Nodes like **While Loops** belong to both `Conditionals` and `Iteration`. 
   - The backend routing evaluator calculates whether the combined conditional mastery points and looping readiness meet the threshold before unlocking while loop lessons or challenges.
 
-### 4.3 Next Step Recommendation: Point Classification + Stance Decider 2B
+### 4.3 Next Step Recommendation: Point Classification + Strands Decider 2B
 The next learning step (whether to give a question, a mini-lesson, a remediation hint, or a project synthesis challenge) is generated through a two-stage hybrid pipeline:
 1. **Deterministic Stage (Point & DAG Classifier)**:
    - Scans the graph for candidate nodes that are unlocked but not yet mastered.
    - Evaluates current point deficits: where does the student have the largest gap relative to their target project skills?
-2. **Dynamic Stage (Stance Decider 2B + Bedrock)**:
+2. **Dynamic Stage (Strands Decider 2B + Bedrock)**:
    - Takes the top deterministic candidate nodes, student response latency, recent mistake patterns, and qualitative diagnostic inputs.
-   - **Stance Decider 2B** outputs a discrete pedagogical stance:
+   - **Strands Decider 2B** outputs a discrete pedagogical stance:
      - `STANCE_REINFORCE`: Student has borderline points; serve targeted diagnostic follow-up question.
      - `STANCE_ADVANCE`: Student demonstrated decisive point surplus; advance to next topological skill node.
      - `STANCE_BRIDGE`: Student mastered two disparate branches; recommend a cross-cutting challenge (e.g. while loops + list filtering).
@@ -130,6 +130,6 @@ The next learning step (whether to give a question, a mini-lesson, a remediation
 |---|---|---|---|
 | **Phase 1** | **Diagnostic & Architecture Scaffold** | Diagnostic schema, tri-modal question generator, `collab.md` operational flow | 🟡 In Progress |
 | **Phase 2** | **Skill Tree Engine & Graph Logic** | DAG node schema (supporting poly-hierarchy), deterministic pre-req evaluator, tree state visualizer | ⚪ Upcoming |
-| **Phase 3** | **Stance Decider 2B & Bedrock Lesson AI** | Bedrock wrapper (model abstraction), SLM inference for routing, interactive Socratic tutor | ⚪ Upcoming |
+| **Phase 3** | **Strands Decider 2B & Bedrock Lesson AI** | Bedrock wrapper (model abstraction), SLM inference for routing, interactive Socratic tutor | ⚪ Upcoming |
 | **Phase 4** | **Project Studio & AP CSP Content** | AP CSP curriculum nodes, final project builder templates | ⚪ Upcoming |
 | **Phase 5** | **Post-Diagnostic & Teacher Dashboard** | Growth delta calculation engine, classroom mastery overview | ⚪ Upcoming |
