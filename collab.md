@@ -35,7 +35,7 @@ Every autonomous agent or developer **MUST read this file before writing code** 
 | `Agent-3` | Unassigned | `idle` | None | - |
 | `zane-claude` | Claude Opus 5.5 (Kiro) | `idle` | Renamed "Stance Decider 2B" to "Strands Decider 2B" in documentation/ | 2026-11-03 15:30 PST |
 | `Kiro-Diagnostic` | Claude Sonnet 5.5 (Kiro) | `idle` | Built the gamified grade 3-5 Weather Station readiness diagnostic (`diagnostic/`, `projects/weather-station/diagnostic/`, additive `evaluation/` files) on the `diagnosis` branch | 2026-11-04 |
-| `Kiro-Demo` | Claude Opus 5.5 (Kiro) | `idle` | Adaptive path across projects (`engine/course.py`, quizzes, revision projects, Lists & Dictionaries topic) on `proto-branch`; UI handoff in `docs/HANDOFF-adaptive-path.md` | 2026-11-04 10:40 PST |
+| `Kiro-Demo` | Claude Opus 5.5 (Kiro) | `idle` | Merged `diagnosis` into `proto-branch` and connected the readiness quest to `Course` (confident stages seed the profile; placement sets the first problem) | 2026-11-04 12:05 PST |
 
 ---
 
@@ -43,6 +43,11 @@ Every autonomous agent or developer **MUST read this file before writing code** 
 
 > *Most recent on top. Maximum 10 items.*
 
+1. **[Task 015] Readiness Diagnostic Connected to the Adaptive Path**
+   - **Model:** Claude Opus 5.5 (Kiro)
+   - **Agent:** `Kiro-Demo`
+   - **Timestamp:** 2026-11-04 12:05 PST
+   - **Summary:** Merged `diagnosis` (Task 014, Kiro-Diagnostic) into `proto-branch`. The only conflict was `collab.md`, kept from both sides, with the diagnostic entry renumbered 014. `Course` now wraps the quest (`diagnostic_start/answer/next/finish`). When a quest ends, `apply_diagnostic` seeds the profile with every concept the quest is confident about (confidence 0.8 or higher, not borderline; set in `projects/catalog.yaml`) and starts the lesson at the quest's placement. A lesson that has already started keeps its place. **@Kiro-Diagnostic:** this changes your "never seed a stage" rule at the user's request. `diagnostic/` itself is unchanged, and the seeding lives in `engine/course.py`. CLI: `engine.cli placement --student STU-...`. 237 tests pass (87 + 145 + 5). **@Pratheek:** diagnostic methods added to `docs/HANDOFF-adaptive-path.md`. Open question: the quest targets grades 3 to 5, the lessons grades 9 to 12.
 1. **[Task 014] Gamified Grade 3-5 Readiness Diagnostic for the Weather Station Lesson**
    - **Model:** Claude Sonnet 5.5 (Kiro)
    - **Agent:** `Kiro-Diagnostic`
@@ -88,8 +93,3 @@ Every autonomous agent or developer **MUST read this file before writing code** 
    - **Agent:** Agent-Bootstrap
    - **Timestamp:** 2026-11-03 15:31 PST
    - **Summary:** Scraped and verified Google Doc reference into documentation/resources/concept_learning_trajectories_draft.md (Units 1-4, Stage 0-3 progressions), verified CSTA PK-12 standard mappings from csteachers.org, and added mandatory documentation diff-check requirement for collaborating agents.
-2. **[Task 005] Course Flow Graph, Curriculum DB Integration & Post-Project Reteach Loop**
-   - **Model:** Gemini 3.8 Flash
-   - **Agent:** `Agent-Bootstrap`
-   - **Timestamp:** 2026-11-03 15:21 PST
-   - **Summary:** Added `documentation/COURSE_FLOW_GRAPH.md` showing end-to-end adaptive flow. Updated `documentation/PROJECT_SPEC.md` with the teammate's Curriculum Database in Aurora/SimpleDB, dual evaluation modalities (eval checks answers, lesson checks live telemetry feed), post-project AI reteach option, and committed all files to the local Git repository pointing to `https://github.com/NotABot122/CodeAITeam8`.

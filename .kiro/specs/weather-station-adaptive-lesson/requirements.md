@@ -424,3 +424,17 @@ Assumptions made for this draft (please confirm or correct):
 6. THE explain score SHALL NOT change Stages until the Rubric_Grader meets the agreement benchmark in Requirement 11.
 7. THE content check SHALL run every "predict" snippet and fail when its output doesn't match exactly one choice, the one marked correct.
 8. A scaffolded starter file SHALL fail its coding task's checks until the student completes it.
+
+### Requirement 25: Starting stages from the readiness diagnostic
+
+**User Story:** As a student who already knows some of this, I want the readiness quest to set where I start, so that I'm not taught what I've shown I know.
+
+#### Acceptance Criteria
+
+1. WHEN a student's readiness quest is finished, THE Engine SHALL apply its result to that student's profile, at most once.
+2. FOR EACH concept in the result, THE Engine SHALL use the quest's stage only if its confidence is at least the catalog's `diagnostic.min_confidence` (default 0.8) and, unless `diagnostic.use_borderline` is true, the quest did not mark it borderline. THE Engine SHALL record every decision with its reason.
+3. WHEN a stage is used, THE Engine SHALL set the profile stage to the higher of the current profile stage and the quest's stage.
+4. IF the student has not started the lesson, THEN THE Engine SHALL start a fresh lesson record at the seeded stages and the quest's placement problem.
+5. IF the student has started the lesson, THEN THE Engine SHALL leave the lesson record unchanged and update only the profile.
+6. IF the quest is not finished, THEN THE Engine SHALL refuse to apply it with a plain-language message.
+7. THE Engine SHALL log the application with the Student_Id only.

@@ -79,3 +79,9 @@
   - [x] 9.5 Content: `weather-collections`, six revision projects, `catalog.yaml`; content check runs quiz snippets
     - _Requirements: 24.1, 24.7, 24.8_
   - [x] 9.6 CLI `answer` and `next`, `engine.path_demo`, tests, and the UI handoff (`docs/HANDOFF-adaptive-path.md`)
+
+- [x] 10. Readiness diagnostic integration
+  - [x] 10.1 Merge `diagnosis` into `proto-branch` (resolve `collab.md`)
+  - [x] 10.2 `Course` diagnostic methods, `seed_from_placement`, `apply_diagnostic`, `state()["diagnostic"]`
+    - _Requirements: 25.1–25.7_
+  - [x] 10.3 Catalog `diagnostic` settings, CLI `placement`, tests, README, and UI handoff
