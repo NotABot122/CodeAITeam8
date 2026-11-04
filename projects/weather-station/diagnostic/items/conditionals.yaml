@@ -34,6 +34,7 @@ items:
   - id: dec-2a
     tier: 2
     type: sort
+    display: belt
     nodes: [if_else_compare]
     prompt: "The code is: is_heat_wave = temp_high_c >= 35.0. Drag each temperature to True or False."
     buckets:

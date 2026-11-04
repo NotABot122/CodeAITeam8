@@ -3,6 +3,7 @@
 #  - choice/spot/trace: mark exactly one option `correct: true`. Every wrong option needs a `misconception` tag.
 #  - order: list `cards` in the CORRECT order. The game shuffles them.
 #  - sort: each card names its correct `bucket`. A card may carry a `misconception` tag.
+#    Optional `display:` on a sort item picks a game skin (rows, belt, chips); scoring is identical.
 #  - Each tier needs at least two items (a first question and a twin).
 # The table matches the lesson: daily_readings(station_id, date, temp_high_c, temp_low_c, rain_mm).
 concept: database_retrieval
@@ -40,6 +41,7 @@ items:
   - id: log-2a
     tier: 2
     type: sort
+    display: rows
     nodes: [filter_rows]
     prompt: "The query is: SELECT * FROM daily_readings WHERE station_id = 'ST-A' AND date >= '2026-01-01' AND date <= '2026-01-03'. Drag each row to Returned or Not returned."
     buckets:

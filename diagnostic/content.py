@@ -12,7 +12,7 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 import yaml
 
-from .models import (CHOICE, CHOICE_LIKE, DEFAULT_FACET, FACETS, ITEM_TYPES, ORDER, TIERS, Bucket, Card,
+from .models import (DISPLAYS, CHOICE, CHOICE_LIKE, DEFAULT_FACET, FACETS, ITEM_TYPES, ORDER, SORT, TIERS, Bucket, Card,
                      ExplainPrompt, Goal, Item, KeyIdea, Node, Option, ScoringRules, Zone)
 from .paths import PathLike, content_dir
 from .readability import readability_problems
@@ -455,12 +455,16 @@ def _parse_item(entry: Any, where: str, concept: Optional[str], config: Config, 
                 errors.add(where, "every bucket needs at least one card")
             if not item_misconception and not any(c.misconception for c in cards):
                 errors.add(where, "sort questions need a misconception tag on the item or on a card")
+    display = entry.get("display")
+    if display is not None and (item_type != SORT or display not in DISPLAYS):
+        errors.add(where, f"display is only for sort questions and must be one of {', '.join(DISPLAYS)}")
 
     return Item(
         id=item_id, concept=None if booster else concept, tier=tier, type=item_type, prompt=prompt, nodes=nodes,
         facet=facet, options=tuple(options), cards=tuple(cards), buckets=tuple(buckets), answer=answer,
         misconception=item_misconception, feedback_right=entry.get("feedback_right"),
         feedback_wrong=entry.get("feedback_wrong"), pass_credit=config.pass_credit.get(item_type, 1.0),
+        display=display,
     )
 
 

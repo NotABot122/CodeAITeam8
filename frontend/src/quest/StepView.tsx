@@ -3,6 +3,7 @@ import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import {Box, Button, IconButton, TextField, ToggleButton, ToggleButtonGroup, Typography} from '@mui/material';
 import {useState} from 'react';
 
+import {BeltGame, ChipsGame, initialRows, RowsGame} from './SortGames';
 import type {ExplainStep, ItemStep} from './types';
 
 export type Response = string | string[] | Record<string, string> | {text: string} | {skip: true};
@@ -18,6 +19,7 @@ export function responseReady(step: ItemStep, value: unknown): boolean {
 }
 
 export function initialResponse(step: ItemStep): unknown {
+  if (step.type === 'sort' && step.display === 'rows') return initialRows(step);
   return step.type === 'order' ? (step.cards ?? []).map(c => c.id) : step.type === 'sort' ? {} : null;
 }
 
@@ -42,6 +44,10 @@ export function ItemView({step, value, onChange, disabled}: {step: ItemStep; val
         ))}
       </Box>
     );
+  }
+  if (step.type === 'sort' && step.display) {
+    const Game = step.display === 'rows' ? RowsGame : step.display === 'belt' ? BeltGame : ChipsGame;
+    return <Game step={step} value={(value ?? {}) as Record<string, string>} onChange={onChange} disabled={disabled} />;
   }
   if (step.type === 'sort') {
     const placed = (value ?? {}) as Record<string, string>;
