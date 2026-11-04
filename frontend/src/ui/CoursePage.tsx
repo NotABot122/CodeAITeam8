@@ -5,8 +5,7 @@ import {useEffect, useState} from 'react';
 
 import type {ApiClient} from '@/api/client';
 import type {CourseView} from '@/api/types';
-
-const COLORS = ['#9a9ab0', '#e8a200', '#4c42cf', '#1a7f4b'];
+import SkillTree from './SkillTree';
 
 export function CourseBody({view}: {view: CourseView}) {
   return (
@@ -48,20 +47,8 @@ export function CourseBody({view}: {view: CourseView}) {
       )}
 
       <Box>
-        <Typography sx={{fontWeight: 700, mb: 1}}>Your ideas so far</Typography>
-        <Box sx={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 1}}>
-          {view.concepts.map(c => (
-            <Paper key={c.id} variant="outlined" sx={{p: 1.25, borderRadius: '10px'}}>
-              <Box sx={{display: 'flex', justifyContent: 'space-between', gap: 1}}>
-                <Typography variant="body2" sx={{fontWeight: 600}}>{c.name}</Typography>
-                <Typography variant="caption" sx={{color: COLORS[c.stage], fontWeight: 700}}>{c.stageName}</Typography>
-              </Box>
-              <Box role="meter" aria-label={`${c.name}: ${c.stageName}`} aria-valuemin={0} aria-valuemax={3} aria-valuenow={c.stage} sx={{display: 'flex', gap: 0.5, mt: 0.5}}>
-                {[1, 2, 3].map(i => <Box key={i} sx={{flex: 1, height: 6, borderRadius: 3, bgcolor: i <= c.stage ? COLORS[c.stage] : 'divider'}} />)}
-              </Box>
-            </Paper>
-          ))}
-        </Box>
+        <Typography sx={{fontWeight: 700, mb: 1}}>Your skill tree</Typography>
+        <SkillTree concepts={view.concepts} />
       </Box>
 
       {view.nextStep && <Alert severity="info">{view.nextStep}</Alert>}

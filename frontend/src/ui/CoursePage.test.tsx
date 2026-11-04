@@ -12,13 +12,13 @@ const view: CourseView = {
     {id: 'c', title: 'Functions', status: 'upcoming', concepts: ['Functions']},
   ],
   reviewsDone: ['Review 1'],
-  concepts: [{id: 'v', name: 'Variables', stage: 3, stageName: 'Exceeding'}, {id: 'l', name: 'Loops', stage: 0, stageName: 'Missing'}],
+  concepts: [{id: 'database_retrieval', name: 'Database Retrieval', stage: 3, stageName: 'Exceeding', inProject: false}, {id: 'loops', name: 'Loops', stage: 0, stageName: 'Missing', inProject: true}],
   quest: {status: 'applied', seeded: ['Variables']}, nextStep: 'Next: review loops.', stageNames: [],
 };
 
 describe('CourseBody', () => {
   it('shows topics with status, concepts and next step', () => {
     const out = renderToString(<CourseBody view={view} />).replace(/<!-- -->/g, '');
-    for (const t of ['You are here', 'Done', 'Up next', 'Next: review loops.', 'Review 1', 'Loops: Missing', 'Conditionals · Loops']) expect(out).toContain(t);
+    for (const t of ['You are here', 'Done', 'Up next', 'Next: review loops.', 'Review 1', 'Loops: Missing, you are here', 'Database Retrieval: Exceeding', 'Learned!', 'Conditionals · Loops']) expect(out).toContain(t);
   });
 });

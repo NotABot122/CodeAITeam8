@@ -128,7 +128,7 @@ export interface CourseView {
   now: {project: string; isReview: boolean; complete: boolean};
   topics: {id: string; title: string; status: 'done' | 'current' | 'upcoming'; concepts: string[]}[];
   reviewsDone: string[];
-  concepts: {id: string; name: string; stage: number; stageName: string}[];
+  concepts: {id: string; name: string; stage: number; stageName: string; inProject: boolean}[];
   quest: {status: 'none' | 'in_progress' | 'finished' | 'applied'; seeded: string[]};
   nextStep: string | null;
   stageNames: string[];

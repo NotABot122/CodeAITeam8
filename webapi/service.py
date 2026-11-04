@@ -246,7 +246,8 @@ class Service:
                 "now": {"project": project.title, "isReview": project.topic == "revision", "complete": record.complete},
                 "topics": topics,
                 "reviewsDone": reviews,
-                "concepts": [{"id": c, "name": n, "stage": stages.get(c, 0), "stageName": STAGE_NAMES[min(3, stages.get(c, 0))]}
+                "concepts": [{"id": c, "name": n, "stage": stages.get(c, 0), "stageName": STAGE_NAMES[min(3, stages.get(c, 0))],
+                              "inProject": c in record.concepts and not record.complete}
                              for c, n in catalog.concepts.items()],
                 "quest": {"status": course.diagnostic_status(student_id),
                           "seeded": [catalog.name(c) for c, v in (diag.get("seeded") or {}).items() if v > 0]},
