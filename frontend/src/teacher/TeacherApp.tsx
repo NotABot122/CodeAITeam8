@@ -13,7 +13,7 @@ const COLORS = ['#9a9ab0', '#e8a200', '#4c42cf', '#1a7f4b'];
 
 async function api<T>(path: string, token: string): Promise<T> {
   let res: Response;
-  try { res = await fetch(path, {headers: {'X-Teacher-Token': token}}); }
+  try { res = await fetch(`${import.meta.env.VITE_API_BASE_URL ?? ''}${path}`, {headers: {'X-Teacher-Token': token}}); }
   catch { throw Object.assign(new Error("Can't reach the server."), {status: 0}); }
   const body = await res.json().catch(() => null);
   if (!res.ok) throw Object.assign(new Error(body?.error?.message ?? 'Something went wrong.'), {status: res.status});
