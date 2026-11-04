@@ -1,0 +1,188 @@
+{
+  "run_id": "run-20261104T004927Z-drift-t07-1c25",
+  "contract_version": "0.2",
+  "model_id": "us.anthropic.claude-sonnet-4-6",
+  "temperature": 0.7,
+  "rubric_id": "C3-L6-v0.1-draft",
+  "n_submissions": 60,
+  "label_source": "synthetic_target (debugging only, overstates real agreement)",
+  "E01_agreement_vs_synthetic_target": {
+    "prompting": {
+      "n": 60,
+      "exact": 0.45,
+      "adjacent": 1.0,
+      "qwk": 0.727,
+      "confusion": [
+        [
+          3,
+          8,
+          0,
+          0
+        ],
+        [
+          0,
+          11,
+          2,
+          0
+        ],
+        [
+          0,
+          0,
+          6,
+          4
+        ],
+        [
+          0,
+          0,
+          19,
+          7
+        ]
+      ]
+    },
+    "evaluation": {
+      "n": 60,
+      "exact": 0.6,
+      "adjacent": 1.0,
+      "qwk": 0.785,
+      "confusion": [
+        [
+          6,
+          4,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          19,
+          0
+        ],
+        [
+          0,
+          0,
+          17,
+          0
+        ],
+        [
+          0,
+          0,
+          1,
+          13
+        ]
+      ]
+    },
+    "prompt_revision": {
+      "n": 60,
+      "exact": 0.667,
+      "adjacent": 0.95,
+      "qwk": 0.716,
+      "confusion": [
+        [
+          4,
+          3,
+          3,
+          0
+        ],
+        [
+          0,
+          12,
+          6,
+          0
+        ],
+        [
+          0,
+          0,
+          16,
+          0
+        ],
+        [
+          0,
+          0,
+          8,
+          8
+        ]
+      ]
+    }
+  },
+  "E02_repeat_stability": {
+    "n_items": 0,
+    "repeats": 1
+  },
+  "E11_calibration": {
+    "bins": [
+      {
+        "bin": "[0.7, 0.8]",
+        "n": 46,
+        "mean_confidence": 0.762,
+        "exact_agreement": 0.478
+      },
+      {
+        "bin": "[0.8, 0.9]",
+        "n": 131,
+        "mean_confidence": 0.835,
+        "exact_agreement": 0.595
+      },
+      {
+        "bin": "[0.9, 1.0]",
+        "n": 3,
+        "mean_confidence": 0.92,
+        "exact_agreement": 1.0
+      }
+    ],
+    "ece": 0.248,
+    "n": 180
+  },
+  "E08_E16_adversarial": [],
+  "E09_cost_latency": {
+    "model_calls": 60,
+    "tokens_in_per_call": 1265,
+    "tokens_out_per_call": 460,
+    "cost_per_call_usd": 0.01177,
+    "cost_main_pass_usd": 0.7062,
+    "latency_p50_ms": 4126,
+    "latency_p95_ms": 5117
+  },
+  "E14_style_bias_mean_pred_minus_target": {
+    "esl": {
+      "prompting": -0.04,
+      "evaluation": 0.29,
+      "prompt_revision": 0.12
+    },
+    "standard": {
+      "prompting": -0.18,
+      "evaluation": 0.64,
+      "prompt_revision": 0.36
+    },
+    "verbose": {
+      "prompting": 0.09,
+      "evaluation": 0.27,
+      "prompt_revision": -0.18
+    },
+    "informal": {
+      "prompting": -0.25,
+      "evaluation": 0.38,
+      "prompt_revision": 0.25
+    },
+    "terse": {
+      "prompting": -0.17,
+      "evaluation": 0.33,
+      "prompt_revision": 0
+    }
+  },
+  "E14_length_bias_mean_pred_minus_target": {
+    "long (>180)": {
+      "prompting": -0.12,
+      "evaluation": 0.37,
+      "prompt_revision": 0.09
+    },
+    "medium (120-180)": {
+      "prompting": 0.67,
+      "evaluation": 0.33,
+      "prompt_revision": 0.67
+    }
+  },
+  "needs_review_count": 0,
+  "errors": [],
+  "parse_errors": [],
+  "event_log": "event_log_run-20261104T004927Z-drift-t07-1c25.jsonl"
+}

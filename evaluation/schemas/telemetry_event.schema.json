@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "codeai-team8/evaluation/telemetry_event/v0.1",
+  "title": "Lesson-mode editor telemetry event (draft v0.1)",
+  "description": "One row per editor event during a lesson session. Used to evaluate proactive-hint triggers. The `sim` block exists only in synthetic data and holds the ground truth.",
+  "type": "object",
+  "required": ["timestamp", "session_id", "student_id", "lesson_id", "task_id", "seq", "event_type"],
+  "properties": {
+    "timestamp": { "type": "string", "format": "date-time" },
+    "session_id": { "type": "string" },
+    "student_id": { "type": "string", "pattern": "^SIM-|^ADV-|^STU-" },
+    "lesson_id": { "type": "string" },
+    "task_id": { "type": "string" },
+    "seq": { "type": "integer", "minimum": 1 },
+    "event_type": { "enum": ["session_start", "edit", "run", "idle", "ai_prompt", "hint_shown", "session_end"] },
+    "chars_added": { "type": "integer", "minimum": 0 },
+    "chars_deleted": { "type": "integer", "minimum": 0 },
+    "run_result": { "enum": ["ok", "error"] },
+    "error_type": { "type": "string" },
+    "idle_seconds": { "type": "integer", "minimum": 0 },
+    "prompt_chars": { "type": "integer", "minimum": 0, "description": "Length only; the prompt text is not logged." },
+    "hint_source": { "enum": ["student_request", "proactive"] },
+    "sim": {
+      "type": "object",
+      "properties": {
+        "stuck": { "type": "boolean" },
+        "episode": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

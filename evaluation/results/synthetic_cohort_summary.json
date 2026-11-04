@@ -1,0 +1,226 @@
+{
+  "run_id": "sim-seed8-n100",
+  "contract_version": "0.2",
+  "E06_E07": [
+    {
+      "policy": "stage_rules",
+      "n": 100,
+      "mastered_rate": 0.51,
+      "median_steps_to_mastery": 3,
+      "declared_complete_rate": 0.93,
+      "premature_complete_rate": 0.44,
+      "wasted_steps_per_student": 0.76,
+      "repeats_per_student": 1.63,
+      "loops_per_student": 0.11,
+      "validation_failures": 4,
+      "students_with_failure": 4,
+      "fallback_steps": 4,
+      "stages_reset_after_failure": 0,
+      "mastered_rate_after_failure": 0.75
+    },
+    {
+      "policy": "agent",
+      "n": 100,
+      "mastered_rate": 0.5,
+      "median_steps_to_mastery": 4.0,
+      "declared_complete_rate": 0.83,
+      "premature_complete_rate": 0.33,
+      "wasted_steps_per_student": 1.22,
+      "repeats_per_student": 1.48,
+      "loops_per_student": 0.05,
+      "validation_failures": 17,
+      "students_with_failure": 14,
+      "fallback_steps": 17,
+      "stages_reset_after_failure": 0,
+      "mastered_rate_after_failure": 0.286
+    },
+    {
+      "policy": "fixed_order",
+      "n": 100,
+      "mastered_rate": 0.35,
+      "median_steps_to_mastery": 6,
+      "declared_complete_rate": 0.57,
+      "premature_complete_rate": 0.22,
+      "wasted_steps_per_student": 3.83,
+      "repeats_per_student": 0,
+      "loops_per_student": 0,
+      "validation_failures": 35,
+      "students_with_failure": 28,
+      "fallback_steps": 32,
+      "stages_reset_after_failure": 0,
+      "mastered_rate_after_failure": 0.25
+    },
+    {
+      "policy": "random",
+      "n": 100,
+      "mastered_rate": 0.24,
+      "median_steps_to_mastery": 4.0,
+      "declared_complete_rate": 0.49,
+      "premature_complete_rate": 0.27,
+      "wasted_steps_per_student": 3.79,
+      "repeats_per_student": 0.59,
+      "loops_per_student": 0.06,
+      "validation_failures": 21,
+      "students_with_failure": 18,
+      "fallback_steps": 20,
+      "stages_reset_after_failure": 0,
+      "mastered_rate_after_failure": 0.111
+    }
+  ],
+  "E05": {
+    "policy": "agent",
+    "students": 91,
+    "tasks": [
+      {
+        "task_id": "C3-L6-E1",
+        "attempts": 91,
+        "moved_up": 49,
+        "failed_calls": 1,
+        "moved_up_rate": 0.538
+      },
+      {
+        "task_id": "C3-L6-E2",
+        "attempts": 68,
+        "moved_up": 37,
+        "failed_calls": 4,
+        "moved_up_rate": 0.544
+      },
+      {
+        "task_id": "C3-L6-E3",
+        "attempts": 1,
+        "moved_up": 1,
+        "failed_calls": 0,
+        "moved_up_rate": 1.0
+      },
+      {
+        "task_id": "C3-L6-P1",
+        "attempts": 88,
+        "moved_up": 49,
+        "failed_calls": 3,
+        "moved_up_rate": 0.557
+      },
+      {
+        "task_id": "C3-L6-P2",
+        "attempts": 105,
+        "moved_up": 51,
+        "failed_calls": 5,
+        "moved_up_rate": 0.486
+      },
+      {
+        "task_id": "C3-L6-P3",
+        "attempts": 3,
+        "moved_up": 1,
+        "failed_calls": 0,
+        "moved_up_rate": 0.333
+      },
+      {
+        "task_id": "C3-L6-R1",
+        "attempts": 77,
+        "moved_up": 46,
+        "failed_calls": 1,
+        "moved_up_rate": 0.597
+      },
+      {
+        "task_id": "C3-L6-R2",
+        "attempts": 44,
+        "moved_up": 24,
+        "failed_calls": 0,
+        "moved_up_rate": 0.545
+      },
+      {
+        "task_id": "C3-L6-R3",
+        "attempts": 1,
+        "moved_up": 1,
+        "failed_calls": 0,
+        "moved_up_rate": 1.0
+      },
+      {
+        "task_id": "C3-L6-X1",
+        "attempts": 101,
+        "moved_up": 62,
+        "failed_calls": 3,
+        "moved_up_rate": 0.614
+      }
+    ],
+    "funnel": {
+      "prompting": {
+        "reached_1": 1.0,
+        "reached_2": 1.0,
+        "reached_3": 0.582
+      },
+      "evaluation": {
+        "reached_1": 1.0,
+        "reached_2": 0.923,
+        "reached_3": 0.516
+      },
+      "prompt_revision": {
+        "reached_1": 1.0,
+        "reached_2": 0.879,
+        "reached_3": 0.352
+      }
+    }
+  },
+  "E04": {
+    "adaptive": {
+      "n": 50,
+      "minutes": 23.44,
+      "prompting": {
+        "pre": 1.58,
+        "post": 2.28,
+        "transfer": 1.94,
+        "gain_post": 0.7,
+        "gain_transfer": 0.36
+      },
+      "evaluation": {
+        "pre": 1.46,
+        "post": 2.1,
+        "transfer": 2.1,
+        "gain_post": 0.64,
+        "gain_transfer": 0.64
+      },
+      "prompt_revision": {
+        "pre": 1.22,
+        "post": 1.86,
+        "transfer": 1.58,
+        "gain_post": 0.64,
+        "gain_transfer": 0.36
+      }
+    },
+    "control": {
+      "n": 50,
+      "minutes": 33.52,
+      "prompting": {
+        "pre": 1.4,
+        "post": 1.82,
+        "transfer": 1.66,
+        "gain_post": 0.42,
+        "gain_transfer": 0.26
+      },
+      "evaluation": {
+        "pre": 1.24,
+        "post": 1.96,
+        "transfer": 2.06,
+        "gain_post": 0.72,
+        "gain_transfer": 0.82
+      },
+      "prompt_revision": {
+        "pre": 1.48,
+        "post": 1.94,
+        "transfer": 1.9,
+        "gain_post": 0.46,
+        "gain_transfer": 0.42
+      }
+    },
+    "transfer_gain_diff": -0.05,
+    "standardized_transfer_diff": -0.08
+  },
+  "telemetry": {
+    "sessions": 100,
+    "stuck_episodes": 97,
+    "episodes_detected": 72,
+    "episode_recall": 0.742,
+    "trigger_precision": 0.766,
+    "false_triggers_per_session": 0.39,
+    "median_detection_delay_s": 132.5
+  }
+}

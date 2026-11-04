@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "codeai-team8/evaluation/route_next/v0.2",
+  "title": "route_next (MCP tool contract, draft v0.2)",
+  "description": "Routing logic is owned by teammates; the evaluation harness only calls this tool, once per policy, to compare policies (E06). v0.2: validation_results is typed as validate_submission results; added contract_version, task_id of the attempt, and an explicit LESSON_COMPLETE value.",
+  "type": "object",
+  "required": ["input", "output"],
+  "properties": {
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["student_id", "lesson_id", "validation_results", "policy"],
+      "properties": {
+        "student_id": { "type": "string", "pattern": "^(SIM|ADV|STU)-" },
+        "lesson_id": { "type": "string" },
+        "last_task_id": { "type": ["string", "null"], "description": "Task the validation_results belong to; null before the first task." },
+        "validation_results": {
+          "type": "array",
+          "items": { "$ref": "validate_submission.schema.json#/$defs/result" },
+          "description": "The results[] array from the latest validate_submission call. Empty when validation failed; the router must then return fallback=true."
+        },
+        "policy": { "enum": ["stage_rules", "agent", "fixed_order", "random"] }
+      }
+    },
+    "output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contract_version", "next_task_id", "reason", "policy", "fallback"],
+      "properties": {
+        "contract_version": { "const": "0.2" },
+        "next_task_id": { "type": "string", "description": "A task ID, or LESSON_COMPLETE when the lesson goal is met." },
+        "reason": { "type": "string", "maxLength": 300 },
+        "policy": { "type": "string", "description": "Policy actually used. Differs from input.policy when fallback is true." },
+        "stance": { "enum": ["STANCE_REINFORCE", "STANCE_ADVANCE", "STANCE_BRIDGE", "STANCE_PROJECT_SYNTHESIS"], "description": "Optional; Stance Decider 2B output in PROJECT_SPEC.md." },
+        "fallback": { "type": "boolean", "description": "true when the non-adaptive authored order was used because validation or routing failed." }
+      }
+    }
+  }
+}
