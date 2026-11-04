@@ -1,0 +1,242 @@
+[
+  {
+    "item_id": "E12P-001",
+    "source": "ai_raw",
+    "bug_id": "L4-reimplements-sql"
+  },
+  {
+    "item_id": "E12P-002",
+    "source": "ai_raw",
+    "bug_id": "L3-max-zero"
+  },
+  {
+    "item_id": "E12P-003",
+    "source": "ai_raw",
+    "bug_id": "L1-no-order"
+  },
+  {
+    "item_id": "E12P-004",
+    "source": "ai_raw",
+    "bug_id": "L2-strict-threshold"
+  },
+  {
+    "item_id": "E12P-005",
+    "source": "ai_raw",
+    "bug_id": "L1-string-concat"
+  },
+  {
+    "item_id": "E12P-006",
+    "source": "ai_raw",
+    "bug_id": "L4-rows-not-pairs"
+  },
+  {
+    "item_id": "E12P-007",
+    "source": "ai_raw",
+    "bug_id": "L1-string-concat"
+  },
+  {
+    "item_id": "E12P-008",
+    "source": "authored",
+    "bug_id": "L2-strict-threshold"
+  },
+  {
+    "item_id": "E12P-009",
+    "source": "ai_raw",
+    "bug_id": "L3-builtins"
+  },
+  {
+    "item_id": "E12P-010",
+    "source": "ai_raw",
+    "bug_id": "L3-no-round-sort"
+  },
+  {
+    "item_id": "E12P-011",
+    "source": "authored",
+    "bug_id": "L4-reimplements-sql"
+  },
+  {
+    "item_id": "E12P-012",
+    "source": "authored",
+    "bug_id": "L4-reimplements-sql"
+  },
+  {
+    "item_id": "E12P-013",
+    "source": "authored",
+    "bug_id": "L3-builtins"
+  },
+  {
+    "item_id": "E12P-014",
+    "source": "ai_raw",
+    "bug_id": "L1-tuples"
+  },
+  {
+    "item_id": "E12P-015",
+    "source": "ai_raw",
+    "bug_id": "L1-exclusive-range"
+  },
+  {
+    "item_id": "E12P-016",
+    "source": "ai_raw",
+    "bug_id": "L2-elif"
+  },
+  {
+    "item_id": "E12P-017",
+    "source": "ai_raw",
+    "bug_id": "L2-strict-threshold"
+  },
+  {
+    "item_id": "E12P-018",
+    "source": "ai_raw",
+    "bug_id": "L1-no-order"
+  },
+  {
+    "item_id": "E12P-019",
+    "source": "ai_raw",
+    "bug_id": "L4-rows-not-pairs"
+  },
+  {
+    "item_id": "E12P-020",
+    "source": "ai_raw",
+    "bug_id": "L2-always-normal"
+  },
+  {
+    "item_id": "E12P-021",
+    "source": "ai_raw",
+    "bug_id": "L2-elif"
+  },
+  {
+    "item_id": "E12P-022",
+    "source": "ai_raw",
+    "bug_id": "L4-rows-not-pairs"
+  },
+  {
+    "item_id": "E12P-023",
+    "source": "ai_raw",
+    "bug_id": "L3-builtins"
+  },
+  {
+    "item_id": "E12P-024",
+    "source": "ai_raw",
+    "bug_id": "L3-no-round-sort"
+  },
+  {
+    "item_id": "E12P-025",
+    "source": "authored",
+    "bug_id": "L2-strict-threshold"
+  },
+  {
+    "item_id": "E12P-026",
+    "source": "authored",
+    "bug_id": "L1-exclusive-range"
+  },
+  {
+    "item_id": "E12P-027",
+    "source": "ai_raw",
+    "bug_id": "L3-max-zero"
+  },
+  {
+    "item_id": "E12P-028",
+    "source": "ai_raw",
+    "bug_id": "L2-strict-threshold"
+  },
+  {
+    "item_id": "E12P-029",
+    "source": "authored",
+    "bug_id": "L3-builtins"
+  },
+  {
+    "item_id": "E12P-030",
+    "source": "ai_raw",
+    "bug_id": "L1-tuples"
+  },
+  {
+    "item_id": "E12P-031",
+    "source": "authored",
+    "bug_id": "L4-reimplements-sql"
+  },
+  {
+    "item_id": "E12P-032",
+    "source": "ai_raw",
+    "bug_id": "L2-always-normal"
+  },
+  {
+    "item_id": "E12P-033",
+    "source": "ai_raw",
+    "bug_id": "L3-builtins"
+  },
+  {
+    "item_id": "E12P-034",
+    "source": "authored",
+    "bug_id": "L1-exclusive-range"
+  },
+  {
+    "item_id": "E12P-035",
+    "source": "ai_raw",
+    "bug_id": "L1-exclusive-range"
+  },
+  {
+    "item_id": "E12P-036",
+    "source": "ai_raw",
+    "bug_id": "L1-no-order"
+  },
+  {
+    "item_id": "E12P-037",
+    "source": "authored",
+    "bug_id": "L3-builtins"
+  },
+  {
+    "item_id": "E12P-038",
+    "source": "ai_raw",
+    "bug_id": "L4-reimplements-sql"
+  },
+  {
+    "item_id": "E12P-039",
+    "source": "ai_raw",
+    "bug_id": "L3-no-round-sort"
+  },
+  {
+    "item_id": "E12P-040",
+    "source": "ai_raw",
+    "bug_id": "L2-elif"
+  },
+  {
+    "item_id": "E12P-041",
+    "source": "ai_raw",
+    "bug_id": "L1-tuples"
+  },
+  {
+    "item_id": "E12P-042",
+    "source": "ai_raw",
+    "bug_id": "L3-max-zero"
+  },
+  {
+    "item_id": "E12P-043",
+    "source": "ai_raw",
+    "bug_id": "L1-exclusive-range"
+  },
+  {
+    "item_id": "E12P-044",
+    "source": "authored",
+    "bug_id": "L1-exclusive-range"
+  },
+  {
+    "item_id": "E12P-045",
+    "source": "ai_raw",
+    "bug_id": "L4-reimplements-sql"
+  },
+  {
+    "item_id": "E12P-046",
+    "source": "ai_raw",
+    "bug_id": "L2-always-normal"
+  },
+  {
+    "item_id": "E12P-047",
+    "source": "ai_raw",
+    "bug_id": "L1-string-concat"
+  },
+  {
+    "item_id": "E12P-048",
+    "source": "authored",
+    "bug_id": "L2-strict-threshold"
+  }
+]
