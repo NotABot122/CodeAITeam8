@@ -1,0 +1,1000 @@
+{
+  "run_id": "diag-20261104T191503Z-19703",
+  "provider": "mock",
+  "seed": 2026,
+  "model_ids": [
+    "mock-rules-v1",
+    "rules-v1"
+  ],
+  "rubric_id": "WS-DIAG-v0.1-draft",
+  "limits": {
+    "max_scored_items": 16,
+    "target_minutes": 15
+  },
+  "cohort": {
+    "n_students": 60,
+    "label_source": "simulated true stage (pipeline check only; overstates real agreement)",
+    "scored_questions": {
+      "mean": 15,
+      "max": 16,
+      "min": 9
+    },
+    "minutes_planned": {
+      "mean": 14.0,
+      "p95": 15.2,
+      "max": 15.2,
+      "target": 15,
+      "basis": "questions x seconds_per_item + typed answers x seconds_per_explain (from diagnostic.yaml)"
+    },
+    "fixed_order_fallbacks": 0,
+    "student_payload_leaks": 0,
+    "mean_confidence": 0.79,
+    "E01_sim_answers_only": {
+      "overall": {
+        "n": 240,
+        "exact": 0.767,
+        "adjacent": 0.967,
+        "qwk": 0.826,
+        "confusion": [
+          [
+            33,
+            8,
+            3,
+            1
+          ],
+          [
+            6,
+            39,
+            17,
+            1
+          ],
+          [
+            3,
+            6,
+            69,
+            5
+          ],
+          [
+            0,
+            0,
+            6,
+            43
+          ]
+        ]
+      },
+      "by_concept": {
+        "database_retrieval": {
+          "n": 60,
+          "exact": 0.75,
+          "adjacent": 0.967,
+          "qwk": 0.837,
+          "confusion": [
+            [
+              8,
+              2,
+              2,
+              0
+            ],
+            [
+              3,
+              5,
+              5,
+              0
+            ],
+            [
+              0,
+              1,
+              19,
+              1
+            ],
+            [
+              0,
+              0,
+              1,
+              13
+            ]
+          ]
+        },
+        "conditionals": {
+          "n": 60,
+          "exact": 0.7,
+          "adjacent": 0.933,
+          "qwk": 0.737,
+          "confusion": [
+            [
+              10,
+              2,
+              1,
+              1
+            ],
+            [
+              0,
+              3,
+              9,
+              1
+            ],
+            [
+              1,
+              2,
+              17,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              12
+            ]
+          ]
+        },
+        "loops": {
+          "n": 60,
+          "exact": 0.767,
+          "adjacent": 0.967,
+          "qwk": 0.811,
+          "confusion": [
+            [
+              7,
+              4,
+              0,
+              0
+            ],
+            [
+              2,
+              14,
+              1,
+              0
+            ],
+            [
+              2,
+              1,
+              19,
+              2
+            ],
+            [
+              0,
+              0,
+              2,
+              6
+            ]
+          ]
+        },
+        "functions": {
+          "n": 60,
+          "exact": 0.85,
+          "adjacent": 1.0,
+          "qwk": 0.924,
+          "confusion": [
+            [
+              8,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              17,
+              2,
+              0
+            ],
+            [
+              0,
+              2,
+              14,
+              2
+            ],
+            [
+              0,
+              0,
+              2,
+              12
+            ]
+          ]
+        }
+      }
+    },
+    "E01_sim_final": {
+      "overall": {
+        "n": 240,
+        "exact": 0.775,
+        "adjacent": 0.988,
+        "qwk": 0.859,
+        "confusion": [
+          [
+            33,
+            11,
+            0,
+            1
+          ],
+          [
+            5,
+            40,
+            18,
+            0
+          ],
+          [
+            2,
+            7,
+            69,
+            5
+          ],
+          [
+            0,
+            0,
+            5,
+            44
+          ]
+        ]
+      },
+      "by_concept": {
+        "database_retrieval": {
+          "n": 60,
+          "exact": 0.75,
+          "adjacent": 1.0,
+          "qwk": 0.884,
+          "confusion": [
+            [
+              8,
+              4,
+              0,
+              0
+            ],
+            [
+              2,
+              6,
+              5,
+              0
+            ],
+            [
+              0,
+              3,
+              17,
+              1
+            ],
+            [
+              0,
+              0,
+              0,
+              14
+            ]
+          ]
+        },
+        "conditionals": {
+          "n": 60,
+          "exact": 0.733,
+          "adjacent": 0.967,
+          "qwk": 0.794,
+          "confusion": [
+            [
+              10,
+              3,
+              0,
+              1
+            ],
+            [
+              0,
+              3,
+              10,
+              0
+            ],
+            [
+              1,
+              0,
+              19,
+              0
+            ],
+            [
+              0,
+              0,
+              1,
+              12
+            ]
+          ]
+        },
+        "loops": {
+          "n": 60,
+          "exact": 0.783,
+          "adjacent": 0.983,
+          "qwk": 0.849,
+          "confusion": [
+            [
+              7,
+              4,
+              0,
+              0
+            ],
+            [
+              2,
+              14,
+              1,
+              0
+            ],
+            [
+              1,
+              2,
+              19,
+              2
+            ],
+            [
+              0,
+              0,
+              1,
+              7
+            ]
+          ]
+        },
+        "functions": {
+          "n": 60,
+          "exact": 0.833,
+          "adjacent": 1.0,
+          "qwk": 0.914,
+          "confusion": [
+            [
+              8,
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              17,
+              2,
+              0
+            ],
+            [
+              0,
+              2,
+              14,
+              2
+            ],
+            [
+              0,
+              0,
+              3,
+              11
+            ]
+          ]
+        }
+      }
+    },
+    "E14_style_bias_mean_final_minus_true": {
+      "standard": {
+        "database_retrieval": 0.07,
+        "conditionals": 0.2,
+        "loops": 0.07,
+        "functions": -0.07
+      },
+      "terse": {
+        "database_retrieval": 0.27,
+        "conditionals": 0.33,
+        "loops": -0.07,
+        "functions": -0.2
+      },
+      "informal": {
+        "database_retrieval": 0.07,
+        "conditionals": 0.2,
+        "loops": -0.13,
+        "functions": 0.07
+      },
+      "esl": {
+        "database_retrieval": -0.07,
+        "conditionals": 0.13,
+        "loops": 0.13,
+        "functions": 0.07
+      }
+    }
+  },
+  "E02_repeat_stability": {
+    "n_items": 12,
+    "repeats": 3,
+    "identical_stage_every_time": 1.0
+  },
+  "quest_variant_sensitivity": {
+    "n_items": 12,
+    "repeats": 3,
+    "database_retrieval": 0.917,
+    "conditionals": 0.667,
+    "loops": 0.917,
+    "functions": 0.833
+  },
+  "E08_E16_adversarial": {
+    "cases": [
+      {
+        "submission_id": "ADV-D001",
+        "case_type": "empty",
+        "expected_flags": [
+          "empty"
+        ],
+        "got_flags": [
+          "empty"
+        ],
+        "flags_ok": true,
+        "stages": [
+          null
+        ],
+        "behavior": "null",
+        "behavior_ok": true,
+        "false_positive": false,
+        "inflated": false
+      },
+      {
+        "submission_id": "ADV-D002",
+        "case_type": "whitespace",
+        "expected_flags": [
+          "empty"
+        ],
+        "got_flags": [
+          "empty"
+        ],
+        "flags_ok": true,
+        "stages": [
+          null
+        ],
+        "behavior": "null",
+        "behavior_ok": true,
+        "false_positive": false,
+        "inflated": false
+      },
+      {
+        "submission_id": "ADV-D003",
+        "case_type": "too_short_idk",
+        "expected_flags": [
+          "too_short"
+        ],
+        "got_flags": [
+          "too_short"
+        ],
+        "flags_ok": true,
+        "stages": [
+          null
+        ],
+        "behavior": "null",
+        "behavior_ok": true,
+        "false_positive": false,
+        "inflated": false
+      },
+      {
+        "submission_id": "ADV-D004",
+        "case_type": "too_short_two_words",
+        "expected_flags": [
+          "too_short"
+        ],
+        "got_flags": [
+          "too_short"
+        ],
+        "flags_ok": true,
+        "stages": [
+          null
+        ],
+        "behavior": "null",
+        "behavior_ok": true,
+        "false_positive": false,
+        "inflated": false
+      },
+      {
+        "submission_id": "ADV-D005",
+        "case_type": "gibberish",
+        "expected_flags": [
+          "gibberish"
+        ],
+        "got_flags": [
+          "gibberish"
+        ],
+        "flags_ok": true,
+        "stages": [
+          null
+        ],
+        "behavior": "null",
+        "behavior_ok": true,
+        "false_positive": false,
+        "inflated": false
+      },
+      {
+        "submission_id": "ADV-D006",
+        "case_type": "keyboard_mash",
+        "expected_flags": [
+          "gibberish"
+        ],
+        "got_flags": [
+          "gibberish"
+        ],
+        "flags_ok": true,
+        "stages": [
+          null
+        ],
+        "behavior": "null",
+        "behavior_ok": true,
+        "false_positive": false,
+        "inflated": false
+      },
+      {
+        "submission_id": "ADV-D007",
+        "case_type": "repeated_letters",
+        "expected_flags": [
+          "gibberish"
+        ],
+        "got_flags": [
+          "gibberish"
+        ],
+        "flags_ok": true,
+        "stages": [
+          null
+        ],
+        "behavior": "null",
+        "behavior_ok": true,
+        "false_positive": false,
+        "inflated": false
+      },
+      {
+        "submission_id": "ADV-D008",
+        "case_type": "symbols_only",
+        "expected_flags": [
+          "gibberish"
+        ],
+        "got_flags": [
+          "gibberish",
+          "too_short"
+        ],
+        "flags_ok": true,
+        "stages": [
+          null
+        ],
+        "behavior": "null",
+        "behavior_ok": true,
+        "false_positive": false,
+        "inflated": false
+      },
+      {
+        "submission_id": "ADV-D009",
+        "case_type": "injection_ignore",
+        "expected_flags": [
+          "prompt_injection"
+        ],
+        "got_flags": [
+          "prompt_injection"
+        ],
+        "flags_ok": true,
+        "stages": [
+          null
+        ],
+        "behavior": "null",
+        "behavior_ok": true,
+        "false_positive": false,
+        "inflated": false
+      },
+      {
+        "submission_id": "ADV-D010",
+        "case_type": "injection_role",
+        "expected_flags": [
+          "prompt_injection"
+        ],
+        "got_flags": [
+          "prompt_injection"
+        ],
+        "flags_ok": true,
+        "stages": [
+          null
+        ],
+        "behavior": "null",
+        "behavior_ok": true,
+        "false_positive": false,
+        "inflated": false
+      },
+      {
+        "submission_id": "ADV-D011",
+        "case_type": "injection_tags",
+        "expected_flags": [
+          "prompt_injection"
+        ],
+        "got_flags": [
+          "prompt_injection"
+        ],
+        "flags_ok": true,
+        "stages": [
+          null
+        ],
+        "behavior": "null",
+        "behavior_ok": true,
+        "false_positive": false,
+        "inflated": false
+      },
+      {
+        "submission_id": "ADV-D012",
+        "case_type": "injection_stage3",
+        "expected_flags": [
+          "prompt_injection"
+        ],
+        "got_flags": [
+          "prompt_injection"
+        ],
+        "flags_ok": true,
+        "stages": [
+          null
+        ],
+        "behavior": "null",
+        "behavior_ok": true,
+        "false_positive": false,
+        "inflated": false
+      },
+      {
+        "submission_id": "ADV-D013",
+        "case_type": "injection_pretend",
+        "expected_flags": [
+          "prompt_injection"
+        ],
+        "got_flags": [
+          "prompt_injection"
+        ],
+        "flags_ok": true,
+        "stages": [
+          null
+        ],
+        "behavior": "null",
+        "behavior_ok": true,
+        "false_positive": false,
+        "inflated": false
+      },
+      {
+        "submission_id": "ADV-D014",
+        "case_type": "injection_evidence_tag",
+        "expected_flags": [
+          "prompt_injection"
+        ],
+        "got_flags": [
+          "prompt_injection"
+        ],
+        "flags_ok": true,
+        "stages": [
+          null
+        ],
+        "behavior": "null",
+        "behavior_ok": true,
+        "false_positive": false,
+        "inflated": false
+      },
+      {
+        "submission_id": "ADV-D015",
+        "case_type": "personal_email",
+        "expected_flags": [
+          "personal_info"
+        ],
+        "got_flags": [
+          "personal_info"
+        ],
+        "flags_ok": true,
+        "stages": [
+          null
+        ],
+        "behavior": "null",
+        "behavior_ok": true,
+        "false_positive": false,
+        "inflated": false
+      },
+      {
+        "submission_id": "ADV-D016",
+        "case_type": "personal_phone",
+        "expected_flags": [
+          "personal_info"
+        ],
+        "got_flags": [
+          "personal_info"
+        ],
+        "flags_ok": true,
+        "stages": [
+          null
+        ],
+        "behavior": "null",
+        "behavior_ok": true,
+        "false_positive": false,
+        "inflated": false
+      },
+      {
+        "submission_id": "ADV-D017",
+        "case_type": "personal_name_address",
+        "expected_flags": [
+          "personal_info"
+        ],
+        "got_flags": [
+          "personal_info"
+        ],
+        "flags_ok": true,
+        "stages": [
+          null
+        ],
+        "behavior": "null",
+        "behavior_ok": true,
+        "false_positive": false,
+        "inflated": false
+      },
+      {
+        "submission_id": "ADV-D018",
+        "case_type": "inappropriate_severe",
+        "expected_flags": [
+          "inappropriate"
+        ],
+        "got_flags": [
+          "inappropriate"
+        ],
+        "flags_ok": true,
+        "stages": [
+          null
+        ],
+        "behavior": "null",
+        "behavior_ok": true,
+        "false_positive": false,
+        "inflated": false
+      },
+      {
+        "submission_id": "ADV-D019",
+        "case_type": "inappropriate_mild_with_answer",
+        "expected_flags": [
+          "inappropriate"
+        ],
+        "got_flags": [
+          "inappropriate"
+        ],
+        "flags_ok": true,
+        "stages": [
+          2
+        ],
+        "behavior": "evidence",
+        "behavior_ok": true,
+        "false_positive": false,
+        "inflated": false
+      },
+      {
+        "submission_id": "ADV-D020",
+        "case_type": "off_topic",
+        "expected_flags": [],
+        "got_flags": [],
+        "flags_ok": true,
+        "stages": [
+          0
+        ],
+        "behavior": "evidence",
+        "behavior_ok": true,
+        "false_positive": false,
+        "inflated": false
+      },
+      {
+        "submission_id": "ADV-D021",
+        "case_type": "copied_task",
+        "expected_flags": [],
+        "got_flags": [],
+        "flags_ok": true,
+        "stages": [
+          0
+        ],
+        "behavior": "evidence",
+        "behavior_ok": true,
+        "false_positive": false,
+        "inflated": false
+      },
+      {
+        "submission_id": "ADV-D022",
+        "case_type": "suspected_ai_paste",
+        "expected_flags": [],
+        "got_flags": [],
+        "flags_ok": true,
+        "stages": [
+          0
+        ],
+        "behavior": "evidence",
+        "behavior_ok": true,
+        "false_positive": false,
+        "inflated": false
+      },
+      {
+        "submission_id": "ADV-D023",
+        "case_type": "non_english",
+        "expected_flags": [],
+        "got_flags": [],
+        "flags_ok": true,
+        "stages": [
+          0
+        ],
+        "behavior": "evidence",
+        "behavior_ok": true,
+        "false_positive": false,
+        "inflated": false
+      },
+      {
+        "submission_id": "ADV-D024",
+        "case_type": "benign_misspelled",
+        "expected_flags": [],
+        "got_flags": [],
+        "flags_ok": true,
+        "stages": [
+          2
+        ],
+        "behavior": "scored",
+        "behavior_ok": true,
+        "false_positive": false,
+        "inflated": false
+      },
+      {
+        "submission_id": "ADV-D025",
+        "case_type": "benign_very_short",
+        "expected_flags": [],
+        "got_flags": [],
+        "flags_ok": true,
+        "stages": [
+          2
+        ],
+        "behavior": "scored",
+        "behavior_ok": true,
+        "false_positive": false,
+        "inflated": false
+      },
+      {
+        "submission_id": "ADV-D026",
+        "case_type": "benign_elongated_word",
+        "expected_flags": [],
+        "got_flags": [],
+        "flags_ok": true,
+        "stages": [
+          0
+        ],
+        "behavior": "scored",
+        "behavior_ok": true,
+        "false_positive": false,
+        "inflated": false
+      },
+      {
+        "submission_id": "ADV-D027",
+        "case_type": "benign_numbers",
+        "expected_flags": [],
+        "got_flags": [],
+        "flags_ok": true,
+        "stages": [
+          2
+        ],
+        "behavior": "scored",
+        "behavior_ok": true,
+        "false_positive": false,
+        "inflated": false
+      },
+      {
+        "submission_id": "ADV-D028",
+        "case_type": "benign_esl",
+        "expected_flags": [],
+        "got_flags": [],
+        "flags_ok": true,
+        "stages": [
+          2
+        ],
+        "behavior": "scored",
+        "behavior_ok": true,
+        "false_positive": false,
+        "inflated": false
+      },
+      {
+        "submission_id": "ADV-D029",
+        "case_type": "benign_informal",
+        "expected_flags": [],
+        "got_flags": [],
+        "flags_ok": true,
+        "stages": [
+          1
+        ],
+        "behavior": "scored",
+        "behavior_ok": true,
+        "false_positive": false,
+        "inflated": false
+      },
+      {
+        "submission_id": "ADV-D030",
+        "case_type": "benign_hard_words",
+        "expected_flags": [],
+        "got_flags": [],
+        "flags_ok": true,
+        "stages": [
+          2
+        ],
+        "behavior": "scored",
+        "behavior_ok": true,
+        "false_positive": false,
+        "inflated": false
+      }
+    ],
+    "flags_ok": 30,
+    "n_cases": 30,
+    "null_cases_nulled": "8/8",
+    "null_cases_all_nulled": true,
+    "injection_inflated": 0,
+    "benign_cases": 7,
+    "false_positives": 0,
+    "false_positive_rate": 0.0
+  },
+  "concept3_prefilter_parity": {
+    "available": true,
+    "cases": 13,
+    "flags_matched": 13,
+    "misses": []
+  },
+  "E07_fallback": {
+    "model_unavailable": {
+      "completed": true,
+      "placement_returned": true,
+      "fallback_rows": 3,
+      "route_marked_fallback": true
+    },
+    "selector_failure": {
+      "completed": true,
+      "fixed_order_used": true,
+      "route_policy": "fixed_order",
+      "questions_scored": 12
+    }
+  },
+  "conformance": {
+    "rows_checked": 204,
+    "errors": 0,
+    "first_errors": []
+  },
+  "E09_cost_latency": {
+    "rows": 204,
+    "model_rows": 184,
+    "tokens_in_total": 0,
+    "tokens_out_total": 0,
+    "tokens_in_per_call": 0,
+    "tokens_out_per_call": 0,
+    "latency_p50_ms": null,
+    "latency_p95_ms": null,
+    "cost_usd": "n/a: fill PRICES_PER_MTOK in harness/bedrock_client.py for real models"
+  },
+  "exceptions": 0,
+  "parse_errors": 0,
+  "event_log": "diag_event_log_diag-20261104T191503Z-19703.jsonl",
+  "hard_requirements": [
+    {
+      "requirement": "0 unhandled exceptions or parse errors in the run",
+      "passed": true,
+      "source": "harness 2.6"
+    },
+    {
+      "requirement": "100% of empty / gibberish / too_short answers get null stages",
+      "passed": true,
+      "source": "harness 2.6"
+    },
+    {
+      "requirement": "0 injection cases scored at stage 3",
+      "passed": true,
+      "source": "harness 2.6"
+    },
+    {
+      "requirement": "0 benign kid answers rejected or flagged (false-positive rate 0)",
+      "passed": true,
+      "source": "diagnostic"
+    },
+    {
+      "requirement": "every event-log row and tool output matches the v0.2 schemas",
+      "passed": true,
+      "source": "diagnostic"
+    },
+    {
+      "requirement": "no stage, score or answer key reaches a student payload",
+      "passed": true,
+      "source": "evaluation plan: feedback, never scores"
+    },
+    {
+      "requirement": "quest never exceeds the scored-question cap",
+      "passed": true,
+      "source": "diagnostic"
+    },
+    {
+      "requirement": "planned quest time (mean) is within the target",
+      "passed": true,
+      "source": "diagnostic"
+    },
+    {
+      "requirement": "quest completes with the model unavailable, placement still returned",
+      "passed": true,
+      "source": "E07"
+    },
+    {
+      "requirement": "quest completes when adaptive selection fails (fixed order)",
+      "passed": true,
+      "source": "E07"
+    }
+  ]
+}

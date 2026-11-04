@@ -175,11 +175,12 @@ def _output(rubric, results, flags, model_id, latency=0, tin=0, tout=0) -> dict:
 
 
 def normalize_input(tool_input: dict) -> dict:
-    """Accept the deprecated v0.1 field name level_id."""
+    """Accept either task_id (v0.2) or level_id (v0.1) and fill in the other."""
     d = dict(tool_input)
     if "task_id" not in d and "level_id" in d:
         d["task_id"] = d["level_id"]
-    d.pop("level_id", None)
+    if "level_id" not in d and "task_id" in d:
+        d["level_id"] = d["task_id"]  # tools written against v0.1 (e.g. the readiness diagnostic) still read level_id
     return d
 
 

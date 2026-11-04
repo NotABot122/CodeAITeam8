@@ -9,8 +9,6 @@ import os
 import time
 from dataclasses import dataclass
 
-import boto3
-from botocore.config import Config
 
 ALLOWED_REGIONS = ("us-west-2", "us-east-1")
 
@@ -68,6 +66,9 @@ _clients: dict[str, object] = {}
 
 def client(service: str):
     if service not in _clients:
+        import boto3  # lazy: the MCP server and offline harnesses start without boto3
+        from botocore.config import Config
+
         _clients[service] = boto3.client(
             service, region_name=region(),
             config=Config(retries={"max_attempts": 6, "mode": "adaptive"}, read_timeout=120),
