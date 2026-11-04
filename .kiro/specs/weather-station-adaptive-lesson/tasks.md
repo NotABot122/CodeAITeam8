@@ -53,3 +53,16 @@
   - [x] 7.2 Grader and content tests with reference and known-bad submissions
   - [x] 7.3 Engine flow tests and a full demo run
   - [x] 7.4 README with how to run the demo
+
+- [x] 8. Themes and AI hints
+  - [x] 8.1 `engine/ai.py`: ModelProvider, BedrockProvider (Converse, tool use), ScriptedProvider
+    - _Requirements: 10.2, 10.3, 21.5_
+  - [x] 8.2 `engine/safety.py`: local rules and model moderation, fail closed
+    - _Requirements: 12.1, 12.7, 12.8, 20.1, 20.2_
+  - [x] 8.3 `engine/hints.py` and Engine integration with fallback and logging
+    - _Requirements: 21.1–21.8, 19.4_
+  - [x] 8.4 `engine/themes/`: spec validation, renderer, dataset, shared checks, builder with quality gate
+    - _Requirements: 20.3–20.10_
+  - [x] 8.5 CLI `theme` command, per-student active project, `--ai` switch, `engine.theme_demo`
+    - _Requirements: 20.9, 21.8_
+  - [x] 8.6 Tests with a scripted model (spec, filter, builder, themed grading, AI hints) and live Bedrock runs

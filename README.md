@@ -2,7 +2,7 @@
 
 A Python prototype of an adaptive lesson. Students write four functions against a synthetic weather database. The engine grades each submission, tracks a stage (0 Missing to 3 Exceeding) for each concept, and picks the next problem. Students who need more practice get a practice problem before moving on. Everyone finishes on the same final level. If routing breaks, the lesson continues in a fixed order.
 
-Needs Python 3.9 or later and PyYAML. No cloud access is needed.
+Needs Python 3.9 or later and PyYAML. The core lesson runs without cloud access. Themes and AI hints use Amazon Bedrock and need boto3 (see below).
 
 ## Run the demo
 
@@ -28,6 +28,31 @@ python3 -m engine.cli progress --student ID     # stages and levels passed
 ```
 
 Add `--no-adaptive` before the command to use the fixed level order. Progress is saved in `.codeai-data/`.
+
+## Pick your own theme (Amazon Bedrock)
+
+Students can ask for the same project in a theme they like. The concepts, levels, and checks stay the same; only the story, names, and data change.
+
+```bash
+python3 -m engine.cli theme --student ID "I love pokemon, can my project be a pokedex?"
+python3 -m engine.cli theme --student ID --reset      # back to the weather project
+python3 -m engine.theme_demo "Minecraft mobs"         # presentation demo (add --offline without network)
+```
+
+What happens:
+
+1. The request is screened: local word and personal-information rules, then a separate Bedrock moderation call. Anything inappropriate is refused with a friendly message.
+2. Bedrock designs the theme through a forced tool call. It only picks names, words, and number ranges, such as a `pokedex` table with `region`, `attack`, and `speed`.
+3. The engine validates every identifier (it ends up in SQL and Python) and filters all student-visible text. If the spec is invalid, the model gets up to two retries with the errors listed.
+4. The engine generates the data, the tests, and the reference solution from templates, then runs the content check. Only a project that passes reaches the student. Otherwise the student keeps the weather project.
+
+In live testing, 17 of 18 themes passed. The one failure was a scale problem that is now fixed in the request schema. Builds take 4 to 16 seconds. Real franchise names are used for the demo, but the stats are made up. Using trademarked names in production needs a decision.
+
+## AI tutor hints (Amazon Bedrock)
+
+When a check fails, Bedrock writes one hint about the student's actual mistake. The model sees the level instructions, the failing checks, the teacher-written hints, and the student's code. It never sees the reference solution or the student id. A hint is rejected if it contains code, copies the reference solution, is too long, or fails the content filter. Student code with personal information is never sent. Any rejection or model error falls back to the teacher-written hint.
+
+Settings: `--ai off` (or `CODEAI_AI=off`) turns both AI features off. `CODEAI_MODEL_ID` changes the model (default `us.anthropic.claude-haiku-4-5-20251001-v1:0`). `CODEAI_AWS_REGION` changes the region (default `us-west-2`). Needs `pip install --user boto3` and AWS credentials. Each hint or theme event is logged in `.codeai-data/logs/events.jsonl` with its source and model.
 
 ## The lesson
 
@@ -55,7 +80,9 @@ Expected answers are computed by a separate SQL checker (`reference/independent_
 
 ## Not in this demo yet
 
-- AI grading of written answers through Amazon Bedrock, the content filter, and the grader-agreement benchmark (requirements 10–12).
+- AI rubric grading of written answers and the grader-agreement benchmark (requirements 10 and 11).
+- Bedrock Guardrails. The content filter is local rules plus a model moderation call; AI hints get the local rules only.
+- Stages don't carry over between projects: a themed project starts every concept at Stage 0.
 - Student code runs in a separate process with a time limit and its own database copy, but not in a security sandbox. It's fine for a demo, but not for untrusted code in production.
 
 The spec is in `.kiro/specs/weather-station-adaptive-lesson/`.

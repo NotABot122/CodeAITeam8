@@ -351,3 +351,35 @@ Assumptions made for this draft (please confirm or correct):
 5. WHEN the benchmark sends a Benchmark_Set item to the Model_Provider, THE Engine SHALL include only that item's written response text, the rubric text, and the open-ended prompt text.
 6. WHEN the Engine writes a log entry that refers to a student, including blocked-content entries, Fallback_Path switch entries, and routing decision records, THE Engine SHALL identify the student only by Student_Id and SHALL include no name, email address, or other personal information.
 7. IF a log entry, Progress_Store record, or Model_Provider request is about to be written or sent with a field that holds personal information or, for a Model_Provider request, a Student_Id, THEN THE Engine SHALL not write or send that item and SHALL report an error naming the field that was rejected.
+
+### Requirement 20: Student-chosen project themes
+
+**User Story:** As a student, I want to ask for the project in a theme I like, such as Pokémon, so that I stay engaged while I practice the same skills as my class.
+
+#### Acceptance Criteria
+
+1. WHEN a student submits a theme request of 1 to 300 characters, THE Engine SHALL screen it with the Content_Filter before any model call that designs the theme.
+2. IF the Content_Filter blocks the request or cannot return a result, THEN THE Engine SHALL refuse the request with a plain-language message, make no theme-design model call, and keep the student on their current project.
+3. WHEN a request is allowed, THE Engine SHALL obtain a theme spec from the Model_Provider through a forced structured tool call. The spec SHALL contain only titles, story text, names, identifiers, and number ranges.
+4. THE Engine SHALL validate every identifier in the spec against a lowercase pattern and against SQL keywords, Python keywords, and Python built-in names before using it in SQL or Python source.
+5. IF the spec fails validation, THEN THE Engine SHALL ask the Model_Provider again with the validation errors, up to 3 attempts in total, and SHALL report a failure after the last attempt.
+6. WHEN a spec is valid, THE Engine SHALL generate the themed project's dataset, checks, hints, and reference solution from templates, so that a themed project has the same four levels, the same concepts, and the same kinds of checks as Project 1.
+7. THE Engine SHALL run the content check (Requirement 8) on the generated project and SHALL make the project available to the student only if the check passes. IF the check fails, THEN THE Engine SHALL delete the generated project and keep the student on their current project.
+8. THE Engine SHALL screen every piece of student-visible text in the spec (title, story, descriptions, group names, and item names) with the Content_Filter, and SHALL treat a blocked text as a validation failure.
+9. WHEN a themed project is ready, THE Engine SHALL save it as the student's active project, so that later show, submit, and progress commands use it until the student resets to the standard project.
+10. THE Engine SHALL state in the themed instructions that the names may be real but the numbers are made up for practice.
+
+### Requirement 21: AI tutor hints
+
+**User Story:** As a student, I want a hint about my actual mistake, so that I can fix my code without being given the answer.
+
+#### Acceptance Criteria
+
+1. WHEN a code Submission fails and a Model_Provider is configured, THE Engine SHALL request one hint that is built from the Problem instructions, the failure messages, the pre-authored hints, and the Submission code.
+2. THE Engine SHALL send no Student_Id and no Reference_Solution source to the Model_Provider.
+3. IF the Submission code is blocked by the Content_Filter, THEN THE Engine SHALL not send it to the Model_Provider and SHALL use the pre-authored hint.
+4. IF the model reply is empty, longer than 400 characters, contains a code block, a statement line, a def statement, a complete SQL query, or any line of the Reference_Solution, or is blocked by the Content_Filter, THEN THE Engine SHALL discard it and use the pre-authored hint.
+5. IF the Model_Provider returns an error or times out, THEN THE Engine SHALL use the pre-authored hint.
+6. THE Engine SHALL count an AI hint as a hint seen for stage criteria, the same as a pre-authored hint.
+7. WHEN a hint is shown, THE Engine SHALL log its source (ai or authored), the Problem identifier, and for AI hints the model identifier and latency, identifying the student only by Student_Id.
+8. WHERE AI features are turned off in configuration, THE Engine SHALL use only pre-authored hints and make no model calls.

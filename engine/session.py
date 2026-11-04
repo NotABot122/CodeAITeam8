@@ -6,9 +6,14 @@ import uuid
 from dataclasses import dataclass, field
 from typing import Callable, List, Optional, Tuple
 
+from pathlib import Path
+
 from . import grader as g
+from .ai import ModelProvider
 from .events import EventLog
 from .feedback import messages_for, next_hint
+from .hints import AIHinter
+from .safety import ContentFilter
 from .progress import ProgressLoadError, ProgressRecord, ProgressStore
 from .project import Problem, Project
 from .router import Decision, PROJECT_COMPLETE, next_problem
@@ -37,12 +42,14 @@ class SubmitOutcome:
     next_problem: Optional[Problem] = None
     complete: bool = False
     notices: List[str] = field(default_factory=list)
+    hint_source: Optional[str] = None     # "ai" or "authored"
 
 
 class Engine:
     def __init__(self, project: Project, store: ProgressStore, events: EventLog,
                  grader: Optional[g.Grader] = None, adaptive: bool = True,
-                 router: Callable[..., Decision] = next_problem):
+                 router: Callable[..., Decision] = next_problem,
+                 hint_provider: Optional[ModelProvider] = None):
         self.project = project
         self.manifest = project.manifest
         self.store = store
@@ -50,6 +57,10 @@ class Engine:
         self.grader = grader or g.Grader()
         self.adaptive = adaptive
         self.router = router
+        self.hinter = None
+        if hint_provider is not None:
+            reference = project.reference_path.read_text() if project.reference_path.exists() else ""
+            self.hinter = AIHinter(hint_provider, ContentFilter(), reference_source=reference)
 
     # Students and records ---------------------------------------------------
     def new_student(self) -> str:
@@ -173,8 +184,10 @@ class Engine:
 
         if not result.passed:
             hint, record.hints_seen[problem.id] = next_hint(problem, record.hints_seen.get(problem.id, 0))
+            hint, source = self._ai_hint(record, problem, messages, submission_path, hint)
             notices.extend(self._save(record))
-            return SubmitOutcome(result.status, False, messages, hint=hint, next_problem=problem, notices=notices)
+            return SubmitOutcome(result.status, False, messages, hint=hint, next_problem=problem, notices=notices,
+                                 hint_source=source if hint else None)
 
         changes = record_result(
             record.concepts, problem.concepts, problem.id,
@@ -188,6 +201,24 @@ class Engine:
         following = None if record.complete else self.project.problem(record.current_problem)
         return SubmitOutcome(result.status, True, messages, stage_changes=changes,
                              next_problem=following, complete=record.complete, notices=notices)
+
+    def _ai_hint(self, record: ProgressRecord, problem: Problem, messages: List[str], submission_path,
+                 authored: Optional[str]) -> Tuple[Optional[str], str]:
+        """Try an AI hint. Fall back to the pre-authored hint on any problem."""
+        if self.hinter is None:
+            return authored, "authored"
+        try:
+            code = Path(submission_path).read_text()
+        except (OSError, UnicodeDecodeError):
+            code = ""
+        result = self.hinter.hint(problem, messages, code, attempt=record.attempts.get(problem.id, 1))
+        if result is None:
+            self.events.write("hint", student_id=record.student_id, project_id=self.project.id,
+                              problem_id=problem.id, source="authored", reason=self.hinter.last_rejection)
+            return authored, "authored"
+        self.events.write("hint", student_id=record.student_id, project_id=self.project.id, problem_id=problem.id,
+                          source="ai", model_id=result.model_id, latency_ms=result.latency_ms)
+        return result.text, "ai"
 
     # Progress view ----------------------------------------------------------
     def progress_view(self, student_id: str) -> str:

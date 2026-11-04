@@ -95,6 +95,14 @@ class ProgressStore(ABC):
     def quarantine(self, student_id: str, project_id: str) -> None:
         """Keep an unreadable record aside so it isn't overwritten."""
 
+    @abstractmethod
+    def active_project(self, student_id: str) -> Optional[str]:
+        """The folder of the project the student is working on, or None for the default."""
+
+    @abstractmethod
+    def set_active_project(self, student_id: str, project_folder: Optional[str]) -> None:
+        ...
+
 
 class JsonProgressStore(ProgressStore):
     """One JSON file per student and project, under root/progress/."""
@@ -137,3 +145,17 @@ class JsonProgressStore(ProgressStore):
         path = self._path(student_id, project_id)
         if path.exists():
             path.rename(path.with_name(f"{project_id}.corrupt-{time.strftime('%Y%m%d-%H%M%S')}.json"))
+
+    def _profile(self, student_id: str) -> Path:
+        return self.root / student_id / "profile.json"
+
+    def active_project(self, student_id: str) -> Optional[str]:
+        try:
+            return json.loads(self._profile(student_id).read_text()).get("active_project")
+        except (OSError, ValueError, AttributeError):
+            return None
+
+    def set_active_project(self, student_id: str, project_folder: Optional[str]) -> None:
+        path = self._profile(student_id)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps({"active_project": project_folder}))

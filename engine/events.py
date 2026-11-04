@@ -6,7 +6,8 @@ import json
 from pathlib import Path
 from typing import List
 
-ALLOWED_FIELDS = {"event", "student_id", "project_id", "problem_id", "reason", "selected", "stages", "timestamp"}
+ALLOWED_FIELDS = {"event", "student_id", "project_id", "problem_id", "reason", "selected", "stages", "timestamp",
+                  "source", "model_id", "latency_ms", "category", "direction"}
 
 
 class EventLog:

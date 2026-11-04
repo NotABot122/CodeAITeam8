@@ -34,7 +34,7 @@ Every autonomous agent or developer **MUST read this file before writing code** 
 | `Agent-2` | Unassigned | `idle` | None | - |
 | `Agent-3` | Unassigned | `idle` | None | - |
 | `zane-claude` | Claude Opus 5.5 (Kiro) | `idle` | Renamed "Stance Decider 2B" to "Strands Decider 2B" in documentation/ | 2026-11-03 15:30 PST |
-| `Kiro-Demo` | Claude Opus 5.5 (Kiro) | `idle` | Built the Python weather-station adaptive lesson demo (`engine/`, `projects/weather-station/`, `tests/`) on `proto-branch` | 2026-11-04 08:56 PST |
+| `Kiro-Demo` | Claude Opus 5.5 (Kiro) | `idle` | Added student-chosen themes and Bedrock AI tutor hints to the demo (`engine/themes/`, `engine/ai.py`, `engine/hints.py`, `engine/safety.py`) on `proto-branch` | 2026-11-04 09:39 PST |
 
 ---
 
@@ -42,7 +42,12 @@ Every autonomous agent or developer **MUST read this file before writing code** 
 
 > *Most recent on top. Maximum 10 items.*
 
-1. **[Task 011] Weather Station Adaptive Lesson Demo (Python Prototype)**
+1. **[Task 012] Student-Chosen Themes & Bedrock AI Tutor Hints**
+   - **Model:** Claude Opus 5.5 (Kiro)
+   - **Agent:** `Kiro-Demo`
+   - **Timestamp:** 2026-11-04 09:39 PST
+   - **Summary:** Students can ask for the project in a theme they like (`python3 -m engine.cli theme --student ID "pokemon"`). The request is screened locally and by a separate Bedrock moderation call. Bedrock then designs the theme through a forced tool call, choosing only names, words, and number ranges. The engine validates it, generates data, checks, and a reference solution from templates, and uses the project only if the content check passes. Concepts and levels stay the same. AI hints: when a check fails, Bedrock writes one hint from the instructions, the failing checks, and the student's code. It never sees the reference solution or student ID. Unsafe or code-containing hints fall back to the teacher-written hint. Model: Claude Haiku 4.5 via `us.` inference profile in us-west-2, changeable with `CODEAI_MODEL_ID`, off with `--ai off`. Live: 17/18 themes built (one scale issue, since fixed). 69 tests pass, using a scripted model. Demo: `python3 -m engine.theme_demo` (or `--offline`). Needs `boto3`. Spec Requirements 20 and 21 added.
+2. **[Task 011] Weather Station Adaptive Lesson Demo (Python Prototype)**
    - **Model:** Claude Opus 5.5 (Kiro)
    - **Agent:** `Kiro-Demo`
    - **Timestamp:** 2026-11-04 08:56 PST

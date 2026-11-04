@@ -271,3 +271,52 @@ Run with `python3 -m unittest discover -s tests`.
 - **Router:** each rule and determinism.
 - **Progress store:** a round-trip property, and backup of a corrupt record.
 - **Engine flow:** a strong student path, a struggling student path through practice, router failure falling back, and adaptive routing turned off.
+
+## Addendum: Themes and AI Hints (Requirements 12, 20, 21)
+
+### Decisions
+
+1. **Themes are reskins.** The model chooses only text, identifiers, and number ranges (`engine/themes/spec.py`). The engine derives the function names (`get_pokemon`), the summary keys (`powerful_count`), the data, the tests, and the reference solution. Every themed project therefore tests the same skills the same way, and it can be checked automatically.
+2. **The content check is the quality gate.** A generated project is used only if its reference solution passes every check and its stored answers match an SQL computation written separately. This is the same check Project 1 uses.
+3. **Moderation is a separate call.** The request is screened before the design call, so a request can't persuade the designer to skip screening. Both layers fail closed.
+4. **AI hints never see the answer.** The reference solution is used only locally, to reject hints that copy it.
+5. **Default model:** `us.anthropic.claude-haiku-4-5-20251001-v1:0` through cross-region inference in us-west-2. This was verified with a live call. The model sits behind `ModelProvider` and can be changed with `CODEAI_MODEL_ID`. No `temperature` is sent, because newer Claude models reject it. `maxTokens` is always set.
+6. **Real franchise names** are allowed for the demo. The copyright question is noted for the presentation.
+
+### Components
+
+| Module | Role |
+|---|---|
+| `engine/ai.py` | `ModelProvider`, `BedrockProvider` (Converse, forced tool use, adaptive retries, 30 s read timeout), `ScriptedProvider` for tests |
+| `engine/safety.py` | `screen_text` (local category words, emails, phone numbers) and `ContentFilter.screen_request` (local rules, then model moderation) |
+| `engine/hints.py` | `AIHinter`: builds the prompt, calls the model, rejects unsafe hints |
+| `engine/themes/spec.py` | `ThemeSpec`, `parse_theme` validation, derived names |
+| `engine/themes/render.py` | Writes a standard project folder: manifest, data generator stub, instructions, hints, check stubs, reference, independent checker |
+| `engine/themes/dataset.py` | Seeded data with forced boundary rows in each group |
+| `engine/themes/checks/` | Shared themed checks configured from `manifest.parameters.theme` |
+| `engine/themes/builder.py` | The pipeline: screen, design, validate and retry, render, gate |
+| `engine/theme_demo.py` | Presentation demo (live or `--offline`) |
+
+Themed projects are written to `.codeai-data/themes/<project-id>/`. The student's active project is saved in `progress/<student_id>/profile.json`.
+
+### Theme flow
+
+```mermaid
+flowchart LR
+    R[Student request] --> F{Local filter}
+    F -- blocked --> X[Refuse, keep project]
+    F --> M{Moderation call}
+    M -- blocked or error --> X
+    M --> D[Design call: create_theme tool]
+    D --> V{parse_theme}
+    V -- errors, tries left --> D
+    V -- errors, none left --> Y[Fail, keep project]
+    V --> P[Render project + data + expected answers]
+    P --> G{Content check}
+    G -- fail --> Y
+    G -- pass --> A[Set as active project]
+```
+
+### Measured
+
+18 live builds across varied themes. 17 passed the first time. One failed because a value was out of range, and adding bounds to the tool schema fixed it (10 of 10 passed afterward). Builds take 4 to 16 seconds and 2 to 4 model calls. Hints take about 1 second.
