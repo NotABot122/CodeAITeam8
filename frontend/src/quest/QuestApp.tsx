@@ -104,6 +104,7 @@ export default function QuestApp({client, resumeId, onStarted, onFinished, onSki
         <Container maxWidth="md" sx={{py: 1.25, display: 'flex', alignItems: 'baseline', gap: 1.5, flexWrap: 'wrap'}}>
           <Typography component="p" variant="h5" sx={{flex: 1}}>CodeAI <Typography component="span" sx={{opacity: 0.85, fontWeight: 400}}>Storm Chaser Academy</Typography></Typography>
           {(phase.name === 'welcome') && <Button color="inherit" onClick={onSkip}>Skip to coding</Button>}
+          {(phase.name === 'welcome') && <Button color="inherit" href="#/teacher">For teachers</Button>}
         </Container>
       </Box>
       <Container maxWidth="md" sx={{py: 3, display: 'grid', gap: 2}}>

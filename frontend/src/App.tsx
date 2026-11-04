@@ -12,6 +12,7 @@ import {PracticeDialog, ThemeDialog} from './ui/Dialogs';
 import {Markdown} from './ui/markdown';
 import PathStrip from './ui/PathStrip';
 import QuestApp from './quest/QuestApp';
+import TeacherApp from './teacher/TeacherApp';
 import NextStepPanel from './ui/NextStepPanel';
 import QuizPanel, {quizReady, SubmitQuiz, type QuizAnswers} from './ui/QuizPanel';
 import Results from './ui/Results';
@@ -28,6 +29,12 @@ export default function App({client: injected}: {client?: ApiClient}) {
   const client = useMemo(() => injected ?? createHttpClient(import.meta.env.VITE_API_BASE_URL ?? ''), [injected]);
   const [state, setState] = useState<StudentState | null>(null);
   // The first screen is the readiness quest. 'resume' continues one that was started; 'lesson' is the coding screen.
+  const [teacher, setTeacher] = useState(() => location.hash === '#/teacher');
+  useEffect(() => {
+    const on = () => setTeacher(location.hash === '#/teacher');
+    window.addEventListener('hashchange', on);
+    return () => window.removeEventListener('hashchange', on);
+  }, []);
   const [mode, setMode] = useState<'loading' | 'quest' | 'resume' | 'lesson'>('loading');
   const [health, setHealth] = useState<Health | null>(null);
   const [code, setCode] = useState('');
@@ -125,6 +132,7 @@ export default function App({client: injected}: {client?: ApiClient}) {
     try { adopt(await client.getState(id)); setOutcome(null); setMode('lesson'); } catch (e) { setLoadError(msg(e)); }
   };
 
+  if (teacher) return <TeacherApp onExit={() => { location.hash = ''; }} />;
   if (loadError) return <Container sx={{py: 6}}><Alert severity="error" action={<Button color="inherit" onClick={() => location.reload()}>Retry</Button>}>{loadError}</Alert></Container>;
   if (mode === 'quest' || (mode === 'resume' && state)) {
     return <QuestApp client={client} resumeId={mode === 'resume' ? state!.studentId : null}

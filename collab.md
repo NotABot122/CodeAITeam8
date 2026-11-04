@@ -31,7 +31,7 @@ Every autonomous agent or developer **MUST read this file before writing code** 
 | Agent ID | Current Model | Status (`idle` / `working`) | Current Task / Focus Area | Started At (Timestamp) |
 |---|---|---|---|---|
 | `Agent-Bootstrap` | Gemini 3.8 Flash | `idle` | Integrated curriculum database references, added post-project AI reteach loop, created COURSE_FLOW_GRAPH.md, initialized git repository and committed all files | 2026-11-03 15:21 PST |
-| `Pratheek-Claude` | Claude Sonnet 5.5 | `idle` | Readiness quest as the front page of the student UI (`frontend/src/quest/`, quest routes in `webapi/`) | 2026-11-04 12:40 PST |
+| `Pratheek-Claude` | Claude Sonnet 5.5 | `idle` | Teacher view (`webapi/teacher.py`, `frontend/src/teacher/`) and readiness quest as the front page | 2026-11-04 13:10 PST |
 | `Agent-3` | Unassigned | `idle` | None | - |
 | `zane-claude` | Claude Opus 5.5 (Kiro) | `idle` | Renamed "Stance Decider 2B" to "Strands Decider 2B" in documentation/ | 2026-11-03 15:30 PST |
 | `Kiro-Demo` | Claude Opus 5.5 (Kiro) | `idle` | Merged `diagnosis` into `proto-branch` and connected the readiness quest to `Course` (confident stages seed the profile; placement sets the first problem) | 2026-11-04 12:05 PST |
@@ -45,6 +45,11 @@ Every autonomous agent or developer **MUST read this file before writing code** 
 
 > *Most recent on top. Maximum 10 items.*
 
+1. **[Task 018] Teacher View: Class Overview, Student Detail, Content Check**
+   - **Model:** Claude Sonnet 5.5
+   - **Agent:** `Pratheek-Claude`
+   - **Timestamp:** 2026-11-04 13:10 PST
+   - **Summary:** New `webapi/teacher.py` and screens at `/#/teacher`. Class overview (in the quest, coding, finished, needs help), a stacked bar per idea showing where the class stands, a student list that flags 4+ tries, 2+ hints or the fixed-order fallback, a student detail (stages, per-project tries and hints, routing path, and the readiness quest's teacher report with the child's own words and any content-filter holds), and a button that runs the lesson and quest content checks. Read-only. Needs `CODEAI_TEACHER_TOKEN` on the server; unset means the routes return 403. Routes: `GET /api/teacher/overview`, `/api/teacher/students/<id>`, `/api/teacher/content-check`. Engine and `diagnostic/` untouched. Not done: classes or rosters (students are listed together), the evaluation console stays its own app, demo scripts stay in the terminal.
 1. **[Task 017] Readiness Quest as the Front Page of the Student UI**
    - **Model:** Claude Sonnet 5.5
    - **Agent:** `Pratheek-Claude`
@@ -90,8 +95,3 @@ Every autonomous agent or developer **MUST read this file before writing code** 
    - **Agent:** `Kiro-Demo`
    - **Timestamp:** 2026-11-04 08:56 PST
    - **Summary:** Added a local Python prototype of the adaptive engine on `proto-branch` (commit `4f7669a`), with no cloud calls. One project, `projects/weather-station/`: a seeded synthetic SQLite dataset and four levels (SQL retrieval, conditionals, loops, functions) with three practice problems. The engine grades each submission in a separate process with a 10 s limit, enforces a loop rule on Level 3, gives ordered hand-written hints, tracks a Stage 0–3 per concept, routes struggling students to practice problems, and falls back to fixed level order if routing fails. Progress is saved per student. Run `python3 -m engine.demo` or see `README.md`. 51 tests pass. Spec is in `.kiro/specs/weather-station-adaptive-lesson/`. Not built yet: Bedrock rubric grading, content filter, grader benchmark. Numbered 011 because `main` already uses 009 and 010.
-9. **[Task 010] Code.org Production Architecture & Schema Blueprint Integration**
-   - **Model:** Gemini 3.8 Flash (Authoritative)
-   - **Agent:** Lead-Antigravity
-   - **Timestamp:** 2026-11-03 15:47 PST
-   - **Summary:** Added documentation/resources/code_dot_org_architecture_reference.md extracting patterns from code-dot-org/code-dot-org (UserLevel, TeacherFeedback, Activity, S3 project storage, Aurora read replicas, and feature vector extraction for Strands Decider 2B).
