@@ -270,22 +270,22 @@ async function call<T>(method: 'GET' | 'POST', path: string, body?: unknown): Pr
 }
 
 export const api = {
-  health: () => call<Health>('GET', '/api/health'),
-  overview: () => call<{items: OverviewItem[]; generated_at: string}>('GET', '/api/overview'),
-  presets: () => call<Presets>('GET', '/api/presets'),
-  e01: () => call<E01>('GET', '/api/results/e01'),
-  e07: () => call<E07>('GET', '/api/results/e07'),
-  e08: () => call<E08>('GET', '/api/results/e08'),
-  e12: () => call<E12>('GET', '/api/results/e12'),
-  run: (suite: 'e01' | 'e07') => call<{suite: string; seconds: number}>('POST', `/api/run/${suite}`),
-  validate: (level: string, code: string) => call<ValidateResult>('POST', '/api/live/validate', {level, code}),
+  health: () => call<Health>('GET', 'api/health'),
+  overview: () => call<{items: OverviewItem[]; generated_at: string}>('GET', 'api/overview'),
+  presets: () => call<Presets>('GET', 'api/presets'),
+  e01: () => call<E01>('GET', 'api/results/e01'),
+  e07: () => call<E07>('GET', 'api/results/e07'),
+  e08: () => call<E08>('GET', 'api/results/e08'),
+  e12: () => call<E12>('GET', 'api/results/e12'),
+  run: (suite: 'e01' | 'e07') => call<{suite: string; seconds: number}>('POST', `api/run/${suite}`),
+  validate: (level: string, code: string) => call<ValidateResult>('POST', 'api/live/validate', {level, code}),
   hint: (body: {level: string; code: string; attempt: number; gap?: string; agentcore: boolean}) =>
-    call<HintResult>('POST', '/api/live/hint', body),
+    call<HintResult>('POST', 'api/live/hint', body),
   filter: (text: string, direction: 'input' | 'output') =>
-    call<FilterResult>('POST', '/api/live/filter', {text, direction}),
-  ratingItems: () => call<{items: RatingItem[]; rated: Record<string, string[]>}>('GET', '/api/rating/items'),
-  saveRating: (body: Record<string, unknown>) => call<{saved: boolean}>('POST', '/api/rating', body),
-  agreement: () => call<RatingAgreement>('GET', '/api/rating/agreement'),
+    call<FilterResult>('POST', 'api/live/filter', {text, direction}),
+  ratingItems: () => call<{items: RatingItem[]; rated: Record<string, string[]>}>('GET', 'api/rating/items'),
+  saveRating: (body: Record<string, unknown>) => call<{saved: boolean}>('POST', 'api/rating', body),
+  agreement: () => call<RatingAgreement>('GET', 'api/rating/agreement'),
 };
 
 export function pct(x: number | null | undefined): string {
