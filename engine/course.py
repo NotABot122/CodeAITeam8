@@ -32,6 +32,7 @@ from .progress import JsonProgressStore, ProgressRecord
 from .project import Project, load_project
 from .quiz import public_questions
 from .session import Engine, SubmitOutcome, UnknownStudent
+from .support import SupportPolicy
 from .stages import STAGE_NAMES
 
 PROJECTS_ROOT = REPO_ROOT / "projects"
@@ -48,6 +49,8 @@ class Topic:
     project: str
     concepts: List[str]
     themeable: bool = False
+    # Projects with the same skills and different stories: [{"project", "goals", "pitch"}]. The student picks one.
+    choices: List[dict] = field(default_factory=list)
 
 
 @dataclass
@@ -58,6 +61,7 @@ class Catalog:
     thresholds: dict
     diagnostic: dict = field(default_factory=lambda: {"min_confidence": 0.8, "use_borderline": False, "min_correct_answers": 2})
     intervention: dict = field(default_factory=lambda: {"struggle_after": None})
+    support: dict = field(default_factory=dict)       # adaptive support policy (engine/support.py)
 
     def topic(self, topic_id: str) -> Optional[Topic]:
         return next((t for t in self.topics if t.id == topic_id), None)
@@ -68,14 +72,31 @@ class Catalog:
 
 def load_catalog(projects_root: Path = PROJECTS_ROOT) -> Catalog:
     data = yaml.safe_load((Path(projects_root) / "catalog.yaml").read_text())
-    topics = [Topic(t["id"], t["title"], t["project"], list(t["concepts"]), bool(t.get("themeable")))
+    topics = [Topic(t["id"], t["title"], t["project"], list(t["concepts"]), bool(t.get("themeable")),
+                    [dict(c) for c in t.get("choices") or []])
               for t in data["topics"]]
     diagnostic = {"min_confidence": 0.8, "use_borderline": False, "min_correct_answers": 2}
     diagnostic.update(data.get("diagnostic") or {})
     intervention = {"struggle_after": None}
     intervention.update(data.get("intervention") or {})
     return Catalog(dict(data["concepts"]), topics, dict(data.get("revision") or {}), dict(data["thresholds"]),
-                   diagnostic, intervention)
+                   diagnostic, intervention, dict(data.get("support") or {}))
+
+
+def translate_problem(source: Project, target: Project, problem_id: Optional[str]) -> Optional[str]:
+    """The same place in another project with the same structure: a level keeps its id; a practice problem
+    becomes the target's practice for the same concept and stage."""
+    if not problem_id:
+        return problem_id
+    if target.manifest.has_problem(problem_id) and target.manifest.practice(problem_id) is None:
+        return problem_id
+    practice = source.manifest.practice(problem_id) if source.manifest.has_problem(problem_id) else None
+    if practice is not None:
+        match = next((p for p in target.manifest.practice_problems
+                      if p.concept == practice.concept and p.target_stage == practice.target_stage), None)
+        if match is not None:
+            return match.id
+    return problem_id if target.manifest.has_problem(problem_id) else None
 
 
 def seed_from_placement(placement: dict, rules: dict, correct: Optional[Dict[str, int]] = None) -> Dict[str, dict]:
@@ -265,6 +286,7 @@ class Course:
                       initial_stages=self.stages(student_id),
                       planned_practice=planned.get("problems") if planned.get("project") == project.id else None,
                       struggle_after=self.catalog.intervention.get("struggle_after"),
+                      support=SupportPolicy.from_dict(self.catalog.support),
                       **kwargs)
 
     def _require(self, student_id: str) -> None:
@@ -381,6 +403,91 @@ class Course:
         self.store.set_active_project(student_id, str(self.default_project().root))
         return self.state(student_id)
 
+    # Project choice: same skills, different stories (catalog topics[0].choices) ---------------
+    def core_choices(self) -> List[str]:
+        topic = self.catalog.topics[0]
+        folders = [c["project"] for c in topic.choices if (self.projects_root / c["project"]).is_dir()]
+        return folders or [topic.project]
+
+    def _goal(self, student_id: str) -> Optional[str]:
+        from diagnostic.store import DiagnosticStore
+        try:
+            state = DiagnosticStore(self.data_dir).load(student_id)
+        except Exception:
+            return None
+        return state.goal_id if state is not None else None
+
+    def suggested_project(self, student_id: str) -> str:
+        goal = self._goal(student_id)
+        for choice in self.catalog.topics[0].choices:
+            if goal and goal in (choice.get("goals") or []) and choice["project"] in self.core_choices():
+                return choice["project"]
+        return self.catalog.topics[0].project
+
+    def core_project_for(self, student_id: str) -> str:
+        chosen = self.store.profile(student_id).get("core_project") if student_id else None
+        return chosen if chosen in self.core_choices() else self.suggested_project(student_id)
+
+    def _core_started(self, student_id: str, folder: str) -> bool:
+        try:
+            record = self.store.load(student_id, self._project(self.projects_root / folder).id)
+        except Exception:
+            return False
+        return record is not None and bool(record.attempts or record.passed_problems)
+
+    def project_choices(self, student_id: str) -> dict:
+        self._require(student_id)
+        current = self.core_project_for(student_id)
+        # Only a readiness-check goal suggests a project; students who skipped it get no "matches your goal" tag.
+        suggested = self.suggested_project(student_id) if self._goal(student_id) else None
+        out = []
+        for choice in self.catalog.topics[0].choices:
+            folder = choice["project"]
+            if folder not in self.core_choices():
+                continue
+            project = self._project(self.projects_root / folder)
+            out.append({"project": folder, "title": project.title, "pitch": choice.get("pitch", ""),
+                        "suggested": folder == suggested, "current": folder == current})
+        return {"choices": out, "locked": self._core_started(student_id, current),
+                "topic": self.catalog.topics[0].title}
+
+    def choose_project(self, student_id: str, folder: str) -> dict:
+        """Pick which story to learn the first topic's skills in. Allowed until that project is started."""
+        self._require(student_id)
+        if folder not in self.core_choices():
+            raise CourseError("Pick one of the projects in the list.")
+        current = self.core_project_for(student_id)
+        if folder != current and self._core_started(student_id, current):
+            title = self._project(self.projects_root / current).title
+            raise CourseError(f"You've already started {title}. Finish it first.")
+        profile = self.store.profile(student_id)
+        profile["core_project"] = folder
+        pathway = profile.get("pathway")
+        if pathway:
+            new_title = self._project(self.projects_root / folder).title
+            for step in pathway.get("steps") or []:
+                if step["project"] in self.core_choices():
+                    old_title = step["title"]
+                    step["project"], step["title"] = folder, new_title
+                    # The decider's message may name the old project; keep it true.
+                    if old_title != new_title and old_title in (pathway.get("student_message") or ""):
+                        pathway["student_message"] = pathway["student_message"].replace(old_title, new_title)
+        if (profile.get("diagnostic") or {}).get("applied"):
+            profile["diagnostic"]["applied"] = False        # place the student again, in the chosen project
+        self.store.save_profile(student_id, profile)
+        self.events.write("choose_project", student_id=student_id, project_id=folder, selected=folder)
+        active = Path(self.store.active_project(student_id) or "").name
+        if (profile.get("diagnostic") or {}).get("decisions") is not None:
+            self.apply_diagnostic(student_id)
+            if pathway:
+                step = (pathway.get("steps") or [])[pathway.get("current", 0)] if pathway.get("steps") else None
+                if step and step["project"] == folder:
+                    self._start_step(student_id, step)
+        elif active in self.core_choices():
+            project = self._project(self.projects_root / folder)
+            self._switch(student_id, project, f"Starting {project.title}.")
+        return self.state(student_id)
+
     # Lesson pathway (Strands Decider 2B, engine/decider.py) -----------------------------------
     # After the readiness check, the decider picks a pathway: rules decide which ones the student can get,
     # Bedrock picks one using the evidence, grade and CSTA standards, and the rules' pick is the fallback.
@@ -437,7 +544,8 @@ class Course:
         def resolve(pathway) -> List[dict]:
             out = []
             for step in pathway.steps:
-                folder = self.catalog.revision.get(weakest) if step.project == "revision" else step.project
+                folder = (self.catalog.revision.get(weakest) if step.project == "revision"
+                          else self.core_project_for(student_id) if step.project in self.core_choices() else step.project)
                 if folder and (self.projects_root / folder).is_dir():
                     out.append({"project": folder, "title": self._project(self.projects_root / folder).title,
                                 "start": step.start})
@@ -474,9 +582,10 @@ class Course:
 
     def _start_step(self, student_id: str, step: dict) -> None:
         project = self._project(self.projects_root / step["project"])
-        if project.root != self.default_project().root:
+        if project.root.name not in self.core_choices():
             self._switch(student_id, project, f"Starting {project.title}.")
             return
+        self.store.set_active_project(student_id, str(project.root))
         start = step.get("start")
         if start in (None, "readiness") or not project.manifest.has_problem(start):
             return      # the readiness check's placement (apply_diagnostic) already set the first problem
@@ -544,8 +653,23 @@ class Course:
     def diagnostic_next(self, student_id: str) -> dict:
         step = self.diagnostic().next(student_id)
         if step.get("done"):
-            self.apply_diagnostic(student_id)
+            self._name_first_stop(step, self.apply_diagnostic(student_id), student_id)
         return step
+
+    def _name_first_stop(self, result: dict, summary: dict, student_id: str) -> None:
+        """The quest names a Weather Station problem; say the one the student will really open."""
+        placed = summary.get("start_problem")
+        stop = result.get("next_stop")
+        if placed and isinstance(stop, dict):
+            project = self._project(self.projects_root / self.core_project_for(student_id))
+            if project.manifest.has_problem(placed):
+                stop["activity"] = {"id": placed, "title": project.problem(placed).title}
+                stop["project"] = project.title
+            if project.root != self.default_project().root:
+                # The quest's own sentence is about Weather Station; describe the student's project instead.
+                pitch = next((c.get("pitch", "") for c in self.catalog.topics[0].choices
+                              if c["project"] == project.root.name), "")
+                result["goal_connection"] = f"Your project: {project.title}. {pitch}".strip()
 
     def diagnostic_answer(self, student_id: str, response, elapsed_ms: Optional[int] = None) -> dict:
         return self.diagnostic().answer(student_id, response, elapsed_ms)
@@ -553,7 +677,7 @@ class Course:
     def diagnostic_finish(self, student_id: str) -> dict:
         """End the quest early or on time, then apply its result."""
         result = self.diagnostic().finish(student_id)
-        self.apply_diagnostic(student_id)
+        self._name_first_stop(result, self.apply_diagnostic(student_id), student_id)
         return result
 
     def apply_diagnostic(self, student_id: str) -> dict:
@@ -582,7 +706,7 @@ class Course:
                 concepts[concept] = max(int(concepts.get(concept, 0)), d["stage"])
         profile["concepts"] = concepts
 
-        project = self.default_project()
+        project = self._project(self.projects_root / self.core_project_for(student_id))
         # Plan a practice problem before the level of every concept the diagnostic is confident is a gap.
         planned = []
         for concept, d in decisions.items():
@@ -592,7 +716,8 @@ class Course:
                 if practice is not None:
                     planned.append(practice.id)
         profile["planned_practice"] = {"project": project.id, "problems": planned}
-        start = state.placement.get("route", {}).get("next_task_id")
+        # The readiness check places students in Weather Station's problems; other choices share its structure.
+        start = translate_problem(self.default_project(), project, state.placement.get("route", {}).get("next_task_id"))
         engine = self.engine(student_id, project)
         try:
             existing = self.store.load(student_id, project.id)
@@ -618,7 +743,9 @@ class Course:
                    "seeded": {c: d["stage"] for c, d in decisions.items() if d["used"]},
                    "decisions": decisions, "start_problem": placed_at, "lesson_already_started": started}
         profile["diagnostic"] = summary
-        profile.setdefault("active_project", str(project.root))
+        profile["core_project"] = project.root.name
+        if not profile.get("active_project") or Path(profile["active_project"]).name in self.core_choices():
+            profile["active_project"] = str(project.root)
         self.store.save_profile(student_id, profile)
         self.events.write("diagnostic_applied", student_id=student_id, project_id=project.id, selected=placed_at,
                           stages=summary["seeded"], reason="lesson_already_started" if started else "placed")

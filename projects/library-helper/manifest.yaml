@@ -1,0 +1,170 @@
+title: Library Helper
+streak_length: 1
+concepts:
+- id: database_retrieval
+  name: Database Retrieval
+- id: conditionals
+  name: Conditionals
+- id: loops
+  name: Loops
+- id: functions
+  name: Functions
+stage_criteria:
+  1:
+    max_attempts: 3
+    max_hints: null
+  2:
+    max_attempts: 2
+    max_hints: null
+  3:
+    max_attempts: 1
+    max_hints: 0
+levels:
+- id: level-1
+  number: 1
+  title: Find the books
+  folder: levels/level-1
+  concepts:
+  - database_retrieval
+  advance_at_stage: 1
+  loop_check: null
+  format: code
+- id: level-2
+  number: 2
+  title: Label Each Entry
+  folder: levels/level-2
+  concepts:
+  - conditionals
+  advance_at_stage: 1
+  loop_check: null
+  format: code
+- id: level-3
+  number: 3
+  title: Count Them All Up
+  folder: levels/level-3
+  concepts:
+  - loops
+  advance_at_stage: 1
+  loop_check: summarize_books
+  format: code
+- id: level-4
+  number: 4
+  title: Build the Report
+  folder: levels/level-4
+  concepts:
+  - functions
+  advance_at_stage: null
+  loop_check: null
+  format: code
+practice_problems:
+- id: practice-count
+  title: 'Practice: Count Each Genre'
+  folder: practice/count
+  concept: database_retrieval
+  target_stage: 1
+  loop_check: null
+- id: practice-band
+  title: 'Practice: Pages Bands'
+  folder: practice/band
+  concept: conditionals
+  target_stage: 1
+  loop_check: null
+- id: practice-loop
+  title: 'Practice: Count the Popular Ones'
+  folder: practice/loop
+  concept: loops
+  target_stage: 1
+  loop_check: count_popular
+fallback_path:
+- level-1
+- level-2
+- level-3
+- level-4
+dataset:
+  generator: dataset/generate.py
+  database: dataset/data.db
+parameters:
+  topic: data-logic
+  theme:
+    title: Library Helper
+    story: The school library wants a helper tool for its student volunteers. It should
+      find the books on a range of shelves, flag the long ones and the popular ones,
+      and build a report the librarian can use to plan displays and reading lists.
+    entity_singular: book
+    entity_plural: books
+    table: library_books
+    group_column: genre
+    group_description: The section of the library
+    groups:
+    - Mystery
+    - Science
+    - Adventure
+    number_column: shelf_number
+    name_column: title
+    metric_a:
+      column: pages
+      label: long
+      unit: pages
+      description: Number of pages
+      minimum: 60.0
+      maximum: 900.0
+      threshold: 400.0
+    metric_b:
+      column: checkouts
+      label: popular
+      unit: checkouts
+      description: Times checked out this year
+      minimum: 0.0
+      maximum: 80.0
+      threshold: 30.0
+    normal_label: regular
+    names:
+      Mystery:
+      - The Clockwork Key
+      - Fog on Harbor Street
+      - The Missing Map
+      - Whispers in the Attic
+      - The Silver Locket
+      - Case of the Quiet Bell
+      - The Hidden Staircase Club
+      - Midnight at the Museum Gate
+      - The Lantern Code
+      - Footprints in the Snow
+      - The Vanishing Violin
+      - Secret of Willow Pond
+      Science:
+      - How Bridges Stand
+      - The Story of Atoms
+      - Our Restless Planet
+      - Inside the Cell
+      - Weather Machines
+      - The Math of Music
+      - Rockets and Orbits
+      - Tiny Life in a Drop
+      - Electric Everything
+      - The Living Ocean
+      - Codes and Ciphers
+      - Why the Sky Glows
+      Adventure:
+      - River of Stars
+      - The Last Lighthouse
+      - Across the Ice Fields
+      - The Sky Pirates
+      - Desert Compass
+      - The Mountain Messenger
+      - Island of Echoes
+      - The Jungle Railway
+      - Wings over the Canyon
+      - The Lost Expedition
+      - Storm Riders
+      - The Coral Kingdom
+  expected_report_args:
+  - group: Mystery
+    start: 1
+    end: 10
+  - group: Science
+    start: 3
+    end: 9
+  - group: Adventure
+    start: 1
+    end: 12

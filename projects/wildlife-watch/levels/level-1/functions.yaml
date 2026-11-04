@@ -1,0 +1,34 @@
+# Function bank for Level 1. Only what the answer should use.
+- call: conn.execute(sql, values)
+  summary: |-
+    Runs one SQL query on the database and gives back a cursor that holds the matching rows.
+    Write a ? in the SQL for each value, then pass the values as a tuple in the same order. The database fills them in safely, so a strange park name can't change your query.
+  example: |-
+    cursor = conn.execute(
+        "SELECT species, weight_kg FROM tagged_animals WHERE park = ?",
+        ("Pine Ridge",),
+    )
+- call: cursor.description
+  summary: |-
+    Describes the columns your query returned, one entry per column, in order.
+    Each entry is a tuple whose first item ([0]) is the column's name. It's not a function, so there are no brackets after it.
+  example: |-
+    names = [column[0] for column in cursor.description]
+    # ["species", "weight_kg"]
+- call: cursor.fetchall()
+  summary: |-
+    Gives back every row the query found, as a list. Each row is a tuple of values in column order.
+  example: |-
+    rows = cursor.fetchall()
+- call: zip(names, values)
+  summary: |-
+    Pairs up two lists item by item: the first name with the first value, and so on.
+  example: |-
+    list(zip(["a", "b"], [1, 2]))
+    # [("a", 1), ("b", 2)]
+- call: dict(pairs)
+  summary: |-
+    Builds a dictionary from (key, value) pairs, such as the pairs zip gives you.
+  example: |-
+    dict([("a", 1), ("b", 2)])
+    # {"a": 1, "b": 2}

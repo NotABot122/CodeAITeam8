@@ -36,6 +36,9 @@ class ProgressRecord:
     quiz_scores: Dict[str, Dict[str, Optional[int]]] = field(default_factory=dict)
     return_to: Optional[str] = None          # level to go back to after an inserted practice problem
     interventions: List[str] = field(default_factory=list)   # concepts that already got a struggle practice
+    # Adaptive support (engine/support.py): per-problem stuck signals, and how often each mistake was seen.
+    support: Dict[str, dict] = field(default_factory=dict)
+    mistakes: Dict[str, int] = field(default_factory=dict)
 
     def stages(self) -> Dict[str, int]:
         return {cid: state.stage for cid, state in self.concepts.items()}
@@ -56,6 +59,8 @@ class ProgressRecord:
             "quiz_scores": {k: dict(v) for k, v in self.quiz_scores.items()},
             "return_to": self.return_to,
             "interventions": list(self.interventions),
+            "support": {k: dict(v) for k, v in self.support.items()},
+            "mistakes": dict(self.mistakes),
         }
 
     @classmethod
@@ -78,6 +83,8 @@ class ProgressRecord:
             quiz_scores={k: dict(v) for k, v in (data.get("quiz_scores") or {}).items()},  # optional: added later
             return_to=data.get("return_to"),                                     # optional: added later
             interventions=list(data.get("interventions") or []),                 # optional: added later
+            support={k: dict(v) for k, v in (data.get("support") or {}).items()},  # optional: added later
+            mistakes={k: int(v) for k, v in (data.get("mistakes") or {}).items()},  # optional: added later
         )
 
 

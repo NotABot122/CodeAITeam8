@@ -1,0 +1,7 @@
+# Function bank for Level 2. The rest is if statements and comparisons.
+- call: my_list.append(item)
+  summary: |-
+    Adds one item to the end of a list. It changes the list itself and gives back nothing.
+  example: |-
+    labels = []
+    labels.append("strong")

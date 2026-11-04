@@ -1,0 +1,2 @@
+- COUNT(*) returns one row with one number in it.
+- Pass (zone,) with the comma, then use .fetchone()[0] to get the number.

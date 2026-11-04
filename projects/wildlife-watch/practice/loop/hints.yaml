@@ -1,0 +1,2 @@
+- Start with count = 0 before the loop.
+- Inside the loop, add 1 when row["daily_km"] >= 15. Return count after.

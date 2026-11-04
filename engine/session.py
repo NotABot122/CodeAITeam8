@@ -13,6 +13,8 @@ from .ai import ModelProvider
 from .events import EventLog
 from .feedback import messages_for, next_hint
 from .hints import AIHinter
+from .support import (LEGACY, LevelRule, SupportPolicy, classify_mistake, explain_error, load_mistakes, note_run,
+                      outline_for, problem_stage)
 from .quiz import grade_quiz
 from .rubric import RubricGrader
 from .safety import ContentFilter
@@ -23,6 +25,13 @@ from .stages import MAX_STAGE, STAGE_NAMES, StageChange, initial_states, record_
 
 FALLBACK_MESSAGE = "The lesson will continue in a fixed order from here."
 STRUGGLE_AFTER = None      # failed attempts on one level before a practice is inserted; None = off (see catalog.yaml)
+# How specific the AI tutor's hint may be, by help level (engine/support.py).
+HELP_GUIDANCE = {
+    "full": "How much help: this student is new to the idea. Be concrete about which part of the code to change, but don't write it.",
+    "guided": "How much help: the student has the basics. Point to the part of the code and ask a guiding question.",
+    "light": "How much help: the student is mostly confident. Give a short, general nudge; don't name the exact change.",
+    "minimal": "How much help: the student is strong. Give only a brief nudge toward what to test or re-read.",
+}
 STRUGGLE_MESSAGE = "Let\'s warm up with a short practice problem, then come back to this level."
 PLANNED_PRACTICE = "planned_practice"
 STRUGGLE_PRACTICE = "struggle_practice"
@@ -53,6 +62,10 @@ class SubmitOutcome:
     hint_source: Optional[str] = None     # "ai" or "authored"
     question_results: List[dict] = field(default_factory=list)   # quiz problems only
     next_step: Optional[dict] = None      # set by Course when a project is complete
+    # Adaptive support (engine/support.py), code problems only:
+    explanation: Optional[dict] = None    # plain-language explanation of a Python error
+    mistake: Optional[dict] = None        # {"id", "tip"}: the likely mistake, at levels that name it
+    stuck: List[str] = field(default_factory=list)   # stuck signals this run added
 
 
 class Engine:
@@ -62,7 +75,8 @@ class Engine:
                  hint_provider: Optional[ModelProvider] = None,
                  initial_stages: Optional[Dict[str, int]] = None,
                  planned_practice: Optional[List[str]] = None,
-                 struggle_after: Optional[int] = STRUGGLE_AFTER):
+                 struggle_after: Optional[int] = STRUGGLE_AFTER,
+                 support: Optional[SupportPolicy] = None):
         self.project = project
         self.manifest = project.manifest
         self.store = store
@@ -75,6 +89,10 @@ class Engine:
         # on a level count as struggling (then the concept\'s practice is inserted once).
         self.planned_practice = [p for p in (planned_practice or []) if self.manifest.practice(p) is not None]
         self.struggle_after = int(struggle_after) if struggle_after else None
+        self.provider = hint_provider
+        # None: no adaptive support (a hint after every failed run, as before).
+        self.support = support
+        self.mistake_catalog = load_mistakes(project) if support is not None else None
         self.hinter = None
         self.rubric_grader = RubricGrader(hint_provider) if hint_provider is not None else None
         if hint_provider is not None:
@@ -204,14 +222,18 @@ class Engine:
         stage is lowered to 0 and a diagnostic_mismatch event is logged (live evidence on diagnostic accuracy).
         """
         level = self.manifest.level(problem.id)
+        tries = record.attempts.get(problem.id, 0)
+        if self.support is not None and self.support.stuck.counts_toward_practice:
+            tries += int((record.support.get(problem.id) or {}).get("practice_signals", 0))
         if (self.struggle_after is None or level is None or not self.adaptive or record.on_fallback
-                or record.attempts.get(problem.id, 0) < self.struggle_after):
+                or tries < self.struggle_after):
             return None
         for concept in level.concepts:
             if concept in record.interventions:
                 continue
-            practice = next((p for p in self.manifest.practice_problems
-                             if p.concept == concept and p.id not in record.passed_problems), None)
+            open_practice = [p for p in self.manifest.practice_problems
+                             if p.concept == concept and p.id not in record.passed_problems]
+            practice = self._practice_for_mistakes(record, concept, open_practice)
             if practice is None:
                 continue
             record.interventions.append(concept)
@@ -228,6 +250,42 @@ class Engine:
                               stages=record.stages())
             return self.project.problem(practice.id)
         return None
+
+    def _practice_for_mistakes(self, record: ProgressRecord, concept: str, options: list):
+        """The open practice problem that works on the student's most frequent mistake for this concept."""
+        if not options:
+            return None
+        catalog = self.mistake_catalog
+        if catalog is None:
+            return options[0]
+        seen = sorted(((n, mid) for mid, n in record.mistakes.items()
+                       if mid in catalog.mistakes and catalog.mistakes[mid].concept == concept), reverse=True)
+        for _, mid in seen:
+            match = next((p for p in options if mid in catalog.practice.get(p.id, [])), None)
+            if match is not None:
+                return match
+        return options[0]
+
+    # Adaptive support -------------------------------------------------------
+    def support_rule(self, record: ProgressRecord, problem: Problem) -> LevelRule:
+        if self.support is None:
+            return LEGACY
+        state = record.support.get(problem.id) or {}
+        return self.support.rule(problem_stage(record.stages(), problem), bool(state.get("stuck")),
+                                 self.support.has_momentum(record.support.get("_momentum") or {}))
+
+    def support_view(self, record: ProgressRecord, problem: Problem, code: str = "") -> Dict[str, object]:
+        """What the screen should offer on this problem right now."""
+        rule = self.support_rule(record, problem)
+        state = record.support.get(problem.id) or {}
+        view = rule.view()
+        threshold = self.support.stuck.errors_in_a_row if self.support else 0
+        view.update({
+            "stuck": bool(state.get("stuck")),
+            "outline": outline_for(problem, rule, code),
+            "suggestBlocks": bool(rule.suggest_blocks and threshold and int(state.get("errors_in_a_row", 0)) >= threshold),
+        })
+        return view
 
     # Submissions ------------------------------------------------------------
     def current_problem(self, student_id: str) -> Tuple[Optional[Problem], List[str]]:
@@ -255,17 +313,55 @@ class Engine:
             return SubmitOutcome(result.status, False, messages, next_problem=problem, notices=notices)
 
         record.attempts[problem.id] = record.attempts.get(problem.id, 0) + 1
+        try:
+            code = Path(submission_path).read_text()
+        except (OSError, UnicodeDecodeError):
+            code = ""
+        stuck: List[str] = []
+        if self.support is not None:
+            stuck = note_run(record.support.setdefault(problem.id, {}), code, result.status, result.passed,
+                             self.support.stuck)
+            if stuck:
+                self.events.write("stuck", student_id=student_id, project_id=self.project.id, problem_id=problem.id,
+                                  reason=",".join(stuck))
 
         if not result.passed:
-            hint, record.hints_seen[problem.id] = next_hint(problem, record.hints_seen.get(problem.id, 0))
-            hint, source = self._ai_hint(record, problem, messages, submission_path, hint)
+            rule = self.support_rule(record, problem)        # after the stuck update: being stuck adds help now
+            explanation = mistake_view = None
+            context = None
+            if self.support is not None:
+                found = explain_error(result, code, rule, self.provider, self._reference_source())
+                explanation = found.view() if found else None
+                labelled = classify_mistake(self.mistake_catalog, problem, result, code, self.provider)
+                if labelled is not None:
+                    mistake, how = labelled
+                    record.mistakes[mistake.id] = record.mistakes.get(mistake.id, 0) + 1
+                    record.support.setdefault(problem.id, {})["last_mistake"] = mistake.id
+                    self.events.write("mistake", student_id=student_id, project_id=self.project.id,
+                                      problem_id=problem.id, reason=mistake.id, source=how, category=mistake.concept)
+                    context = f"Likely mistake: {mistake.label}."
+                    if rule.name_mistake:
+                        mistake_view = {"id": mistake.id, "tip": mistake.tip}
+            if self.support is not None:
+                context = " ".join(c for c in (context, HELP_GUIDANCE.get(rule.name)) if c) or None
+            hint, source = None, None
+            # A Python error gets its explanation instead of a hint: the hint would say the same, and cost a hint.
+            error_explained = explanation is not None and result.status in (g.SYNTAX_ERROR, g.IMPORT_ERROR)
+            if (not error_explained and rule.auto_hint_after is not None
+                    and record.attempts[problem.id] >= rule.auto_hint_after):
+                hint, record.hints_seen[problem.id] = next_hint(problem, record.hints_seen.get(problem.id, 0))
+                hint, source = self._ai_hint(record, problem, messages, submission_path, hint, context)
             inserted = self._struggle(record, problem)
             if inserted is not None:
                 notices.append(STRUGGLE_MESSAGE)
             notices.extend(self._save(record))
             return SubmitOutcome(result.status, False, messages, hint=hint, next_problem=inserted or problem,
-                                 notices=notices, hint_source=source if hint else None)
+                                 notices=notices, hint_source=source if hint else None, explanation=explanation,
+                                 mistake=mistake_view, stuck=stuck)
 
+        if self.support is not None:
+            self.support.note_pass(record.support.setdefault("_momentum", {}), record.attempts[problem.id],
+                                   record.hints_seen.get(problem.id, 0))
         return self._after_pass(record, problem, result.status, messages, notices)
 
     def answer(self, student_id: str, answers: Dict[str, object]) -> SubmitOutcome:
@@ -321,6 +417,8 @@ class Engine:
             return SubmitOutcome("no_hints", False, [], next_problem=problem, notices=notices)
         authored, record.hints_seen[problem.id] = next_hint(problem, seen)
         hint, source = authored, "authored"
+        if self.support is not None:
+            record.support.setdefault(problem.id, {})["hint_pending"] = True
         if not problem.is_quiz and submission_path is not None and self.hinter is not None:
             messages: List[str] = []
             try:
@@ -330,7 +428,8 @@ class Engine:
             except Exception:  # a broken grader must not cost the student their hint
                 messages = []
             if messages:
-                hint, source = self._ai_hint(record, problem, messages, submission_path, authored)
+                guidance = HELP_GUIDANCE.get(self.support_rule(record, problem).name) if self.support else None
+                hint, source = self._ai_hint(record, problem, messages, submission_path, authored, guidance)
         if source == "authored":
             self.events.write("hint", student_id=student_id, project_id=self.project.id, problem_id=problem.id,
                               source="authored", reason="requested")
@@ -338,8 +437,14 @@ class Engine:
         return SubmitOutcome("hint", False, [], hint=hint, next_problem=problem, notices=notices,
                              hint_source=source)
 
+    def _reference_source(self) -> str:
+        try:
+            return self.project.reference_path.read_text()
+        except OSError:
+            return ""
+
     def _ai_hint(self, record: ProgressRecord, problem: Problem, messages: List[str], submission_path,
-                 authored: Optional[str]) -> Tuple[Optional[str], str]:
+                 authored: Optional[str], context: Optional[str] = None) -> Tuple[Optional[str], str]:
         """Try an AI hint. Fall back to the pre-authored hint on any problem."""
         if self.hinter is None:
             return authored, "authored"
@@ -347,7 +452,7 @@ class Engine:
             code = Path(submission_path).read_text()
         except (OSError, UnicodeDecodeError):
             code = ""
-        result = self.hinter.hint(problem, messages, code, attempt=record.attempts.get(problem.id, 1))
+        result = self.hinter.hint(problem, messages, code, attempt=record.attempts.get(problem.id, 1), context=context)
         if result is None:
             self.events.write("hint", student_id=record.student_id, project_id=self.project.id,
                               problem_id=problem.id, source="authored", reason=self.hinter.last_rejection)

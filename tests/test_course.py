@@ -214,7 +214,8 @@ class JourneyTests(TempDirMixin, unittest.TestCase):
         # Every failed attempt shows a hint, so passing on try 3 means 2 hints: "struggled".
         course = self.course()
         sid = course.new_student()
-        for source in (GET_EXCLUSIVE, GET_EXCLUSIVE) + tuple(STRONG_SUBMISSIONS):
+        # Two different failing tries: the same failing code twice would be a stuck signal (engine/support.py).
+        for source in (GET_EXCLUSIVE, GET_EXCLUSIVE + "\n# second try\n") + tuple(STRONG_SUBMISSIONS):
             outcome = self.submit(course, sid, source)
         self.assertEqual(outcome.next_step["kind"], REVISION)
 
@@ -222,7 +223,8 @@ class JourneyTests(TempDirMixin, unittest.TestCase):
         course = self.course(RubricOnly())
         course.catalog.thresholds["struggled"]["min_hints"] = 3      # leave room for a steady band
         sid = course.new_student()
-        for source in (GET_EXCLUSIVE, GET_EXCLUSIVE) + tuple(STRONG_SUBMISSIONS):
+        # Two different failing tries: the same failing code twice would be a stuck signal (engine/support.py).
+        for source in (GET_EXCLUSIVE, GET_EXCLUSIVE + "\n# second try\n") + tuple(STRONG_SUBMISSIONS):
             outcome = self.submit(course, sid, source)
         self.assertEqual(outcome.next_step["kind"], NEW_THEME)
         with self.assertRaises(CourseError):

@@ -7,8 +7,16 @@ import {useCallback, useEffect, useRef, useState} from 'react';
 
 import type {ApiClient} from '@/api/client';
 
+import {expectedSeconds, SLOW_DOWN_MESSAGE, useCountdown, usePace} from '@/ui/pace';
+
 import {ExplainView, initialResponse, ItemView, responseReady} from './StepView';
 import type {AnswerResult, Feedback, Game, QuestDone, QuestOptions, Step, Zone} from './types';
+
+// Seconds this question should take: its prompt plus every option, card and box to read.
+const stepSeconds = (step: Step) => step.kind === 'explain' ? 0 : expectedSeconds({
+  prompt: step.prompt,
+  choices: [...(step.options ?? []), ...(step.cards ?? []), ...(step.buckets ?? [])].map(o => o.text),
+});
 
 const msg = (e: unknown) => (e instanceof Error ? e.message : 'Something went wrong. Try again.');
 
@@ -53,6 +61,11 @@ export default function QuestApp({client, resumeId, onStarted, onFinished, onSki
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [count, setCount] = useState(0);
+  const pace = usePace();
+  const stepNow = phase.name === 'step' ? phase.step : null;
+  const expected = stepNow ? stepSeconds(stepNow) : 0;
+  const waitLeft = useCountdown(pace.slow && !!stepNow && stepNow.kind !== 'explain', expected,
+    phase.name === 'step' ? phase.shownAt : 0);
   const headingRef = useRef<HTMLHeadingElement>(null);
 
   const show = useCallback((r: Awaited<ReturnType<ApiClient['questNext']>>) => {
@@ -86,7 +99,10 @@ export default function QuestApp({client, resumeId, onStarted, onFinished, onSki
     if (!studentId || phase.name !== 'step') return;
     setBusy(true); setError(null);
     try {
-      const r: AnswerResult = await client.questAnswer(studentId, response, Date.now() - phase.shownAt);
+      const elapsed = Date.now() - phase.shownAt;
+      // Typed answers and skips aren't timed: only questions with choices can be clicked through.
+      if (step.kind !== 'explain') pace.record(elapsed, stepSeconds(step));
+      const r: AnswerResult = await client.questAnswer(studentId, response, elapsed);
       setGame(r.game); setCount(c => c + 1);
       setPhase({name: 'feedback', step, feedback: r.feedback, zones: r.zones});
     } catch (e) { setError(msg(e)); } finally { setBusy(false); }
@@ -156,7 +172,18 @@ export default function QuestApp({client, resumeId, onStarted, onFinished, onSki
               {phase.name === 'step' && phase.step.kind !== 'explain' && (
                 <>
                   <ItemView step={phase.step} value={value} onChange={setValue} disabled={busy} />
-                  <Box><Button variant="contained" color="secondary" size="large" disabled={busy || !responseReady(phase.step, value)} onClick={() => send(phase.step, value)}>Check</Button></Box>
+                  {pace.justSlowed && <Alert severity="warning" onClose={pace.dismiss}>{SLOW_DOWN_MESSAGE}</Alert>}
+                  <Box sx={{display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap'}}>
+                    <Button variant="contained" color="secondary" size="large" disabled={busy || waitLeft > 0 || !responseReady(phase.step, value)}
+                      onClick={() => send(phase.step, value)} aria-describedby={waitLeft > 0 ? 'check-wait' : undefined}>
+                      {waitLeft > 0 ? `Check (${waitLeft})` : 'Check'}
+                    </Button>
+                    {waitLeft > 0 && (
+                      <Typography id="check-wait" variant="body2" color="text.secondary" role="timer" aria-live="off">
+                        Read the question and every answer. Check is ready in {waitLeft} second{waitLeft === 1 ? '' : 's'}.
+                      </Typography>
+                    )}
+                  </Box>
                 </>
               )}
               {phase.name === 'step' && phase.step.kind === 'explain' && (
@@ -187,7 +214,10 @@ export default function QuestApp({client, resumeId, onStarted, onFinished, onSki
                 <FlagIcon color="secondary" aria-hidden />
                 <Box>
                   <Typography variant="overline" color="secondary" sx={{fontWeight: 700, lineHeight: 1.4}}>You will start with</Typography>
-                  <Typography sx={{fontWeight: 700, fontSize: 18}}>{phase.result.next_stop.activity.title}</Typography>
+                  <Typography sx={{fontWeight: 700, fontSize: 18}}>
+                    {phase.result.next_stop.activity.title}
+                    {phase.result.next_stop.project && <Typography component="span" color="text.secondary" sx={{fontWeight: 400}}> in {phase.result.next_stop.project}</Typography>}
+                  </Typography>
                   {phase.result.goal_connection && <Typography color="text.secondary">{phase.result.goal_connection}</Typography>}
                 </Box>
               </Paper>

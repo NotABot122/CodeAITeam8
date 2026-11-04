@@ -47,9 +47,9 @@ class WebApiTests(unittest.TestCase):
 
     def test_struggling_gets_practice_on_the_map(self):
         sid = self.svc.new_student()["studentId"]
-        for _ in range(2):
-            self.svc.submit(sid, "print(1)")
-        res = self.svc.submit(sid, "print(1)")  # third failed try on Level 1: in-lesson help inserts practice
+        for i in range(2):
+            self.svc.submit(sid, f"print({i})")
+        res = self.svc.submit(sid, "print(2)")  # third failed try on Level 1: in-lesson help inserts practice
         state = res["state"]
         self.assertEqual(state["problem"]["kind"], "practice")
         self.assertIn(("practice", "current"), [(n["kind"], n["status"]) for n in state["path"]])

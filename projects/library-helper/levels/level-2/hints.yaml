@@ -1,0 +1,3 @@
+- Start with an empty list, labels = [], and add a label for each condition that is true.
+- '"400 or more" means >= 400. Use two separate if statements so an entry can get both labels, long first.'
+- After both checks, if the list is still empty, add "regular". Return the list at the end.

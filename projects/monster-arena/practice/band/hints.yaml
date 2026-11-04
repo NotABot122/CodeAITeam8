@@ -1,0 +1,2 @@
+- Test the highest band first. Python stops at the first if or elif that is true.
+- 'Use >= for both edges: >= 70, then >= 37.5, then else.'

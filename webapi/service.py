@@ -126,6 +126,8 @@ class Service:
                 code = ""
         if state["problem"]:
             state["problem"].update(_problem_extras(project, state["problem"]["id"], record))
+            if state["problem"]["format"] == "code":
+                state["problem"]["support"] = engine.support_view(record, project.problem(state["problem"]["id"]), code)
             inserted = _inserted(record) if manifest.practice(state["problem"]["id"]) is not None else None
             # Only a practice inserted after repeated tries promises a way back to one known level.
             back = record.return_to if inserted == "struggle" else None
@@ -266,6 +268,19 @@ class Service:
             self._guard(lambda: self.course.reset_theme(student_id))
             return self._state(student_id)
 
+    # Project choice --------------------------------------------------------------
+    def project_choices(self, student_id: str) -> Dict[str, Any]:
+        self._check_id(student_id)
+        return self._guard(lambda: self.course.project_choices(student_id))
+
+    def choose_project(self, student_id: str, project: Any) -> Dict[str, Any]:
+        self._check_id(student_id)
+        if not isinstance(project, str) or len(project) > 80:
+            raise ApiError(400, "bad_request", "Pick one of the projects in the list.")
+        with self._lock(student_id):
+            self._guard(lambda: self.course.choose_project(student_id, project))
+            return {"state": self._state(student_id), **self.course.project_choices(student_id)}
+
     # Lesson pathway (Strands Decider 2B) ------------------------------------------
     def pathway(self, student_id: str, grade: Any) -> Dict[str, Any]:
         self._check_id(student_id)
@@ -343,4 +358,7 @@ class Service:
             "notices": list(outcome.notices),
             "questionResults": list(outcome.question_results or []),
             "nextStep": outcome.next_step,
+            "explanation": outcome.explanation,
+            "mistake": outcome.mistake,
+            "stuck": list(outcome.stuck or []),
         }

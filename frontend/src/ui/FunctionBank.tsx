@@ -1,13 +1,27 @@
-import {Box, ButtonBase, Paper, Popover, Typography} from '@mui/material';
+import {Box, Button, ButtonBase, Paper, Popover, Typography} from '@mui/material';
 import {useId, useState} from 'react';
 
 import type {FunctionInfo} from '@/api/types';
 
 // The functions this problem's answer should use, on the left of the text editor (where the block
 // toolbox sits in Blocks mode). Choosing one opens a short description; nothing is inserted.
-export default function FunctionBank({functions}: {functions: FunctionInfo[]}) {
+// The bank fades with the student's level (engine/support.py): full (description and example),
+// names (description only), hidden (closed until the student opens it).
+export type BankMode = 'full' | 'names' | 'hidden';
+export default function FunctionBank({functions, mode = 'full'}: {functions: FunctionInfo[]; mode?: BankMode}) {
   const [open, setOpen] = useState<{el: HTMLElement; fn: FunctionInfo} | null>(null);
+  const [shown, setShown] = useState(false);
   const titleId = useId();
+
+  if (mode === 'hidden' && !shown) {
+    return (
+      <Paper variant="outlined" component="nav" aria-label="Functions for this problem"
+        sx={{flex: {xs: 'none', sm: '0 0 196px'}, p: 1.5, borderRadius: '8px', display: 'grid', gap: 1, alignContent: 'start'}}>
+        <Typography variant="body2" color="text.secondary">You're ready to work from the instructions. The function list is here if you need it.</Typography>
+        <Button size="small" variant="outlined" onClick={() => setShown(true)}>Show functions</Button>
+      </Paper>
+    );
+  }
 
   return (
     <Paper variant="outlined" component="nav" aria-label="Functions for this problem"
@@ -46,7 +60,7 @@ export default function FunctionBank({functions}: {functions: FunctionInfo[]}) {
           <>
             <Typography id={titleId} component="h3" sx={{fontFamily: 'var(--code-font)', fontWeight: 700, fontSize: 14, mb: 1}}>{open.fn.call}</Typography>
             <Typography variant="body2" sx={{whiteSpace: 'pre-line'}}>{open.fn.summary}</Typography>
-            {open.fn.example && (
+            {open.fn.example && mode === 'full' && (
               <>
                 <Typography variant="caption" color="text.secondary" component="p" sx={{mt: 1.5, mb: 0.5, fontWeight: 600}}>Example</Typography>
                 <Box component="pre" sx={{m: 0, p: 1, borderRadius: '6px', bgcolor: 'action.hover', fontFamily: 'var(--code-font)', fontSize: 12.5, overflowX: 'auto', whiteSpace: 'pre'}}>

@@ -111,6 +111,10 @@ def check_content(project: Project, grader: Grader = None) -> ContentCheckResult
                     problems.append(f"{problem.label}: the function bank lists {fn['call']}, "
                                     f"but the reference solution never uses {fn['name']}")
 
+    # 4. Adaptive support files (mistakes.yaml, outline.py): valid, plain-language, outlines aren't answers.
+    from .support import check_support_content
+    problems.extend(check_support_content(project))
+
     if has_reports and not stored.get("teacher_reviewed", False):
         notices.append("Expected values are unreviewed: a teacher has not checked them yet.")
 

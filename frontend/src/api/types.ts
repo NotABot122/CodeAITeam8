@@ -58,6 +58,21 @@ export interface ProblemView {
   inserted: 'after_level' | 'struggle' | 'planned' | null;
   /** The level the student goes back to after this practice (only for 'struggle'). */
   returnTo: {id: string; title: string} | null;
+  /** Adaptive support for code problems (engine/support.py): how much help this problem gets right now. */
+  support?: SupportView;
+}
+
+/** Help fades as the student's level rises: full -> guided -> light -> minimal. Being stuck adds a level of help. */
+export interface SupportView {
+  level: 'full' | 'guided' | 'light' | 'minimal' | 'legacy';
+  autoHintAfter: number | null;
+  functionBank: 'full' | 'names' | 'hidden';
+  errorDetail: 'full' | 'brief';
+  nameMistake: boolean;
+  stuck: boolean;
+  /** An outline of the function to write, offered until the student has started it. */
+  outline: {name: string; text: string} | null;
+  suggestBlocks: boolean;
 }
 
 export interface FunctionInfo {
@@ -78,6 +93,11 @@ export interface PathwayView {
   steps: {title: string; status: 'done' | 'current' | 'todo'}[];
 }
 export interface PathwayResult {pathway: PathwayView; state: StudentState}
+
+/** Projects with the same skills and different stories; the readiness check's goal suggests one. */
+export interface ProjectChoice {project: string; title: string; pitch: string; suggested: boolean; current: boolean}
+export interface ProjectChoices {choices: ProjectChoice[]; locked: boolean; topic: string}
+export interface ChooseResult extends ProjectChoices {state: StudentState}
 
 export interface StudentState {
   studentId: string;
@@ -134,6 +154,11 @@ export interface Outcome {
   notices: string[];
   questionResults: QuestionResult[];
   nextStep: NextStep | null;
+  /** Plain-language explanation of a Python error. */
+  explanation?: {text: string; line: number | null; kind: string; source: 'ai' | 'rules'} | null;
+  /** The likely mistake behind a failed run, at the levels that name it: where to look, never the fix. */
+  mistake?: {id: string; tip: string} | null;
+  stuck?: string[];
 }
 
 export interface Health {ok: boolean; project: string; ai: boolean; aiReason: string | null; adaptive: boolean}

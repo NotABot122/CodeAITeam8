@@ -1,0 +1,3 @@
+- Start with a query that selects the five columns FROM tagged_animals, then add a WHERE clause for park and the number range.
+- 'Use ? in the SQL for each value and pass them as a tuple: conn.execute(sql, (park, start_number, end_number)). Use >= and <= so both ends are included.'
+- ORDER BY tag_number sorts the rows. To make dictionaries, cursor.description gives the column names and zip(names, values) pairs them up.

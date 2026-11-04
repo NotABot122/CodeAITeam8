@@ -20,10 +20,12 @@ import PathStrip from './ui/PathStrip';
 import QuestApp from './quest/QuestApp';
 import Landing from './landing/Landing';
 import PathwayScreen from './landing/PathwayScreen';
+import ChooseScreen from './landing/ChooseScreen';
 import TeacherApp from './teacher/TeacherApp';
 import NextStepPanel from './ui/NextStepPanel';
 import QuizPanel, {quizReady, SubmitQuiz, type QuizAnswers} from './ui/QuizPanel';
 import Results, {HintCard} from './ui/Results';
+import {expectedPageSeconds, SLOW_DOWN_MESSAGE, useCountdown, usePace} from './ui/pace';
 
 const KEY = 'codeai.studentId';
 const store = {
@@ -62,7 +64,7 @@ export default function App({client: injected}: {client?: ApiClient}) {
     return () => window.removeEventListener('hashchange', on);
   }, []);
   // landing -> quest (readiness check) -> pathway (Strands Decider 2B) -> lesson. 'resume' continues a started quest.
-  const [mode, setMode] = useState<'loading' | 'landing' | 'quest' | 'resume' | 'pathway' | 'lesson'>('loading');
+  const [mode, setMode] = useState<'loading' | 'landing' | 'quest' | 'resume' | 'pathway' | 'choose' | 'lesson'>('loading');
   const [grade, setGradeState] = useState<number | null>(savedGrade);
   const setGrade = (g: number) => { setGradeState(g); try { localStorage.setItem(GRADE_KEY, String(g)); } catch { /* private mode */ } };
   const [health, setHealth] = useState<Health | null>(null);
@@ -78,6 +80,18 @@ export default function App({client: injected}: {client?: ApiClient}) {
   // A hint the student asked for (not one that came with a failed run).
   const [asked, setAsked] = useState<{hint: string; source: Outcome['hintSource']} | null>(null);
   const [hintBusy, setHintBusy] = useState(false);
+  const [outlineOff, setOutlineOff] = useState<string | null>(null);
+  // Pacing for lesson quizzes: a whole page is checked at once, so one rushed page turns the timer on.
+  const quizPace = usePace(1, 2);
+  const [quizShownAt, setQuizShownAt] = useState(() => Date.now());
+  const [quizTries, setQuizTries] = useState(0);
+  const quizQuestions = state?.problem?.format === 'quiz' ? state.problem.questions ?? [] : [];
+  const quizSeconds = expectedPageSeconds(quizQuestions.map(q => ({prompt: q.prompt, code: q.code, choices: q.choices, typed: q.type === 'explain'})));
+  // A retry only needs the changed answers re-read: half the time.
+  const quizWait = Math.round(quizTries > 0 ? quizSeconds / 2 : quizSeconds);
+  const quizLeft = useCountdown(quizPace.slow && quizQuestions.length > 0, quizWait, quizShownAt);
+  const quizProblem = state?.problem?.format === 'quiz' ? state.problem.id : null;
+  useEffect(() => { setQuizShownAt(Date.now()); setQuizTries(0); }, [quizProblem]);
   const [themeOpen, setThemeOpen] = useState(false);
   const [themeBusy, setThemeBusy] = useState(false);
   const [themeError, setThemeError] = useState<string | null>(null);
@@ -160,7 +174,9 @@ export default function App({client: injected}: {client?: ApiClient}) {
     setRunning(true); setError(null); setAsked(null);
     try {
       const prevId = state.problem?.id;
+      if (state.problem?.format === 'quiz') quizPace.record(Date.now() - quizShownAt, quizWait);
       const res = state.problem?.format === 'quiz' ? await client.answer(state.studentId, answers) : await client.submit(state.studentId, code);
+      if (state.problem?.format === 'quiz') { setQuizShownAt(Date.now()); setQuizTries(n => n + 1); }
       // Keep what they typed unless a new problem loaded (then its saved draft or starter code replaces it).
       const moved = res.state.problem?.id !== prevId;
       // After repeated tries the practice dialog explains the move, so the old level's result isn't shown too.
@@ -215,7 +231,7 @@ export default function App({client: injected}: {client?: ApiClient}) {
   };
 
   const skipQuest = async () => {
-    try { adopt(await client.newStudent()); setMode('lesson'); } catch (e) { setLoadError(msg(e)); }
+    try { adopt(await client.newStudent()); setMode('choose'); } catch (e) { setLoadError(msg(e)); }
   };
 
   const finishedQuest = async (id: string) => {
@@ -242,6 +258,9 @@ export default function App({client: injected}: {client?: ApiClient}) {
       onStart={() => { if (state) { store.clear(); setState(null); setOutcome(null); } setMode('quest'); }}
       onSkip={() => void skipQuest()} />;
   }
+  if (mode === 'choose' && state) {
+    return <ChooseScreen client={client} studentId={state.studentId} onStart={s => void startPathway(s)} />;
+  }
   if (mode === 'pathway' && state) {
     return <PathwayScreen client={client} studentId={state.studentId} grade={grade} existing={state.pathway}
       onGrade={setGrade} onStart={s => void startPathway(s)} />;
@@ -254,6 +273,9 @@ export default function App({client: injected}: {client?: ApiClient}) {
 
   const p = state.problem;
   const themed = state.themed;
+  // Offer the outline until the student has started the function, or said no thanks.
+  const offered = p?.support?.outline;
+  const outline = offered && outlineOff !== offered.name && !new RegExp(`^\\s*def\\s+${offered.name}\\s*\\(`, 'm').test(code) ? offered : null;
   const quiz = p?.format === 'quiz' && p.questions ? p : null;
   return (
     <Box sx={{minHeight: '100vh', bgcolor: 'background.default'}}>
@@ -308,9 +330,23 @@ export default function App({client: injected}: {client?: ApiClient}) {
                       </Typography>
                     )}
                   </Box>
+                  {editorMode === 'text' && p.support?.suggestBlocks && (
+                    <Alert severity="info" action={<Button color="inherit" size="small" onClick={() => switchMode('blocks')}>Try Blocks</Button>}>
+                      Python couldn't read your code a few times in a row. Blocks snap together, so Python can always read them. You can switch back anytime.
+                    </Alert>
+                  )}
+                  {editorMode === 'text' && outline && (
+                    <Alert severity="info" icon={false} sx={{alignItems: 'center'}}
+                      action={<Box sx={{display: 'flex', gap: 1}}>
+                        <Button color="inherit" size="small" variant="outlined" onClick={() => { setCode(c => `${c.replace(/\s*$/, '')}\n\n\n${outline.text}`); setOutlineOff(outline.name); }}>Add outline</Button>
+                        <Button color="inherit" size="small" onClick={() => setOutlineOff(outline.name)}>No thanks</Button>
+                      </Box>}>
+                      Not sure where to start? Add {outline.text.includes('# Step') ? 'an outline of the steps for' : 'the first line of'} <code>{outline.name}</code> to your code.
+                    </Alert>
+                  )}
                   {editorMode === 'text' ? (
                     <Box sx={{display: 'flex', flexDirection: {xs: 'column', sm: 'row'}, gap: 1.5, flex: '1 0 260px', minHeight: 0}}>
-                      {p.functions && <FunctionBank functions={p.functions} />}
+                      {p.functions && <FunctionBank key={p.id} functions={p.functions} mode={p.support?.functionBank ?? 'full'} />}
                       <Box sx={{flex: 1, minWidth: 0, display: 'flex'}}>
                         <CodeEditor value={code} onChange={setCode} onRun={run} disabled={running} />
                       </Box>
@@ -334,7 +370,7 @@ export default function App({client: injected}: {client?: ApiClient}) {
               )}
               {quiz ? (
                 <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
-                  <SubmitQuiz onClick={run} busy={running} disabled={!quizReady(quiz.questions!, answers)} />
+                  <SubmitQuiz onClick={run} busy={running} disabled={quizLeft > 0 || !quizReady(quiz.questions!, answers)} wait={quizLeft} />
                   <HintButton left={p!.hintCount - p!.hintsSeen} total={p!.hintCount} busy={hintBusy} disabled={running} onClick={askHint} />
                   <Typography variant="caption" color="text.secondary" sx={{ml: 'auto'}}>Attempts: {p!.attempts}</Typography>
                 </Box>
@@ -349,6 +385,7 @@ export default function App({client: injected}: {client?: ApiClient}) {
               </Box>
               )}
               {error && <Alert severity="error">{error}</Alert>}
+              {quiz && quizPace.justSlowed && <Alert severity="warning" onClose={quizPace.dismiss}>{SLOW_DOWN_MESSAGE}</Alert>}
               {asked && <HintCard hint={asked.hint} source={asked.source} note={HINT_COST} />}
               <div ref={resultsRef}>{outcome && <Results outcome={outcome} />}</div>
             </Box>
