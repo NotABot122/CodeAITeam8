@@ -15,13 +15,15 @@ from __future__ import annotations
 
 import json
 import re
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import yaml
 
 from .ai import ModelError, ModelProvider, ToolSpec
+from .ai_trace import record_retrieval
 from .curriculum import Curriculum, Standard, level_for_grade
 from .safety import screen_text
 
@@ -182,13 +184,34 @@ def _tool(candidates: Sequence[Pathway], concepts: Sequence[str], codes: Sequenc
     })
 
 
-def _standards_packet(curriculum: Optional[Curriculum], grade: int, readiness: Dict[str, Readiness]) -> List[Dict[str, Any]]:
-    """The grade band's standards the check maps to, plus what each builds on (for students with gaps)."""
+RETRIEVAL_METHOD = ("Exact lookup, not a vector search. Each concept the readiness check measured maps to CSTA codes "
+                    "(the skill tree's csta: list). Those standards, and the ones each builds on, are read from the "
+                    "curriculum, then kept to the student's grade band. The result goes into the pathway decider's "
+                    "prompt, and the decider may cite only these codes.")
+
+
+def retrieve_standards(curriculum: Optional[Curriculum], grade: int,
+                       readiness: Dict[str, Readiness]) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
+    """The grade band's standards the check maps to, plus what each builds on (for students with gaps).
+    Returns (standards for the prompt, a report of the retrieval for the AI inspector)."""
+    started = time.monotonic()
+    level = level_for_grade(grade)
+    report: Dict[str, Any] = {
+        "method": RETRIEVAL_METHOD, "gradeBand": level, "grade": grade,
+        "source": getattr(curriculum, "source", None), "versionId": getattr(curriculum, "version_id", None),
+        "corpusSize": len(curriculum.standards) if curriculum else 0,
+        "loadMs": getattr(curriculum, "load_ms", None),
+        "query": [{"concept": r.concept, "name": r.name, "stage": r.confident_stage, "codes": list(r.standards)}
+                  for r in readiness.values()],
+        "results": [], "filteredOut": [], "missing": [],
+    }
     if curriculum is None:
-        return []
+        report["latencyMs"] = 0
+        return [], report
     out: List[Dict[str, Any]] = []
     seen = set()
     for r in readiness.values():
+        report["missing"] += [c for c in r.standards if curriculum.get(c) is None and c not in report["missing"]]
         for s in curriculum.lookup(r.standards):
             if s.id in seen:
                 continue
@@ -196,8 +219,15 @@ def _standards_packet(curriculum: Optional[Curriculum], grade: int, readiness: D
             item = dict(s.brief(), level=s.level, concepts=[c for c, x in readiness.items() if s.id in x.standards])
             item["builds_on"] = [b.brief() for b in curriculum.lookup(s.builds_on_ids())]
             out.append(item)
-    level = level_for_grade(grade)
-    return [s for s in out if s["level"] == level] or out
+    kept = [s for s in out if s["level"] == level] or out
+    report["results"] = kept
+    report["filteredOut"] = [s["id"] for s in out if s not in kept]
+    report["latencyMs"] = int((time.monotonic() - started) * 1000)
+    return kept, report
+
+
+def _standards_packet(curriculum: Optional[Curriculum], grade: int, readiness: Dict[str, Readiness]) -> List[Dict[str, Any]]:
+    return retrieve_standards(curriculum, grade, readiness)[0]
 
 
 def _clean(text: Any, limit: int) -> Optional[str]:
@@ -225,7 +255,8 @@ class StrandsDecider:
         if self.provider is None:
             rules.fallback_reason = "AI is off"
             return rules
-        standards = _standards_packet(self.curriculum, grade, readiness)
+        standards, report = retrieve_standards(self.curriculum, grade, readiness)
+        record_retrieval(self.provider, report)
         codes = [s["id"] for s in standards]
         packet = {
             "grade": grade, "grade_band": level_for_grade(grade), "goal": goal,

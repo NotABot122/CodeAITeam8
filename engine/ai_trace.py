@@ -45,6 +45,14 @@ FEATURES = [
 ]
 
 
+# Not a model call: the retrieval step that grounds the pathway decider in the curriculum (engine/decider.py).
+RETRIEVAL_FEATURE = {
+    "name": "Standards retrieval (RAG)",
+    "what": "Finds the CSTA standards behind the student's readiness check in the curriculum (read from a pinned S3 "
+            "version) and adds them to the pathway decider's prompt. The decider may cite only these.",
+}
+
+
 def feature_of(system: str) -> Dict[str, str]:
     for needle, name, what in FEATURES:
         if needle.lower() in system.lower():
@@ -112,3 +120,32 @@ class TracingProvider(ModelProvider):
                      inputTokens=reply.input_tokens, outputTokens=reply.output_tokens)
         self.log.add(entry)
         return reply
+
+
+def record_retrieval(provider: Any, report: Dict[str, Any]) -> None:
+    """Show a retrieval step in the inspector, next to the model call it feeds. A no-op unless `provider` is a
+    TracingProvider (the server runs with --dev)."""
+    log = getattr(provider, "log", None)
+    if not isinstance(log, TraceLog):
+        return
+    import json
+    source = report.get("source")
+    ok = source is not None
+    label = (f"{source} (version {report['versionId']})" if report.get("versionId") else source) if ok else "no curriculum"
+    log.add({
+        "at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
+        "kind": "retrieval",
+        "feature": dict(RETRIEVAL_FEATURE),
+        "model": label,
+        "student": current_student.get(),
+        "system": report.get("method", ""),
+        "input": _clip(json.dumps({"grade": report.get("grade"), "grade_band": report.get("gradeBand"),
+                                   "concepts": report.get("query")}, indent=1)),
+        "maxTokens": 0, "tools": [], "requireTool": False,
+        "ok": ok,
+        "error": None if ok else "The curriculum couldn't be loaded, so the decider got no standards.",
+        "latencyMs": report.get("latencyMs", 0),
+        "outputText": _clip(json.dumps(report.get("results"), indent=1)),
+        "retrieval": report,
+    })
+

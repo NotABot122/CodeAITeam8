@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import os
 import re
+import time
 import zipfile
 import json
 from io import BytesIO
@@ -115,6 +116,10 @@ def _read_rows(path: Path, sheet_name: str) -> List[List[str]]:
 class Curriculum:
     def __init__(self, standards: Iterable[Standard]):
         self.standards: Dict[str, Standard] = {s.id: s for s in standards}
+        # Where it came from (set by load_curriculum): shown in the dev AI inspector's retrieval entries.
+        self.source: str = "in memory"
+        self.version_id: Optional[str] = None
+        self.load_ms: Optional[int] = None
 
     @classmethod
     def load(cls, path: Optional[Union[Path, str]] = None) -> "Curriculum":
@@ -204,5 +209,10 @@ def load_curriculum(path: Optional[Union[Path, str]] = None) -> Curriculum:
     version = os.environ.get("CODEAI_CURRICULUM_VERSION_ID", "") if key.startswith("s3://") else ""
     cache_key = (key, version)
     if cache_key not in _cache:
-        _cache[cache_key] = Curriculum.load(key)
+        started = time.monotonic()
+        curriculum = Curriculum.load(key)
+        curriculum.load_ms = int((time.monotonic() - started) * 1000)
+        curriculum.source = key if key.startswith("s3://") else f"local file {Path(key).name}"
+        curriculum.version_id = version or None
+        _cache[cache_key] = curriculum
     return _cache[cache_key]

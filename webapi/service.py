@@ -191,7 +191,7 @@ class Service:
         return trace
 
     def dev_info(self) -> Dict[str, Any]:
-        from engine.ai_trace import FEATURES
+        from engine.ai_trace import FEATURES, RETRIEVAL_FEATURE
         self._trace()
         model = getattr(self.provider, "model_id", None)
         # Every feature goes through the one provider, so they share the configured model ($CODEAI_MODEL_ID).
@@ -204,7 +204,17 @@ class Service:
                 + ([{"name": "Safety guardrail (student input / model output)",
                      "what": "Amazon Bedrock Guardrail made from our classroom rules: denied topics, words, personal "
                              "info, content and prompt-attack filters. Local rules decide if it can't answer.",
-                     "model": self.guardrail.label}] if self.guardrail else [])}
+                     "model": self.guardrail.label}] if self.guardrail else [])
+                + [dict(RETRIEVAL_FEATURE, model=self._curriculum_source())]}
+
+    @staticmethod
+    def _curriculum_source() -> Optional[str]:
+        from engine.curriculum import CurriculumError, load_curriculum
+        try:
+            c = load_curriculum()
+        except CurriculumError:
+            return None
+        return f"{c.source} (version {c.version_id})" if c.version_id else c.source
 
     def dev_calls(self, after: int) -> Dict[str, Any]:
         return {"calls": self._trace().after(after)}

@@ -56,6 +56,11 @@ The curriculum is read once per server start from the pinned version (`CODEAI_CU
 until the config is updated and the server restarts. If the S3 copy can't be read, the pathway is chosen without
 standards (`CurriculumError`), and the server never falls back to the local file silently.
 
+With the AI inspector on (`--dev`), each pathway decision shows a **Standards retrieval (RAG)** entry before the
+decider's call. It lists the source (S3 address and version), the query (grade and each concept's CSTA codes), the
+standards retrieved into the prompt, any left out by the grade-band filter, and which of them the decider cited. The
+retrieval is an exact lookup by code, not a vector search (`retrieve_standards` in `engine/decider.py`).
+
 ## What is stored about a student
 
 | Data | Personal details? |

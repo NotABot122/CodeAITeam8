@@ -183,9 +183,28 @@ export interface Outcome {
 
 export interface Health {ok: boolean; project: string; ai: boolean; aiReason: string | null; adaptive: boolean; dev?: boolean; devLocked?: boolean}
 
-/** Dev-only AI inspector (server started with --dev): one recorded model call. */
+/** A standard as the retrieval step returns it (engine/decider.py retrieve_standards). */
+export interface RetrievedStandard {
+  id: string; skill: string; must_do: string; skill_area: string; level: string;
+  /** The readiness-check concepts that map to this standard. */
+  concepts: string[];
+  builds_on: {id: string; skill: string}[];
+}
+/** What the standards retrieval (RAG) step looked up, where from, and what it found. */
+export interface RetrievalReport {
+  method: string; grade: number; gradeBand: string;
+  source: string | null; versionId: string | null; corpusSize: number; loadMs: number | null; latencyMs: number;
+  query: {concept: string; name: string; stage: number | null; codes: string[]}[];
+  results: RetrievedStandard[];
+  filteredOut: string[];
+  missing: string[];
+}
+
+/** Dev-only AI inspector (server started with --dev): one recorded model call, guardrail check or retrieval. */
 export interface AiCall {
   id: number;
+  kind?: 'retrieval';
+  retrieval?: RetrievalReport;
   at: string;
   feature: {name: string; what: string};
   model: string;

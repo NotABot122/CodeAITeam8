@@ -9,7 +9,7 @@ import {
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 import {ApiError, createHttpClient} from '@/api/client';
-import type {AiCall, AiInfo} from '@/api/types';
+import type {AiCall, AiInfo, RetrievalReport} from '@/api/types';
 
 // Dev-only AI inspector. Shows only when the server runs with --dev (health.dev). A button in the corner opens a
 // side panel listing every AI model call, newest first: which feature made it, the model, the system prompt, the
@@ -42,7 +42,64 @@ function Block({label, text, open = false}: {label: string; text: string; open?:
   );
 }
 
-function CallCard({call, color, fresh}: {call: AiCall; color: string; fresh: boolean}) {
+// What the decider did with a retrieval: the codes it cited, 'failed' if its call failed, or undefined until it answers.
+type Cited = string[] | 'failed' | undefined;
+
+function RetrievalDetails({r, cited, color}: {r: RetrievalReport; cited: Cited; color: string}) {
+  const citedSet = new Set(Array.isArray(cited) ? cited : []);
+  const fromS3 = r.source?.startsWith('s3://');
+  return (
+    <Box sx={{display: 'grid', gap: 1}}>
+      <Typography variant="caption" sx={{fontFamily: 'var(--code-font)', wordBreak: 'break-all'}}>
+        source: {r.source ?? 'none'}{r.versionId ? ` · version ${r.versionId}` : ''} · {r.corpusSize} standards in the curriculum
+        {r.loadMs != null ? ` · loaded ${fromS3 ? 'from S3 ' : ''}in ${r.loadMs} ms at first use` : ''}
+      </Typography>
+      <Typography variant="body2" color="text.secondary">{r.method}</Typography>
+      <Box>
+        <Typography variant="subtitle2">Query: grade {r.grade} ({r.gradeBand})</Typography>
+        <Box component="ul" sx={{m: 0, pl: 2.5}}>
+          {r.query.map(q => (
+            <li key={q.concept}><Typography variant="body2">
+              {q.name}{q.stage != null ? ` (stage ${q.stage})` : ' (not sure yet)'} → {q.codes.length ? q.codes.join(', ') : 'no codes mapped'}
+            </Typography></li>
+          ))}
+        </Box>
+      </Box>
+      <Box>
+        <Typography variant="subtitle2">Retrieved: {r.results.length} standard{r.results.length === 1 ? '' : 's'} added to the decider's prompt</Typography>
+        <Box sx={{display: 'grid', gap: 1, mt: 0.5}}>
+          {r.results.map(st => {
+            const used = citedSet.has(st.id);
+            return (
+              <Box key={st.id} sx={{p: 1, borderRadius: '8px', border: 1, borderColor: used ? color : 'divider', bgcolor: used ? 'action.hover' : 'transparent'}}>
+                <Box sx={{display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap'}}>
+                  <Chip size="small" label={st.id} variant={used ? 'filled' : 'outlined'} sx={used ? {bgcolor: color, color: '#fff'} : undefined} />
+                  {used && <Typography variant="caption" sx={{fontWeight: 700, color}}>cited by the decider</Typography>}
+                  <Typography variant="caption" color="text.secondary">{st.skill_area}</Typography>
+                </Box>
+                <Typography variant="body2" sx={{fontWeight: 600, mt: 0.5}}>{st.skill}</Typography>
+                {st.must_do && <Typography variant="body2" color="text.secondary">{st.must_do}</Typography>}
+                <Typography variant="caption" color="text.secondary">
+                  for: {st.concepts.join(', ') || '-'}{st.builds_on.length ? ` · builds on: ${st.builds_on.map(b => b.id).join(', ')}` : ''}
+                </Typography>
+              </Box>
+            );
+          })}
+        </Box>
+      </Box>
+      {r.filteredOut.length > 0 && <Typography variant="caption" color="text.secondary">Left out (other grade bands): {r.filteredOut.join(', ')}</Typography>}
+      {r.missing.length > 0 && <Typography variant="caption" color="warning.main">Mapped but not in the curriculum: {r.missing.join(', ')}</Typography>}
+      <Typography variant="body2">
+        {cited === undefined ? 'Waiting for the decider\'s answer…'
+          : cited === 'failed' ? 'The decider call failed, so the rules chose the pathway.'
+          : cited.length ? `The decider cited ${cited.join(', ')} in its answer.` : 'The decider cited none of them.'}
+      </Typography>
+    </Box>
+  );
+}
+
+function CallCard({call, color, fresh, cited}: {call: AiCall; color: string; fresh: boolean; cited?: Cited}) {
+  const r = call.retrieval;
   const output = call.toolInput !== undefined && call.toolInput !== null
     ? `${call.toolName ? `Tool: ${call.toolName}\n` : ''}${JSON.stringify(call.toolInput, null, 2)}`
     : call.outputText ?? '';
@@ -52,7 +109,8 @@ function CallCard({call, color, fresh}: {call: AiCall; color: string; fresh: boo
       <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{'& .MuiAccordionSummary-content': {display: 'grid', gap: 0.5, my: 1}}}>
         <Box sx={{display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap'}}>
           <Typography sx={{fontWeight: 700, color}}>{call.feature.name}</Typography>
-          {!call.ok && <Chip size="small" color="error" label="model error → fallback" />}
+          {!call.ok && <Chip size="small" color="error" label={r ? 'no curriculum' : 'model error → fallback'} />}
+          {r && call.ok && <Chip size="small" variant="outlined" label={`${r.results.length} standards from ${r.source?.startsWith('s3://') ? 'S3' : 'local file'}`} />}
         </Box>
         <Typography variant="caption" color="text.secondary">
           #{call.id} · {time(call.at)} · {(call.latencyMs / 1000).toFixed(1)} s
@@ -62,6 +120,10 @@ function CallCard({call, color, fresh}: {call: AiCall; color: string; fresh: boo
       </AccordionSummary>
       <AccordionDetails sx={{display: 'grid', gap: 1, pt: 0}}>
         {call.feature.what && <Typography variant="body2" color="text.secondary">{call.feature.what}</Typography>}
+        {r ? <>
+          {call.ok ? <RetrievalDetails r={r} cited={cited} color={color} /> : <Alert severity="warning">{call.error}</Alert>}
+          <Block label="Raw retrieval result (JSON)" text={call.outputText ?? '[]'} />
+        </> : <>
         <Typography variant="caption" sx={{fontFamily: 'var(--code-font)'}}>model: {call.model} · max tokens {call.maxTokens}{call.requireTool ? ' · must answer with a tool' : ''}</Typography>
         <Block label="Output" text={call.ok ? output || '(empty)' : `Error: ${call.error}`} open />
         <Block label="Input sent to the model" text={call.input} />
@@ -70,9 +132,19 @@ function CallCard({call, color, fresh}: {call: AiCall; color: string; fresh: boo
           <Block label={`Tools offered: ${call.tools.map(t => t.name).join(', ')}`}
             text={call.tools.map(t => `${t.name}: ${t.description}\n${JSON.stringify(t.schema, null, 2)}`).join('\n\n')} />
         )}
+        </>}
       </AccordionDetails>
     </Accordion>
   );
+}
+
+// The pathway decider call that a retrieval fed: the next one for the same student. Its answer lists the codes it cited.
+function citedBy(retrieval: AiCall, calls: AiCall[]): Cited {
+  const decider = calls.find(c => c.id > retrieval.id && c.student === retrieval.student && c.feature.name.startsWith('Pathway decider'));
+  if (!decider) return undefined;
+  if (!decider.ok) return 'failed';
+  const codes = (decider.toolInput as {standards?: unknown} | null | undefined)?.standards;
+  return Array.isArray(codes) ? codes.filter((x): x is string => typeof x === 'string') : [];
 }
 
 export default function AiInspector() {
@@ -221,7 +293,8 @@ export default function AiInspector() {
               No AI calls yet. Run code that fails, ask Ducky for a hint, finish the readiness check, or use "Make it yours".
             </Typography>
           )}
-          {shown.map(c => <CallCard key={c.id} call={c} color={colorFor(c.feature.name, names)} fresh={(freshUntil.current[c.id] ?? 0) > Date.now()} />)}
+          {shown.map(c => <CallCard key={c.id} call={c} color={colorFor(c.feature.name, names)} fresh={(freshUntil.current[c.id] ?? 0) > Date.now()}
+            cited={c.kind === 'retrieval' ? citedBy(c, calls) : undefined} />)}
         </Box>}
       </Drawer>
     </>
