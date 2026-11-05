@@ -205,12 +205,17 @@ def cmd_release(allow_dirty: bool) -> int:
     for line in output.strip().splitlines()[-4:]:
         say("  " + line)
     health = _health(app["Url"])
+    inspector = ("on, teacher token needed" if health.get("devLocked") else "OPEN TO EVERYONE") if health.get("dev") else "off"
     say(f"Live at {app['Url']}: AI {'on' if health.get('ai') else 'off'}, safety {health.get('safety')}, "
-        f"storage {health.get('storage')}, dev {health.get('dev')}")
-    if health.get("dev") or not str(health.get("storage", "")).startswith("S3"):
-        say("WARNING: production should have dev off and S3 storage on.")
-        return 1
-    return 0
+        f"storage {health.get('storage')}, AI inspector {inspector}")
+    problems = []
+    if health.get("dev") and not health.get("devLocked"):
+        problems.append("the AI inspector must need the teacher token")
+    if not str(health.get("storage", "")).startswith("S3"):
+        problems.append("student data must be stored in S3")
+    for problem in problems:
+        say(f"WARNING: {problem}.")
+    return 1 if problems else 0
 
 
 def cmd_status() -> int:

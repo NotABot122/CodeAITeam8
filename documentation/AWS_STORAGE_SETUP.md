@@ -91,5 +91,6 @@ Account admins can still change these policies. That is true of any AWS account,
   people out of that role.
 - Set a retention period with the school. Current objects are kept until deleted.
 - Add a "delete this student" tool that removes every version under `progress/<id>/` and `workspace/<id>/`.
-- The AI inspector (`--dev`) shows every student's prompts to anyone who can open the page. Keep it off.
+- The AI inspector (`--dev`) shows students' prompts. When `CODEAI_TEACHER_TOKEN` is set it needs that token (as in
+  production); without a token it is open to anyone who can reach the server, so use that only on a dev machine.
 - Teacher pages need `CODEAI_TEACHER_TOKEN`. Student pages rely on the 128-bit student id staying private.

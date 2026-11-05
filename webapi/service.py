@@ -179,6 +179,7 @@ class Service:
         return {"ok": True, "project": self.course.default_project().title, "ai": self.provider is not None,
                 "aiReason": None if self.provider is not None else self.ai_reason,
                 "adaptive": self.adaptive, "dev": getattr(self, "trace", None) is not None,
+                "devLocked": getattr(self, "trace", None) is not None and getattr(self, "inspector_locked", False),
                 "safety": self.guardrail.label if getattr(self, "guardrail", None) else "local rules",
                 "storage": s3_storage.current().describe() if s3_storage.current() else "local disk"}
 

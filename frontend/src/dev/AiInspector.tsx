@@ -3,21 +3,29 @@ import DeleteSweepOutlinedIcon from '@mui/icons-material/DeleteSweepOutlined';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import PsychologyOutlinedIcon from '@mui/icons-material/PsychologyOutlined';
 import {
-  Accordion, AccordionDetails, AccordionSummary, Alert, Badge, Box, Chip, Drawer, Fab, FormControlLabel,
-  IconButton, Switch, Tooltip, Typography,
+  Accordion, AccordionDetails, AccordionSummary, Alert, Badge, Box, Button, Chip, Drawer, Fab, FormControlLabel,
+  IconButton, Switch, TextField, Tooltip, Typography,
 } from '@mui/material';
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
-import {createHttpClient} from '@/api/client';
+import {ApiError, createHttpClient} from '@/api/client';
 import type {AiCall, AiInfo} from '@/api/types';
 
 // Dev-only AI inspector. Shows only when the server runs with --dev (health.dev). A button in the corner opens a
 // side panel listing every AI model call, newest first: which feature made it, the model, the system prompt, the
 // input, the tools offered, and the output, with latency and tokens. For demos of the AI adaptivity.
+// When the server has a teacher token (health.devLocked, e.g. production), the panel asks for it first: the calls
+// include students' code and words. The token is kept for this browser tab only, shared with the teacher page.
 
 const POLL_OPEN_MS = 1500;
 const POLL_CLOSED_MS = 5000;
 const studentNow = () => { try { return localStorage.getItem('codeai.studentId'); } catch { return null; } };
+const TOKEN_KEY = 'codeai.teacherToken';   // same key as the teacher page (sessionStorage)
+const tokenStore = {
+  get: () => { try { return sessionStorage.getItem(TOKEN_KEY) ?? ''; } catch { return ''; } },
+  set: (v: string) => { try { sessionStorage.setItem(TOKEN_KEY, v); } catch { /* private mode */ } },
+  clear: () => { try { sessionStorage.removeItem(TOKEN_KEY); } catch { /* private mode */ } },
+};
 const time = (iso: string) => new Date(iso).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', second: '2-digit'});
 
 // One colour per feature, so the same kind of call is easy to spot.
@@ -76,20 +84,39 @@ export default function AiInspector() {
   const [seen, setSeen] = useState(0);
   const [mine, setMine] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [locked, setLocked] = useState(false);
+  const [token, setToken] = useState(tokenStore.get);
+  const [tokenInput, setTokenInput] = useState('');
   const last = useRef(0);
   const freshUntil = useRef<Record<number, number>>({});
+  const ready = enabled && (!locked || !!token);
 
   useEffect(() => {
     client.health().then(h => {
       if (!h.dev) return;
       setEnabled(true);
-      client.devAiInfo().then(setInfo).catch(() => setInfo(null));
+      setLocked(!!h.devLocked);
     }).catch(() => undefined);
   }, [client]);
 
+  const rejected = useCallback((e: unknown) => {
+    if (e instanceof ApiError && e.status === 403) {
+      tokenStore.clear();
+      setToken('');
+      setError('That teacher token was not accepted.');
+      return true;
+    }
+    return false;
+  }, []);
+
+  useEffect(() => {
+    if (!ready) return;
+    client.devAiInfo(token || undefined).then(setInfo).catch(e => { if (!rejected(e)) setInfo(null); });
+  }, [client, ready, token, rejected]);
+
   const poll = useCallback(async () => {
     try {
-      const {calls: more} = await client.devAiCalls(last.current);
+      const {calls: more} = await client.devAiCalls(last.current, token || undefined);
       if (more.length) {
         last.current = more[more.length - 1].id;
         const until = Date.now() + 1500;
@@ -97,15 +124,24 @@ export default function AiInspector() {
         setCalls(prev => [...prev, ...more].slice(-300));
       }
       setError(null);
-    } catch (e) { setError(e instanceof Error ? e.message : 'Could not load AI calls.'); }
-  }, [client]);
+    } catch (e) { if (!rejected(e)) setError(e instanceof Error ? e.message : 'Could not load AI calls.'); }
+  }, [client, token, rejected]);
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!ready) return;
     void poll();
     const id = window.setInterval(() => void poll(), open ? POLL_OPEN_MS : POLL_CLOSED_MS);
     return () => window.clearInterval(id);
-  }, [enabled, open, poll]);
+  }, [ready, open, poll]);
+
+  const unlock = () => {
+    const value = tokenInput.trim();
+    if (!value) return;
+    tokenStore.set(value);
+    setToken(value);
+    setTokenInput('');
+    setError(null);
+  };
 
   useEffect(() => { if (open) setSeen(last.current); }, [open, calls.length]);
 
@@ -130,13 +166,24 @@ export default function AiInspector() {
         <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
           <PsychologyOutlinedIcon color="primary" />
           <Typography variant="h6" component="h2" sx={{flex: 1}}>AI inspector <Typography component="span" variant="caption" color="text.secondary">dev only</Typography></Typography>
-          <Tooltip title="Clear the list"><IconButton aria-label="Clear the list" onClick={() => { void client.devAiClear(); setCalls([]); }}><DeleteSweepOutlinedIcon /></IconButton></Tooltip>
+          <Tooltip title="Clear the list"><IconButton aria-label="Clear the list" disabled={!ready} onClick={() => { void client.devAiClear(token || undefined).catch(rejected); setCalls([]); }}><DeleteSweepOutlinedIcon /></IconButton></Tooltip>
           <IconButton aria-label="Close the AI inspector" onClick={() => setOpen(false)}><CloseIcon /></IconButton>
         </Box>
         <Typography variant="body2" color="text.secondary">
           Every call our app makes to Amazon Bedrock, live: which part of the adaptive system made it, exactly what the model was given, and what it answered.
           Each one has a rule-based or teacher-written fallback.
         </Typography>
+        {!ready && (
+          <Box component="form" onSubmit={e => { e.preventDefault(); unlock(); }} sx={{display: 'grid', gap: 1}}>
+            <Alert severity="info">These calls include students' code and what they typed, so teachers only: enter the teacher token.</Alert>
+            {error && <Alert severity="warning">{error}</Alert>}
+            <Box sx={{display: 'flex', gap: 1}}>
+              <TextField size="small" type="password" label="Teacher token" value={tokenInput} autoComplete="off"
+                onChange={e => setTokenInput(e.target.value)} sx={{flex: 1}} />
+              <Button type="submit" variant="contained" disabled={!tokenInput.trim()}>Unlock</Button>
+            </Box>
+          </Box>
+        )}
         {info && (
           <Typography variant="caption" sx={{fontFamily: 'var(--code-font)'}}>
             {info.ai ? `AI on · model ${info.model} (${info.modelSource === 'CODEAI_MODEL_ID' ? 'set by CODEAI_MODEL_ID' : 'team default'}) · safety: ${info.safety ?? 'local rules'}` : `AI is off${info.aiReason ? ` (${info.aiReason})` : ''}: the app is using its rules and teacher-written content.`}
@@ -167,15 +214,15 @@ export default function AiInspector() {
             </Box>
           </Box>
         )}
-        {error && <Alert severity="warning">{error}</Alert>}
-        <Box sx={{flex: 1, overflowY: 'auto', display: 'grid', gap: 1, alignContent: 'start', pr: 0.5}}>
+        {ready && error && <Alert severity="warning">{error}</Alert>}
+        {ready && <Box sx={{flex: 1, overflowY: 'auto', display: 'grid', gap: 1, alignContent: 'start', pr: 0.5}}>
           {shown.length === 0 && (
             <Typography variant="body2" color="text.secondary" sx={{py: 4, textAlign: 'center'}}>
               No AI calls yet. Run code that fails, ask Ducky for a hint, finish the readiness check, or use "Make it yours".
             </Typography>
           )}
           {shown.map(c => <CallCard key={c.id} call={c} color={colorFor(c.feature.name, names)} fresh={(freshUntil.current[c.id] ?? 0) > Date.now()} />)}
-        </Box>
+        </Box>}
       </Drawer>
     </>
   );

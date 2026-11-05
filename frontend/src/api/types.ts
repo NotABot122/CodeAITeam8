@@ -181,7 +181,7 @@ export interface Outcome {
   stuck?: string[];
 }
 
-export interface Health {ok: boolean; project: string; ai: boolean; aiReason: string | null; adaptive: boolean; dev?: boolean}
+export interface Health {ok: boolean; project: string; ai: boolean; aiReason: string | null; adaptive: boolean; dev?: boolean; devLocked?: boolean}
 
 /** Dev-only AI inspector (server started with --dev): one recorded model call. */
 export interface AiCall {

@@ -35,21 +35,25 @@ export interface ApiClient {
   startNext(id: string, option: number, theme?: string): Promise<StartResult>;
   buildTheme(id: string, request: string): Promise<ThemeResult>;
   resetTheme(id: string): Promise<StudentState>;
-  /** Dev-only AI inspector (server --dev): what each model call got and gave back. */
-  devAiInfo(): Promise<AiInfo>;
-  devAiCalls(after: number): Promise<{calls: AiCall[]}>;
-  devAiClear(): Promise<unknown>;
+  /** Dev-only AI inspector (server --dev): what each model call got and gave back. `token` is the teacher token,
+   *  needed when the server has one (health.devLocked). */
+  devAiInfo(token?: string): Promise<AiInfo>;
+  devAiCalls(after: number, token?: string): Promise<{calls: AiCall[]}>;
+  devAiClear(token?: string): Promise<unknown>;
   /** Python -> block workspace. Parses only; the code isn't run or saved. */
   toBlocks(code: string): Promise<BlocksResult>;
 }
 
 export function createHttpClient(base = ''): ApiClient {
-  async function call<T>(method: 'GET' | 'POST', path: string, body?: unknown): Promise<T> {
+  async function call<T>(method: 'GET' | 'POST', path: string, body?: unknown, token?: string): Promise<T> {
     let res: Response;
+    const headers: Record<string, string> = {};
+    if (body !== undefined) headers['Content-Type'] = 'application/json';
+    if (token) headers['X-Teacher-Token'] = token;
     try {
       res = await fetch(`${base}${path}`, {
         method,
-        headers: body === undefined ? undefined : {'Content-Type': 'application/json'},
+        headers,
         body: body === undefined ? undefined : JSON.stringify(body),
       });
     } catch {
@@ -90,8 +94,8 @@ export function createHttpClient(base = ''): ApiClient {
     buildTheme: (id, request) => call('POST', `${s(id)}/theme`, {request}),
     resetTheme: id => call('POST', `${s(id)}/theme/reset`, {}),
     toBlocks: code => call('POST', '/api/blocks', {code}),
-    devAiInfo: () => call('GET', '/api/dev/ai'),
-    devAiCalls: after => call('GET', `/api/dev/ai/calls/after/${after}`),
-    devAiClear: () => call('POST', '/api/dev/ai/clear', {}),
+    devAiInfo: token => call('GET', '/api/dev/ai', undefined, token),
+    devAiCalls: (after, token) => call('GET', `/api/dev/ai/calls/after/${after}`, undefined, token),
+    devAiClear: token => call('POST', '/api/dev/ai/clear', {}, token),
   };
 }

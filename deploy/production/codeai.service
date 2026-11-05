@@ -9,7 +9,8 @@ User=codeai
 Group=codeai
 EnvironmentFile=/etc/codeai/env
 WorkingDirectory=/opt/codeai/app
-ExecStart=/opt/codeai/venv/bin/python -m webapi.server --host 0.0.0.0 --port 8080 --ai bedrock --data-dir /var/lib/codeai
+# --dev turns on the AI inspector. With CODEAI_TEACHER_TOKEN set (always, here) it needs the teacher token.
+ExecStart=/opt/codeai/venv/bin/python -m webapi.server --host 0.0.0.0 --port 8080 --ai bedrock --dev --data-dir /var/lib/codeai
 Restart=always
 RestartSec=3
 # SIGTERM makes the server send pending student data to S3 before it exits (webapi/server.py).

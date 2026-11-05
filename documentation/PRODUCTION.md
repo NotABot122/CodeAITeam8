@@ -5,7 +5,7 @@ data is stored as described in [AWS_STORAGE_SETUP.md](AWS_STORAGE_SETUP.md), in 
 
 ```
 browser ──HTTPS──▶ CloudFront ──VPC origin (AWS network)──▶ EC2 (private, no public IP), port 8080
-                   security headers, HTTP→HTTPS                  │ codeai service (webapi.server, no --dev)
+                   security headers, HTTP→HTTPS                  │ codeai service (webapi.server --dev)
                                                                  │   ├─ S3 student data, as the prod app role
                                                                  │   └─ Bedrock (models, guardrail)
                                                                  │ codeai-sandbox user runs student code: no network
@@ -57,7 +57,11 @@ There is no SSH. Get a shell with `aws ssm start-session --target <instance id>`
   `/etc/codeai/env` (root:codeai, 0640) on each install. Teachers send it as the `X-Teacher-Token` header. Read it
   with `aws secretsmanager get-secret-value --secret-id codeai-team8/prod/teacher-token --query SecretString --output text`.
   To rotate it, change the secret, then run `release` again.
-- **The AI inspector is off** (`--dev` is never passed).
+- **The AI inspector is on, for teachers only.** The service runs with `--dev`, so the corner button appears. Because
+  the teacher token is set, the inspector's endpoints (`/api/dev/*`) answer only with the `X-Teacher-Token` header, and
+  the panel asks for the token before showing anything. The calls include students' code and what they typed. They are
+  kept in memory only (the last 300) and are gone after a restart. `release` fails its check if the inspector is ever
+  on without the lock.
 - **IMDSv2 only**, with a hop limit of 1.
 
 ## Limits

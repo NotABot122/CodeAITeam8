@@ -25,7 +25,8 @@ Routes (JSON):
     POST /api/students/<id>/next            {"option": 0, "theme": "..."} -> {message, built, state}
     POST /api/students/<id>/theme           {"request": "pokemon"} -> {built, message, state}
     POST /api/students/<id>/theme/reset     -> state
-    GET  /api/dev/ai, /api/dev/ai/calls/after/<n>, POST /api/dev/ai/clear   (only with --dev: the AI inspector)
+    GET  /api/dev/ai, /api/dev/ai/calls/after/<n>, POST /api/dev/ai/clear   (only with --dev: the AI inspector;
+                                            needs X-Teacher-Token too when $CODEAI_TEACHER_TOKEN is set)
     POST /api/blocks                        {"code": "..."} -> {ok, workspace, blockCount} or {ok: false, reason, message, line}
 Teacher routes (GET, need header X-Teacher-Token = $CODEAI_TEACHER_TOKEN; off if unset):
     /api/teacher/overview, /api/teacher/students/<id>, /api/teacher/content-check
@@ -86,6 +87,7 @@ ROUTES = [
 
 
 def make_handler(service: Service, teacher_token=None):
+    service.inspector_locked = bool(teacher_token)      # health tells the UI the inspector needs the token
     teacher = Teacher(service)
     teacher_routes = {
         "/api/teacher/overview": lambda: teacher.overview(),
@@ -135,6 +137,9 @@ def make_handler(service: Service, teacher_token=None):
                     if m:
                         return self._send(200, teacher.student(m.group(1)))
                     raise ApiError(404, "not_found", "No such endpoint.")
+                if path.startswith("/api/dev/") and teacher_token:
+                    # The inspector shows students' code and words: teachers only, whenever teacher pages are on.
+                    token_ok(teacher_token, self.headers.get("X-Teacher-Token"))
                 wrong_method = False
                 for verb, pattern, fn in ROUTES:
                     match = pattern.match(path)
