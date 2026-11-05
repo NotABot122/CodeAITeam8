@@ -13,6 +13,12 @@ export interface ItemStep {
   cards?: {id: string; text: string}[];
   buckets?: {id: string; text: string}[];
   display?: 'rows' | 'belt' | 'chips';
+  /** A code block shown under the prompt. The prompt sentence itself never contains code. */
+  code?: {lang: 'python' | 'sql'; text: string};
+  /** Rows of data shown under the prompt. */
+  table?: {columns: string[]; rows: string[][]};
+  /** 'code': draw every option and card in the code font. Text options may still hold `inline code`. */
+  option_format?: 'text' | 'code';
   zone?: {id: string; name: string};
   intro?: string;
 }

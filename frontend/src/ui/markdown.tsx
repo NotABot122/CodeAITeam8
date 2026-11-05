@@ -4,6 +4,11 @@ import type {ReactNode} from 'react';
 // Instructions are teacher-authored markdown: headings, paragraphs, lists, tables, fenced code, **bold**, `code`.
 // Rendered as React nodes (never innerHTML), so nothing in the text can inject markup.
 
+/** One line of text with `code` and **bold** spans, e.g. a quest prompt, an answer choice or feedback. */
+export function InlineText({text}: {text: string}) {
+  return <>{inline(text)}</>;
+}
+
 function inline(text: string): ReactNode[] {
   const out: ReactNode[] = [];
   const re = /(`[^`]+`|\*\*[^*]+\*\*)/g;

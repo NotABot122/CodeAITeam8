@@ -5,6 +5,9 @@
 #  - sort: each card names its correct `bucket`. A card may carry a `misconception` tag.
 #    Optional `display:` on a sort item picks a game skin (rows, belt, chips); scoring is identical.
 #  - Each tier needs at least two items (a first question and a twin).
+#  - Layout (enforced by check-content): code goes in `code:` (set `code_lang: sql` for queries) and rows of
+#    data go in `table:`, never inside the prompt sentence. Short names inside sentences use `backticks`.
+#    `option_format: code` draws every option in the code font (the default for trace, spot and order).
 # The table matches the lesson: daily_readings(station_id, date, temp_high_c, temp_low_c, rain_mm).
 concept: database_retrieval
 explain:
@@ -20,7 +23,13 @@ items:
     tier: 1
     type: choice
     nodes: [read_a_log]
-    prompt: "daily_readings has the columns station_id, date, temp_high_c, rain_mm. Rows: (ST-A, 2026-01-02, 31.0, 0.0), (ST-A, 2026-01-03, 22.5, 14.2), (ST-B, 2026-01-03, 28.1, 0.0). How much rain fell at ST-A on 2026-01-03?"
+    prompt: "Here are three rows of `daily_readings`. How much rain fell at ST-A on 2026-01-03?"
+    table:
+      columns: [station_id, date, temp_high_c, rain_mm]
+      rows:
+        - [ST-A, 2026-01-02, "31.0", "0.0"]
+        - [ST-A, 2026-01-03, "22.5", "14.2"]
+        - [ST-B, 2026-01-03, "28.1", "0.0"]
     options:
       - {id: a, text: "14.2 mm", correct: true}
       - {id: b, text: "22.5 mm", misconception: reads_wrong_column, why: "22.5 is the high temperature. Rain is the last column."}
@@ -31,7 +40,13 @@ items:
     tier: 1
     type: choice
     nodes: [read_a_log]
-    prompt: "Same table: (ST-A, 2026-01-02, 31.0, 0.0), (ST-A, 2026-01-03, 22.5, 14.2), (ST-B, 2026-01-03, 28.1, 0.0). What was the high temperature at ST-B on 2026-01-03?"
+    prompt: "Same table. What was the high temperature at ST-B on 2026-01-03?"
+    table:
+      columns: [station_id, date, temp_high_c, rain_mm]
+      rows:
+        - [ST-A, 2026-01-02, "31.0", "0.0"]
+        - [ST-A, 2026-01-03, "22.5", "14.2"]
+        - [ST-B, 2026-01-03, "28.1", "0.0"]
     options:
       - {id: a, text: "28.1", correct: true}
       - {id: b, text: "0.0", misconception: reads_wrong_column, why: "0.0 is the rain. The high temperature is the third column."}
@@ -43,7 +58,13 @@ items:
     type: sort
     display: rows
     nodes: [filter_rows]
-    prompt: "The query is: SELECT * FROM daily_readings WHERE station_id = 'ST-A' AND date >= '2026-01-01' AND date <= '2026-01-03'. Sort each row into Returned or Not returned."
+    prompt: "Sort each row into Returned or Not returned by this query."
+    code_lang: sql
+    code: |
+      SELECT * FROM daily_readings
+      WHERE station_id = 'ST-A'
+        AND date >= '2026-01-01'
+        AND date <= '2026-01-03'
     buckets:
       - {id: keep, text: "Returned"}
       - {id: skip, text: "Not returned"}
@@ -53,19 +74,20 @@ items:
       - {id: c3, text: "ST-A, 2026-01-03", bucket: keep, misconception: forgets_end_date}
       - {id: c4, text: "ST-A, 2026-01-04", bucket: skip, misconception: ignores_one_filter}
       - {id: c5, text: "ST-A, 2026-01-02", bucket: keep}
-    feedback_right: "Yes. <= includes the end date, and the station has to match."
-    feedback_wrong: "Check the end date: <= includes 2026-01-03. Both conditions must be true."
+    feedback_right: "Yes. `<=` includes the end date, and the station has to match."
+    feedback_wrong: "Check the end date: `<=` includes 2026-01-03. Both conditions must be true."
   - id: log-2b
     tier: 2
     type: choice
+    option_format: code
     nodes: [filter_rows]
-    prompt: "Which WHERE clause returns only the rainy days (rain_mm > 0) at station ST-B?"
+    prompt: "Which `WHERE` clause returns only the rainy days (`rain_mm > 0`) at station ST-B?"
     options:
       - {id: a, text: "WHERE station_id = 'ST-B' AND rain_mm > 0", correct: true}
-      - {id: b, text: "WHERE station_id = 'ST-B' OR rain_mm > 0", misconception: mixes_and_or, why: "OR also returns dry days at ST-B and rainy days elsewhere. Both must be true."}
+      - {id: b, text: "WHERE station_id = 'ST-B' OR rain_mm > 0", misconception: mixes_and_or, why: "`OR` also returns dry days at ST-B and rainy days elsewhere. Both must be true."}
       - {id: c, text: "WHERE station_id = 'ST-A' AND rain_mm > 0", misconception: ignores_one_filter, why: "The station has to be ST-B."}
       - {id: d, text: "WHERE rain_mm > 0", misconception: ignores_one_filter, why: "That returns rainy days at every station."}
-    feedback_right: "Yes. AND means both conditions must hold."
+    feedback_right: "Yes. `AND` means both conditions must hold."
   - id: log-3a
     tier: 3
     type: order
@@ -78,14 +100,16 @@ items:
       - {id: s3, text: "ORDER BY temp_high_c ASC"}
       - {id: s4, text: "LIMIT 1"}
     feedback_right: "Yes. Filter the rows, then sort, then take the first one."
-    feedback_wrong: "SQL filters with WHERE before it sorts with ORDER BY and keeps rows with LIMIT."
+    feedback_wrong: "SQL filters with `WHERE` before it sorts with `ORDER BY` and keeps rows with `LIMIT`."
   - id: log-3b
     tier: 3
     type: choice
     nodes: [sort_and_edges]
-    prompt: "get_readings(conn, 'ST-C', '2026-07-01', '2026-07-31') matches no rows. What should it return?"
+    prompt: "No rows match this call. What should `get_readings` return?"
+    code: |
+      get_readings(conn, 'ST-C', '2026-07-01', '2026-07-31')
     options:
-      - {id: a, text: "An empty list: []", correct: true}
+      - {id: a, text: "An empty list: `[]`", correct: true}
       - {id: b, text: "Raise an error", misconception: empty_is_error, why: "No matching rows is a normal result, not a failure."}
       - {id: c, text: "Every row in the table", misconception: ignores_filter, why: "The query still asks only for ST-C in July."}
       - {id: d, text: "A placeholder row with zeros", misconception: invents_answer, why: "Never invent data. Return what the table has."}

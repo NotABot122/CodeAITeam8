@@ -12,10 +12,12 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 import yaml
 
-from .models import (DISPLAYS, CHOICE, CHOICE_LIKE, DEFAULT_FACET, FACETS, ITEM_TYPES, ORDER, SORT, TIERS, Bucket, Card,
-                     ExplainPrompt, Goal, Item, KeyIdea, Node, Option, ScoringRules, Zone)
+from .models import (CODE_LANGS, DEFAULT_OPTION_FORMAT, DISPLAYS, CHOICE, CHOICE_LIKE, DEFAULT_FACET, FACETS, ITEM_TYPES,
+                     OPTION_FORMATS, ORDER, SORT, SPOT, TIERS, Bucket, Card, ExplainPrompt, Goal, Item, KeyIdea, Node, Option,
+                     ScoringRules, Table, Zone)
 from .paths import PathLike, content_dir
 from .readability import readability_problems
+from .safety import authored_text_problem
 from .tree import SkillTree
 
 CONFIG_FILE = "diagnostic.yaml"
@@ -24,6 +26,22 @@ BOOSTERS_FILE = "boosters.yaml"
 ITEMS_FOLDER = "items"
 MIN_ITEMS_PER_TIER = 2          # a first question and a twin
 ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9_-]*$")
+
+# Code blocks and tables must fit a phone screen without sideways scrolling.
+MAX_CODE_LINES = 12
+MAX_CODE_LINE_CHARS = 60
+MAX_TABLE_COLUMNS = 6
+MAX_TABLE_ROWS = 8
+# A prompt that reads like code belongs in `code`, not in the sentence. Checked after removing `backtick`
+# spans: an assignment or comparison between names, a block header (if/for/while/def ... :), or a SQL clause.
+_BACKTICKS = re.compile(r"`[^`]*`")
+_CODE_IN_PROMPT = re.compile(r"\b[a-z_][a-z0-9_]*\s*(=|\+=|>=|<=|==)\s*\S"
+                             r"|\b(if|for|while|def)\b[^.?]*:(\s|$)"
+                             r"|\b(SELECT|WHERE|FROM)\b\s+\S")
+
+
+def _code_in_sentence(prompt: str) -> bool:
+    return bool(_CODE_IN_PROMPT.search(_BACKTICKS.sub("", prompt)))
 
 
 class ContentError(ValueError):
@@ -406,8 +424,10 @@ def _parse_item(entry: Any, where: str, concept: Optional[str], config: Config, 
         correct = []
         for index, raw in enumerate(_sequence(entry.get("options"), f"{where} options", errors), start=1):
             raw = _mapping(raw, f"{where} option #{index}", errors)
-            option = Option(errors.ident(raw.get("id"), f"{where} option #{index}"),
-                            errors.text(raw.get("text"), f"{where} option #{index}", "text"),
+            # A spot item's options are lines of one program, so their indentation is kept like a card's.
+            text = (_card_text(raw.get("text"), f"{where} option #{index}", errors) if item_type == SPOT
+                    else errors.text(raw.get("text"), f"{where} option #{index}", "text"))
+            option = Option(errors.ident(raw.get("id"), f"{where} option #{index}"), text,
                             raw.get("misconception"), raw.get("why"))
             options.append(option)
             if raw.get("correct") is True:
@@ -458,14 +478,61 @@ def _parse_item(entry: Any, where: str, concept: Optional[str], config: Config, 
     display = entry.get("display")
     if display is not None and (item_type != SORT or display not in DISPLAYS):
         errors.add(where, f"display is only for sort questions and must be one of {', '.join(DISPLAYS)}")
+    code, code_lang = _parse_code(entry, where, errors)
+    table = _parse_table(entry.get("table"), where, errors)
+    if _code_in_sentence(prompt):
+        errors.add(where, "the prompt has code in its sentence; move it to `code:` (a block) or wrap names in `backticks`")
+    option_format = entry.get("option_format", DEFAULT_OPTION_FORMAT[item_type])
+    if option_format not in OPTION_FORMATS:
+        errors.add(where, f"option_format must be one of {', '.join(OPTION_FORMATS)}")
+        option_format = DEFAULT_OPTION_FORMAT[item_type]
 
     return Item(
         id=item_id, concept=None if booster else concept, tier=tier, type=item_type, prompt=prompt, nodes=nodes,
         facet=facet, options=tuple(options), cards=tuple(cards), buckets=tuple(buckets), answer=answer,
         misconception=item_misconception, feedback_right=entry.get("feedback_right"),
         feedback_wrong=entry.get("feedback_wrong"), pass_credit=config.pass_credit.get(item_type, 1.0),
-        display=display,
+        display=display, code=code, code_lang=code_lang, table=table, option_format=option_format,
     )
+
+
+def _parse_code(entry: Dict[str, Any], where: str, errors: _Errors) -> Tuple[Optional[str], str]:
+    raw = entry.get("code")
+    lang = entry.get("code_lang", "python")
+    if lang not in CODE_LANGS:
+        errors.add(where, f"code_lang must be one of {', '.join(CODE_LANGS)}")
+        lang = "python"
+    if raw is None:
+        return None, lang
+    if not isinstance(raw, str) or not raw.strip():
+        errors.add(where, "code must be a non-empty block of text")
+        return None, lang
+    if "\t" in raw:
+        errors.add(where, "code must indent with spaces, not tabs")
+    lines = raw.rstrip("\n").split("\n")
+    if len(lines) > MAX_CODE_LINES:
+        errors.add(where, f"code has {len(lines)} lines; keep it to {MAX_CODE_LINES}")
+    for number, line in enumerate(lines, start=1):
+        if len(line) > MAX_CODE_LINE_CHARS:
+            errors.add(where, f"code line {number} is {len(line)} characters; keep lines to {MAX_CODE_LINE_CHARS}")
+    return "\n".join(line.rstrip() for line in lines), lang
+
+
+def _parse_table(raw: Any, where: str, errors: _Errors) -> Optional[Table]:
+    if raw is None:
+        return None
+    raw = _mapping(raw, f"{where} table", errors)
+    columns = tuple(str(c) for c in _sequence(raw.get("columns"), f"{where} table columns", errors))
+    rows = tuple(tuple(str(cell) for cell in _sequence(row, f"{where} table row", errors))
+                 for row in _sequence(raw.get("rows"), f"{where} table rows", errors))
+    if not 2 <= len(columns) <= MAX_TABLE_COLUMNS:
+        errors.add(where, f"a table needs 2 to {MAX_TABLE_COLUMNS} columns")
+    if not 1 <= len(rows) <= MAX_TABLE_ROWS:
+        errors.add(where, f"a table needs 1 to {MAX_TABLE_ROWS} rows")
+    for number, row in enumerate(rows, start=1):
+        if len(row) != len(columns):
+            errors.add(where, f"table row {number} has {len(row)} cells but there are {len(columns)} columns")
+    return Table(columns, rows)
 
 
 def _parse_explain(entry: Any, concept: str, where: str, tree: Optional[SkillTree], errors: _Errors) -> Optional[ExplainPrompt]:
@@ -497,9 +564,10 @@ def _student_strings(content: Content) -> List[Tuple[str, str]]:
     for item in list(content.items.values()) + content.boosters:
         label = f"item {item.id}"
         strings.append((f"{label} prompt", item.prompt))
-        strings += [(f"{label} option", o.text) for o in item.options]
+        if item.option_format == "text":
+            strings += [(f"{label} option", o.text) for o in item.options]
+            strings += [(f"{label} card", c.text) for c in item.cards]
         strings += [(f"{label} why", o.why) for o in item.options if o.why]
-        strings += [(f"{label} card", c.text) for c in item.cards]
         strings += [(f"{label} bucket", b.text) for b in item.buckets]
         strings += [(f"{label} feedback", t) for t in (item.feedback_right, item.feedback_wrong) if t]
     strings += [(f"explain {e.id} prompt", e.prompt) for e in content.explain.values()]
@@ -515,15 +583,38 @@ def _student_strings(content: Content) -> List[Tuple[str, str]]:
     return strings
 
 
+def _student_code_strings(content: Content) -> List[Tuple[str, str]]:
+    """(where, text) for code and data a student reads: code blocks, table cells, code-style options and cards."""
+    strings: List[Tuple[str, str]] = []
+    for item in list(content.items.values()) + content.boosters:
+        label = f"item {item.id}"
+        if item.code:
+            strings += [(f"{label} code", line) for line in item.code.split("\n") if line.strip()]
+        if item.table is not None:
+            strings += [(f"{label} table", cell) for cell in item.table.columns]
+            strings += [(f"{label} table", cell) for row in item.table.rows for cell in row]
+        if item.option_format == "code":
+            strings += [(f"{label} option", o.text) for o in item.options]
+            strings += [(f"{label} card", c.text) for c in item.cards]
+    return strings
+
+
 def _lint_student_text(content: Content, errors: _Errors) -> None:
+    """Reading level for prose; for everything a student sees, no stage/score words and nothing the
+    content filter blocks (profanity, slurs, violence, personal details)."""
     rules = content.config.reading
     banned = [re.compile(r"\b" + re.escape(w) + r"\b", re.IGNORECASE) for w in content.config.banned_student_words]
-    for where, text in _student_strings(content):
+    prose = _student_strings(content)
+    for where, text in prose:
         for problem in readability_problems(text, rules.max_sentence_words, rules.max_word_length):
             errors.add(where, problem)
+    for where, text in prose + _student_code_strings(content):
         for pattern in banned:
             if pattern.search(text):
                 errors.add(where, f"uses the word {pattern.pattern!r}, which stays out of student-facing text")
+        problem = authored_text_problem(text)
+        if problem:
+            errors.add(where, f"the content filter blocks this text ({problem})")
 
 
 def _check_coverage(content: Content, concept_ids: Optional[Sequence[str]], errors: _Errors) -> None:

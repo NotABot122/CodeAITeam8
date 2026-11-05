@@ -1,4 +1,6 @@
 # Zone: Decision Point (conditionals). Grades 9-12. Code is Python, as in the lesson.
+# Layout rule (enforced by check-content): code goes in `code:` as a block, never inside the prompt
+# sentence. Short names and values inside sentences use `backticks`.
 concept: conditionals
 explain:
   id: decide-explain
@@ -13,10 +15,13 @@ items:
     tier: 1
     type: choice
     nodes: [if_then]
-    prompt: "The code is: if rain_mm > 0: print('Bring an umbrella'). Today rain_mm is 3.2. What does it print?"
+    prompt: "Today `rain_mm` is 3.2. What does this code print?"
+    code: |
+      if rain_mm > 0:
+          print('Bring an umbrella')
     options:
       - {id: a, text: "Bring an umbrella", correct: true}
-      - {id: b, text: "Nothing", misconception: ignores_condition, why: "3.2 > 0 is True, so the print runs."}
+      - {id: b, text: "Nothing", misconception: ignores_condition, why: "`3.2 > 0` is True, so the print runs."}
       - {id: c, text: "3.2", misconception: prints_value_instead, why: "The print shows the message, not the variable."}
       - {id: d, text: "An error", misconception: ignores_task, why: "This is valid Python. The condition is simply True."}
     feedback_right: "Yes. The condition is True, so the body runs."
@@ -24,19 +29,24 @@ items:
     tier: 1
     type: choice
     nodes: [if_then]
-    prompt: "The code is: if temp >= 30: print('HOT'). Today temp is 25. What does it print?"
+    prompt: "Today `temp` is 25. What does this code print?"
+    code: |
+      if temp >= 30:
+          print('HOT')
     options:
       - {id: a, text: "Nothing. The condition is False.", correct: true}
-      - {id: b, text: "HOT", misconception: runs_rule_always, why: "25 >= 30 is False, so the body is skipped."}
+      - {id: b, text: "HOT", misconception: runs_rule_always, why: "`25 >= 30` is False, so the body is skipped."}
       - {id: c, text: "COLD", misconception: invents_else, why: "There is no else branch here."}
-      - {id: d, text: "25", misconception: prints_value_instead, why: "Only 'HOT' could be printed, and only when the condition is True."}
+      - {id: d, text: "25", misconception: prints_value_instead, why: "Only `'HOT'` could be printed, and only when the condition is True."}
     feedback_right: "Yes. False means the body is skipped."
   - id: dec-2a
     tier: 2
     type: sort
     display: belt
     nodes: [if_else_compare]
-    prompt: "The code is: is_heat_wave = temp_high_c >= 35.0. Sort each temperature into True or False."
+    prompt: "Sort each value of `temp_high_c` by what `is_heat_wave` becomes."
+    code: |
+      is_heat_wave = temp_high_c >= 35.0
     buckets:
       - {id: heat, text: "True"}
       - {id: notheat, text: "False"}
@@ -46,37 +56,49 @@ items:
       - {id: t36, text: "36.2", bucket: heat}
       - {id: t20, text: "20.0", bucket: notheat}
       - {id: t38, text: "38.4", bucket: heat}
-    feedback_right: "Yes. >= includes 35.0 itself."
-    feedback_wrong: "Remember that >= includes the boundary: 35.0 >= 35.0 is True."
+    feedback_right: "Yes. `>=` includes 35.0 itself."
+    feedback_wrong: "Remember that `>=` includes the boundary: `35.0 >= 35.0` is True."
   - id: dec-2b
     tier: 2
     type: choice
     nodes: [if_else_compare]
-    prompt: "The code is: if rain_mm >= 20.0: label = 'heavy_rain' else: label = 'ok'. Today rain_mm is 20.0. What is label?"
+    prompt: "Today `rain_mm` is 20.0. What is `label` after this code runs?"
+    code: |
+      if rain_mm >= 20.0:
+          label = 'heavy_rain'
+      else:
+          label = 'ok'
     options:
-      - {id: a, text: "'heavy_rain'", correct: true}
-      - {id: b, text: "'ok'", misconception: at_least_means_over, why: "20.0 >= 20.0 is True."}
+      - {id: a, text: "`'heavy_rain'`", correct: true}
+      - {id: b, text: "`'ok'`", misconception: at_least_means_over, why: "`20.0 >= 20.0` is True."}
       - {id: c, text: "Both values, one after the other", misconception: both_branches, why: "Exactly one branch of an if/else runs."}
-      - {id: d, text: "label is never set", misconception: no_else, why: "The else branch covers every other case, so label is always set."}
+      - {id: d, text: "`label` is never set", misconception: no_else, why: "The else branch covers every other case, so `label` is always set."}
     feedback_right: "Yes. 20.0 meets the condition."
   - id: dec-3a
     tier: 3
     type: trace
     nodes: [both_true]
-    prompt: "labels = []. If temp >= 35: labels.append('heat_wave'). Then, as a separate if, if rain >= 20: labels.append('heavy_rain'). temp is 36.1 and rain is 25.0. What is labels?"
+    prompt: "`temp` is 36.1 and `rain` is 25.0. What is `labels` after this code runs?"
+    code: |
+      labels = []
+      if temp >= 35:
+          labels.append('heat_wave')
+      if rain >= 20:
+          labels.append('heavy_rain')
     options:
       - {id: a, text: "['heat_wave', 'heavy_rain']", correct: true}
       - {id: b, text: "['heat_wave']", misconception: stops_at_first_match, why: "These are two separate if statements, so both are checked."}
       - {id: c, text: "['heavy_rain']", misconception: stops_at_first_match, why: "The first if is also True and runs first."}
-      - {id: d, text: "['normal']", misconception: ignores_rules, why: "Nothing in this code adds 'normal'."}
+      - {id: d, text: "['normal']", misconception: ignores_rules, why: "Nothing in this code adds `'normal'`."}
     feedback_right: "Yes. Two separate ifs can both run."
+  # A spot item's options are the program's lines, shown in order as one numbered block.
   - id: dec-3b
     tier: 3
     type: spot
     nodes: [both_true]
     prompt: "This code should mark every heat wave day, which means 35.0 or more. Tap the line with the bug."
     options:
-      - {id: a, text: "Line 1: temp = row['temp_high_c']", misconception: misreads_steps, why: "That line reads the value correctly. Look at the comparison."}
-      - {id: b, text: "Line 2: if temp > 35.0:", correct: true}
-      - {id: c, text: "Line 3: labels.append('heat_wave')", misconception: misreads_steps, why: "That line is fine. Look at the comparison."}
-    feedback_right: "Yes. > skips a day that is exactly 35.0. Use >=."
+      - {id: a, text: "temp = row['temp_high_c']", misconception: misreads_steps, why: "That line reads the value correctly. Look at the comparison."}
+      - {id: b, text: "if temp > 35.0:", correct: true}
+      - {id: c, text: "    labels.append('heat_wave')", misconception: misreads_steps, why: "That line is fine. Look at the comparison."}
+    feedback_right: "Yes. `>` skips a day that is exactly 35.0. Use `>=`."

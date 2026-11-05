@@ -7,14 +7,16 @@ import {useCallback, useEffect, useRef, useState} from 'react';
 
 import type {ApiClient} from '@/api/client';
 
+import {InlineText} from '@/ui/markdown';
 import {expectedSeconds, SLOW_DOWN_MESSAGE, useCountdown, usePace} from '@/ui/pace';
 
-import {ExplainView, initialResponse, ItemView, responseReady} from './StepView';
+import {ExplainView, initialResponse, ItemView, QuestionBody, responseReady} from './StepView';
 import type {AnswerResult, Feedback, Game, QuestDone, QuestOptions, Step, Zone} from './types';
 
-// Seconds this question should take: its prompt plus every option, card and box to read.
+// Seconds this question should take: its prompt, its code block or table, and every option, card and box to read.
 const stepSeconds = (step: Step) => step.kind === 'explain' ? 0 : expectedSeconds({
-  prompt: step.prompt,
+  prompt: [step.prompt, ...(step.table ? [step.table.columns, ...step.table.rows].flat() : [])].join(' '),
+  code: step.code?.text ?? null,
   choices: [...(step.options ?? []), ...(step.cards ?? []), ...(step.buckets ?? [])].map(o => o.text),
 });
 
@@ -167,7 +169,8 @@ export default function QuestApp({client, resumeId, onStarted, onFinished, onSki
             </Box>
             <Paper variant="outlined" sx={{p: {xs: 2, sm: 3}, borderRadius: '12px', display: 'grid', gap: 2}}>
               {phase.step.intro && phase.name === 'step' && <Typography color="text.secondary">{phase.step.intro}</Typography>}
-              <Typography ref={headingRef} tabIndex={-1} variant="h5" component="h1" sx={{outline: 0}}>{phase.step.prompt}</Typography>
+              <Typography ref={headingRef} tabIndex={-1} variant="h5" component="h1" sx={{outline: 0, lineHeight: 1.45}}><InlineText text={phase.step.prompt} /></Typography>
+              {phase.step.kind !== 'explain' && <QuestionBody step={phase.step} />}
 
               {phase.name === 'step' && phase.step.kind !== 'explain' && (
                 <>
@@ -193,8 +196,8 @@ export default function QuestApp({client, resumeId, onStarted, onFinished, onSki
               {phase.name === 'feedback' && (
                 <Box role="status" aria-live="polite" sx={{display: 'grid', gap: 1.5}}>
                   <Alert severity={phase.feedback.correct === false ? 'info' : 'success'}>
-                    <Typography sx={{fontWeight: 700}}>{phase.feedback.message}</Typography>
-                    {phase.feedback.tip && <Typography>{phase.feedback.tip}</Typography>}
+                    <Typography sx={{fontWeight: 700}}><InlineText text={phase.feedback.message} /></Typography>
+                    {phase.feedback.tip && <Typography><InlineText text={phase.feedback.tip} /></Typography>}
                   </Alert>
                   {phase.feedback.new_badges.map(b => <Chip key={b.id} color="secondary" label={`New badge: ${b.name}`} sx={{justifySelf: 'start'}} />)}
                   {phase.feedback.zone_cleared && <Typography>Zone cleared!</Typography>}
