@@ -3,7 +3,7 @@ import {Alert, Box, Button, CircularProgress, Dialog, DialogActions, DialogConte
   Radio, RadioGroup, Typography} from '@mui/material';
 import {useEffect, useRef, useState} from 'react';
 
-import {ApiError, type ApiClient} from '@/api/client';
+import type {ApiClient} from '@/api/client';
 import type {ImportResult, ImportSample, StudentState} from '@/api/types';
 
 import MatchCard from './MatchCard';
@@ -40,7 +40,7 @@ export default function ImportDialog({client, open, onClose, onDone}: {
   const send = async (from: {sample: string} | {data: unknown}) => {
     setBusy(true); setError(null);
     try { setDone(await client.importPrevious(from)); }
-    catch (e) { setError(e instanceof ApiError || e instanceof Error ? e.message : msg(e)); }
+    catch (e) { setError(msg(e)); }
     finally { setBusy(false); }
   };
   const pickFile = async (file: File | undefined) => {

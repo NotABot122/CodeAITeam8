@@ -5,6 +5,7 @@ and returns plain dicts. Nothing here grades or routes; that stays in engine/.
 """
 from __future__ import annotations
 
+import os
 import re
 import threading
 from collections import defaultdict
@@ -90,12 +91,15 @@ def pathway_view(record: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
 
 class Service:
     def __init__(self, data_dir: Path = DEFAULT_DATA, project_path: Path = DEFAULT_PROJECT,
-                 provider=None, ai_reason: Optional[str] = None, adaptive: bool = True):
+                 provider=None, ai_reason: Optional[str] = None, adaptive: bool = True, theme_provider=None):
         self.data_dir = Path(data_dir)
         self.provider = provider
         self.ai_reason = ai_reason
         self.adaptive = adaptive
-        self.course = Course(self.data_dir, provider=provider, adaptive=adaptive)
+        self.trace = None            # engine.ai_trace.TraceLog when the server runs with --dev
+        self.guardrail = None        # engine.guardrail.BedrockGuardrail when synced and AI is on
+        self.theme_provider = theme_provider
+        self.course = Course(self.data_dir, provider=provider, adaptive=adaptive, theme_provider=theme_provider)
         self._locks: Dict[str, threading.Lock] = defaultdict(threading.Lock)
         self._locks_guard = threading.Lock()
 
@@ -169,7 +173,38 @@ class Service:
     def health(self) -> Dict[str, Any]:
         return {"ok": True, "project": self.course.default_project().title, "ai": self.provider is not None,
                 "aiReason": None if self.provider is not None else self.ai_reason,
-                "adaptive": self.adaptive}
+                "adaptive": self.adaptive, "dev": getattr(self, "trace", None) is not None,
+                "safety": self.guardrail.label if getattr(self, "guardrail", None) else "local rules"}
+
+    # Dev-only AI inspector (webapi.server --dev) -----------------------------------
+    def _trace(self):
+        trace = getattr(self, "trace", None)
+        if trace is None:
+            raise ApiError(404, "not_found", "No such endpoint.")
+        return trace
+
+    def dev_info(self) -> Dict[str, Any]:
+        from engine.ai_trace import FEATURES
+        self._trace()
+        model = getattr(self.provider, "model_id", None)
+        # Every feature goes through the one provider, so they share the configured model ($CODEAI_MODEL_ID).
+        return {"ai": self.provider is not None, "aiReason": None if self.provider is not None else self.ai_reason,
+                "model": model, "modelSource": "CODEAI_MODEL_ID" if os.environ.get("CODEAI_MODEL_ID") else "default",
+                "safety": self.guardrail.label if self.guardrail else "local rules",
+                "features": [{"name": name, "what": what,
+                              "model": getattr(self.theme_provider, "model_id", None) or model if "Theme designer" in name else model}
+                             for _, name, what in FEATURES]
+                + ([{"name": "Safety guardrail (student input / model output)",
+                     "what": "Amazon Bedrock Guardrail made from our classroom rules: denied topics, words, personal "
+                             "info, content and prompt-attack filters. Local rules decide if it can't answer.",
+                     "model": self.guardrail.label}] if self.guardrail else [])}
+
+    def dev_calls(self, after: int) -> Dict[str, Any]:
+        return {"calls": self._trace().after(after)}
+
+    def dev_clear(self) -> Dict[str, Any]:
+        self._trace().clear()
+        return {"ok": True}
 
     def new_student(self) -> Dict[str, Any]:
         return self._state(self.course.new_student())

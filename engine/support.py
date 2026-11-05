@@ -83,6 +83,7 @@ class SupportPolicy:
     by_stage: Tuple[str, ...]              # stage 0..3 -> level name
     stuck: StuckRules = field(default_factory=StuckRules)
     momentum: Momentum = field(default_factory=Momentum)
+    fade: bool = True                      # False: every student gets the "full" level on every problem
 
     @classmethod
     def from_dict(cls, data: Optional[dict]) -> Optional["SupportPolicy"]:
@@ -94,10 +95,12 @@ class SupportPolicy:
             raw.pop("for_stage", None)
             levels[name] = LevelRule(name, **raw)
         stuck = StuckRules(**(data.get("stuck") or {}))
-        return cls(levels, LEVELS, stuck, Momentum(**(data.get("momentum") or {})))
+        return cls(levels, LEVELS, stuck, Momentum(**(data.get("momentum") or {})), bool(data.get("fade", True)))
 
     def rule(self, stage: int, stuck: bool = False, momentum: bool = False) -> LevelRule:
-        """Stuck: one level more help. Momentum (and not stuck): one level less."""
+        """Stuck: one level more help. Momentum (and not stuck): one level less. With fade off: always full."""
+        if not self.fade:
+            return self.levels[self.by_stage[0]]
         index = min(len(self.by_stage) - 1, max(0, stage)) - (1 if stuck else 0) + (1 if momentum and not stuck else 0)
         return self.levels[self.by_stage[max(0, min(len(self.by_stage) - 1, index))]]
 
@@ -289,7 +292,7 @@ def explain_error(result: g.GradeResult, code: str, rule: LevelRule, provider: O
         try:
             reply = provider.complete(EXPLAIN_SYSTEM, prompt, max_tokens=160)
             text = " ".join(reply.text.split())
-            if text and check_hint(text, reference_source) is None and len(text) <= 320 and not screen_text(text).blocked:
+            if text and check_hint(text, reference_source) is None and len(text) <= 320 and not screen_text(text, "OUTPUT").blocked:
                 return Explanation(text, line, kind, "ai", message)
         except ModelError:
             pass
@@ -445,7 +448,7 @@ def check_support_content(project: Project) -> List[str]:
                 problems.append(f"{MISTAKES_FILE}: mistake {m.id} has concept {m.concept}, which this project doesn't teach")
             if not m.tip or not m.label:
                 problems.append(f"{MISTAKES_FILE}: mistake {m.id} needs a label and a tip")
-            elif screen_text(m.tip).blocked or check_hint(m.tip, project.reference_path.read_text()) is not None:
+            elif screen_text(m.tip, local_only=True).blocked or check_hint(m.tip, project.reference_path.read_text()) is not None:
                 problems.append(f"{MISTAKES_FILE}: the tip for {m.id} must be plain words with no code")
         for pid, mapping in catalog.checks.items():
             if not project.manifest.has_problem(pid):

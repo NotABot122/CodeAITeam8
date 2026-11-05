@@ -124,6 +124,10 @@ pathways:
 #   name_mistake: show the likely mistake's tip after a failed run
 #   suggest_blocks: suggest Blocks mode after errors several runs in a row
 support:
+  # fade: false gives every student the "full" level on every problem: a hint after each failed run, the whole
+  # function bank, the outline, AI error explanations and "Where to look" tips. Set it to true to make help
+  # fade with the concept's stage again (the levels below). Stuck detection still runs either way.
+  fade: false
   levels:
     full:    {for_stage: 0, auto_hint_after: 1,    function_bank: full,   outline: steps,     error_detail: full,  ai_explain: true,  name_mistake: true,  suggest_blocks: true}
     guided:  {for_stage: 1, auto_hint_after: 1,    function_bank: full,   outline: signature, error_detail: full,  ai_explain: true,  name_mistake: true,  suggest_blocks: true}

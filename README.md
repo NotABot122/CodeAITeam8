@@ -52,7 +52,7 @@ In live testing, 17 of 18 themes passed. The one failure was a scale problem tha
 
 When a check fails, Bedrock writes one hint about the student's actual mistake. The model sees the level instructions, the failing checks, the teacher-written hints, and the student's code. It never sees the reference solution or the student id. A hint is rejected if it contains code, copies the reference solution, is too long, or fails the content filter. Student code with personal information is never sent. Any rejection or model error falls back to the teacher-written hint.
 
-Settings: `--ai off` (or `CODEAI_AI=off`) turns both AI features off. `CODEAI_MODEL_ID` changes the model (default `us.anthropic.claude-haiku-4-5-20251001-v1:0`). `CODEAI_AWS_REGION` changes the region (default `us-west-2`). Needs `pip install --user boto3` and AWS credentials. Each hint or theme event is logged in `.codeai-data/logs/events.jsonl` with its source and model.
+Settings: `--ai off` (or `CODEAI_AI=off`) turns both AI features off. `CODEAI_MODEL_ID` changes the model (default `us.anthropic.claude-haiku-4-5-20251001-v1:0`). `CODEAI_THEME_MODEL_ID` changes the model that designs "Make it yours" projects (default OpenAI GPT-5.6 Terra, `us.openai.gpt-5.6-terra`; the team model is the backup if it fails; request moderation stays on the team model). `CODEAI_AWS_REGION` changes the region (default `us-west-2`). Needs `pip install --user boto3` and AWS credentials. Each hint or theme event is logged in `.codeai-data/logs/events.jsonl` with its source and model.
 
 ## Landing page and lesson pathway (Strands Decider 2B on Amazon Bedrock)
 
@@ -62,6 +62,41 @@ The site opens on a landing page. The student picks a grade (9-12) and takes the
 2. **Bedrock:** the model reads the evidence (stage estimates, how sure the check is, right answers, mistake patterns, time per question), the grade, and the CSTA standards the check's skill tree is mapped to, read from `curriculum database/CSTA_2026_PK12_Standards_by_Grade.xlsx` (`engine/curriculum.py`, standard library only). It answers through a forced tool call with one eligible pathway, its stance (`STANCE_REINFORCE`, `STANCE_ADVANCE`, `STANCE_BRIDGE`, `STANCE_PROJECT_SYNTHESIS`), the standards to cite, a message for the student and a note for the teacher.
 
 The model can't pick a pathway the rules didn't allow. A model error, a disallowed pathway, a stance that doesn't match its pathway, or a student message that mentions stages or scores all fall back to the rules (logged as a `fallback` event). The decision is kept per student (`POST /api/students/<id>/pathway {"grade": 10}`) and `GET /api/teacher/students/<id>` returns it with the stance and note (the teacher screen doesn't show it yet). When a pathway project is finished, the next one is offered first, unless the course recommends a review after a struggle. The model is the team's Bedrock model (`CODEAI_MODEL_ID`), not a separate 2-billion-parameter model.
+
+## Safety: Amazon Bedrock Guardrail
+
+Our classroom safety rules run as an Amazon Bedrock Guardrail (`engine/guardrail.py`, guardrail `codeai-team8-student-safety`). It was converted from the local rules:
+
+| Local rule | Guardrail policy |
+|---|---|
+| Category word lists (`engine/safety.py`) | Word filter (minus words that are fine in other senses, like "shooting stars") + AWS managed profanity list |
+| Moderation categories | Denied topics: sexual content, real-world violence and weapons, self-harm, hate and harassment, drugs and alcohol, gambling, private details about real people |
+| Emails and phone numbers; "my address is…" | Sensitive information filter: EMAIL, PHONE, ADDRESS → block |
+| Prompt-injection phrases (`diagnostic/safety.py`) | Prompt-attack filter on student input (not on student code, which reads like instructions) |
+| (none) | Content filters: sexual, hate (high), violence, insults, misconduct (medium) |
+
+Student text is checked as INPUT (theme requests, readiness-check answers, quiz answers, code before it goes to a model), model text as OUTPUT (hints, error explanations, the pathway message, theme designs). If the guardrail isn't set up or a check fails, the local rules decide; content checks always use the local rules (no network). Theme requests still also get the AI moderation call.
+
+```bash
+~/.venvs/codeai/bin/python -m engine.guardrail sync    # create/update from the rules, publish a version → config/bedrock_guardrail.json
+~/.venvs/codeai/bin/python -m engine.guardrail check "text" [--output]
+python -m webapi.server ... --no-guardrail               # local rules only
+```
+
+On the evaluation team's 44 labelled theme requests: local rules caught 8 of 23 harmful requests and wrongly blocked 5 of 21 fine ones; the guardrail (v2) caught 21 of 23 and wrongly blocked 1 ("Moby Dick", from AWS's profanity list). It blocked the unkind, personal-info and unsafe hint examples and none of the good ones, and none of the 22 starter/solution files. About 270 ms per check. The policy (topics, strengths, the borderline cases like "Call of Duty weapons" or "poker probabilities") still needs a teacher/T&L decision.
+
+## AI inspector (dev only, for demos)
+
+Start the server with `--dev` to record every AI call and show the **AI inspector**: a button in the bottom-left corner that opens a side panel listing each call live, newest first. For each call it shows:
+- which feature made it (pathway decider, AI tutor hint, error explainer, mistake labeler, quiz answer scorer, readiness check reader and advisor, theme moderation and designer), with a one-line description
+- the model, the system prompt, the exact input, the tools offered (with their schemas), and the output (text, or the structured tool answer)
+- latency, input and output tokens, the student id, and model errors (the app then fell back to rules)
+
+```bash
+~/.venvs/codeai/bin/python -m webapi.server --port 8081 --ai bedrock --dev
+```
+
+`engine/ai_trace.py` wraps the provider and keeps the last 300 calls in memory only (nothing on disk; students appear by random id). Without `--dev`, the `/api/dev/...` routes return 404 and the button doesn't appear. Don't use `--dev` with real students.
 
 ## Slowing down rushed answers
 
@@ -92,6 +127,8 @@ The three new projects were rendered from hand-written specs with the theme temp
 - **Make it yours** (the AI theme builder) is a card in the picker and a button at the top right of every lesson screen whenever the first topic is current or still ahead on the pathway. On a review step, the theme replaces the upcoming project and starts when the student gets there. "Back to the ready-made projects" undoes it.
 
 ## Help that fades as students improve (adaptive support)
+
+**Currently off:** `support.fade: false` in `projects/catalog.yaml` gives every student the **full** column below on every problem. Set it to `true` to make help fade again. Stuck detection, mistake tips and error explanations run either way.
 
 `engine/support.py`, configured in `projects/catalog.yaml` (`support:`). Each code problem gets a help level from the stage of its weakest concept: **full** (Missing), **guided** (Beginning), **light** (Meeting), **minimal** (Exceeding). Passing two problems in a row quickly with no hints gives one level less help; being stuck gives one level more on that problem until it passes. The Hint button works at every level.
 
@@ -212,7 +249,6 @@ See [`deploy/agentcore/README.md`](deploy/agentcore/README.md).
 ## Not in this demo yet
 
 - AI rubric grading of written answers and the grader-agreement benchmark (requirements 10 and 11).
-- Bedrock Guardrails. The content filter is local rules plus a model moderation call; AI hints get the local rules only.
 - Themes apply only to the first topic. Lists and Dictionaries and the revision projects use the weather data.
 - Rubric scores on written answers are feedback only. They should affect stages once the grader is checked against human scores.
 - Student code runs in a separate process with a time limit and its own database copy, but not in a security sandbox. It's fine for a demo, but not for untrusted code in production.
