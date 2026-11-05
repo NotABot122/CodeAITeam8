@@ -20,7 +20,7 @@ from __future__ import annotations
 import datetime as dt
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 import yaml
 
@@ -472,12 +472,49 @@ class Course:
             return None
         return state.goal_id if state is not None else None
 
+    def _interests(self, student_id: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+        """(goal id, goal label, the student's own screened words) from the readiness check or an import."""
+        from diagnostic.store import DiagnosticStore
+        try:
+            state = DiagnosticStore(self.data_dir).load(student_id)
+        except Exception:
+            return None, None, None
+        if state is None:
+            return None, None, None
+        goal = self.diagnostic().content.goals.get(state.goal_id)
+        return state.goal_id, goal.label if goal else None, state.goal_text
+
+    def _story_match(self, student_id: str):
+        from .matching import match_story
+        goal, label, words = self._interests(student_id)
+        available = [c for c in self.catalog.topics[0].choices if c["project"] in self.core_choices()]
+        return match_story(available, goal, label, words, self.catalog.topics[0].project)
+
     def suggested_project(self, student_id: str) -> str:
-        goal = self._goal(student_id)
-        for choice in self.catalog.topics[0].choices:
-            if goal and goal in (choice.get("goals") or []) and choice["project"] in self.core_choices():
-                return choice["project"]
-        return self.catalog.topics[0].project
+        """The ready-made story that best fits the student's interests (engine/matching.py)."""
+        if not self._goal(student_id):
+            return self.catalog.topics[0].project
+        return self._story_match(student_id).project
+
+    def project_match(self, student_id: str) -> Optional[dict]:
+        """Why the suggested project fits this student: their interests (the story) and what the readiness
+        check is confident about (where they start). None for students who skipped the check."""
+        from .matching import match_view, skill_fit
+        if not self._goal(student_id):
+            return None
+        story = self._story_match(student_id)
+        profile = self.store.profile(student_id)
+        decisions = (profile.get("diagnostic") or {}).get("decisions")
+        skills = None
+        if decisions is not None:
+            # Warm-ups are the planned practice problems; the student sees their concepts, not problem ids.
+            project = self._project(self.projects_root / self.core_project_for(student_id))
+            planned = [project.manifest.practice(p) for p in (profile.get("planned_practice") or {}).get("problems") or []
+                       if project.manifest.has_problem(p)]
+            skills = skill_fit(decisions, self.catalog.concepts, {p.concept for p in planned if p is not None})
+        title = self._project(self.projects_root / story.project).title
+        pitch = next((c.get("pitch", "") for c in self.catalog.topics[0].choices if c["project"] == story.project), "")
+        return match_view(story, skills, title, pitch)
 
     def core_project_for(self, student_id: str) -> str:
         """The student's first-topic project: a catalog folder name, or the path of a theme they built."""
@@ -513,7 +550,7 @@ class Course:
             out.append({"project": folder, "title": project.title, "pitch": choice.get("pitch", ""),
                         "suggested": folder == suggested, "current": folder == current, "custom": False})
         return {"choices": out, "locked": self._core_started(student_id, current),
-                "topic": self.catalog.topics[0].title}
+                "topic": self.catalog.topics[0].title, "match": self.project_match(student_id)}
 
     def choose_project(self, student_id: str, folder: str) -> dict:
         """Pick which story to learn the first topic's skills in. Allowed until that project is started."""
@@ -730,6 +767,7 @@ class Course:
                 pitch = next((c.get("pitch", "") for c in self.catalog.topics[0].choices
                               if c["project"] == project.root.name), "")
                 result["goal_connection"] = f"Your project: {project.title}. {pitch}".strip()
+        result["match"] = self.project_match(student_id)
 
     def diagnostic_answer(self, student_id: str, response, elapsed_ms: Optional[int] = None) -> dict:
         return self.diagnostic().answer(student_id, response, elapsed_ms)

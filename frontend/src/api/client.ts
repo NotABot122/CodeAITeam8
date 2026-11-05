@@ -11,7 +11,8 @@ export interface ApiClient {
   health(): Promise<Health>;
   newStudent(): Promise<StudentState>;
   questOptions(): Promise<QuestOptions>;
-  questStart(buddy: string | null, goal: string | null): Promise<QuestStart>;
+  /** `interests`: optional words about what the student is into; the server screens them. */
+  questStart(buddy: string | null, goal: string | null, interests?: string | null): Promise<QuestStart>;
   questNext(id: string): Promise<QuestNext>;
   questAnswer(id: string, response: unknown, elapsedMs: number | null): Promise<AnswerResult>;
   questFinish(id: string): Promise<unknown>;
@@ -63,7 +64,7 @@ export function createHttpClient(base = ''): ApiClient {
     health: () => call('GET', '/api/health'),
     newStudent: () => call('POST', '/api/students'),
     questOptions: () => call('GET', '/api/quest/options'),
-    questStart: (buddy, goal) => call('POST', '/api/quest', {buddy, goal}),
+    questStart: (buddy, goal, interests) => call('POST', '/api/quest', interests ? {buddy, goal, interests} : {buddy, goal}),
     questNext: id => call('GET', `/api/quest/${encodeURIComponent(id)}/next`),
     questAnswer: (id, response, elapsedMs) => call('POST', `/api/quest/${encodeURIComponent(id)}/answer`, {response, elapsedMs}),
     questFinish: id => call('POST', `/api/quest/${encodeURIComponent(id)}/finish`, {}),

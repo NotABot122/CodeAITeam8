@@ -27,6 +27,7 @@ from .blocks import python_to_blocks
 STUDENT_ID = re.compile(r"^([0-9a-f]{32}|STU-[0-9a-f]{16,32})$")  # lesson-only students, or ones made by the readiness quest
 MAX_CODE_CHARS = 20_000
 MAX_THEME_CHARS = 300
+MAX_INTEREST_CHARS = 80         # the readiness check keeps at most max_goal_chars (diagnostic.yaml) of it
 
 
 class ApiError(Exception):
@@ -341,17 +342,20 @@ class Service:
     def quest_options(self) -> Dict[str, Any]:
         return self.course.diagnostic_options()
 
-    def quest_start(self, buddy: Any, goal: Any) -> Dict[str, Any]:
+    def quest_start(self, buddy: Any, goal: Any, interests: Any = None) -> Dict[str, Any]:
         for value in (buddy, goal):
             if value is not None and (not isinstance(value, str) or len(value) > 40):
                 raise ApiError(400, "bad_request", "Pick a buddy and a goal from the lists.")
+        if interests is not None and (not isinstance(interests, str) or len(interests) > MAX_INTEREST_CHARS):
+            raise ApiError(400, "request_too_long", f"Keep it under {MAX_INTEREST_CHARS} characters.")
         options = self.course.diagnostic_options()
         if buddy is not None and buddy not in {b["id"] for b in options["buddies"]}:
             raise ApiError(400, "bad_request", "Pick a buddy from the list.")
         if goal is not None and goal not in {g["id"] for g in options["goals"]}:
             raise ApiError(400, "bad_request", "Pick a goal from the list.")
-        # The free-text goal is left out on purpose: the screen only offers taps.
-        return self._guard(lambda: self.course.diagnostic_start(buddy, goal, None))
+        # "What are you into?" is optional free text. The quest screens it (diagnostic.safety.clean_goal_text):
+        # personal details, filtered words or instructions to the AI mean it's dropped, and the student is told.
+        return self._guard(lambda: self.course.diagnostic_start(buddy, goal, (interests or "").strip() or None))
 
     def quest_next(self, student_id: str) -> Dict[str, Any]:
         self._check_id(student_id)

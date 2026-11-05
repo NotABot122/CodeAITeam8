@@ -6,7 +6,7 @@ Routes (JSON):
     GET  /api/health
     POST /api/students                      -> new student + state (skips the readiness quest)
     GET  /api/quest/options                 -> buddies, goals, zones
-    POST /api/quest                         {"buddy", "goal"} -> {student_id, welcome, first}
+    POST /api/quest                         {"buddy", "goal", "interests"?} -> {student_id, welcome, first}
     GET  /api/quest/<id>/next               -> next step, or {done: true, ...} (result is applied)
     POST /api/quest/<id>/answer             {"response", "elapsedMs"} -> feedback
     POST /api/quest/<id>/finish             -> end early (result is applied)
@@ -53,7 +53,7 @@ ROUTES = [
     ("GET", re.compile(r"^/api/health$"), lambda s, m, b: s.health()),
     ("POST", re.compile(r"^/api/students$"), lambda s, m, b: s.new_student()),
     ("GET", re.compile(r"^/api/quest/options$"), lambda s, m, b: s.quest_options()),
-    ("POST", re.compile(r"^/api/quest$"), lambda s, m, b: s.quest_start(b.get("buddy"), b.get("goal"))),
+    ("POST", re.compile(r"^/api/quest$"), lambda s, m, b: s.quest_start(b.get("buddy"), b.get("goal"), b.get("interests"))),
     ("GET", re.compile(rf"^/api/quest/{ID}/next$"), lambda s, m, b: s.quest_next(m[1])),
     ("POST", re.compile(rf"^/api/quest/{ID}/answer$"), lambda s, m, b: s.quest_answer(m[1], b.get("response"), b.get("elapsedMs"))),
     ("POST", re.compile(rf"^/api/quest/{ID}/finish$"), lambda s, m, b: s.quest_finish(m[1])),

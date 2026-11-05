@@ -9,6 +9,7 @@ import type {PathwayView, ProjectChoices, StudentState} from '@/api/types';
 import {GRADES} from './Landing';
 import {ThemeDialog} from '@/ui/Dialogs';
 
+import MatchCard from './MatchCard';
 import ProjectPicker from './ProjectPicker';
 
 const msg = (e: unknown) => (e instanceof Error ? e.message : 'Something went wrong. Try again.');
@@ -141,6 +142,12 @@ export default function PathwayScreen({client, studentId, grade: initialGrade, e
               </Box>
             </Box>
 
+            {choices?.match && <MatchCard match={choices.match} heading="Suggested for you" />}
+            {choices?.match?.themeIdea && aiOn && (
+              <Typography color="text.secondary">
+                None of the ready-made stories is about “{choices.match.themeIdea}”. Use Make it yours below to build one that is.
+              </Typography>
+            )}
             {choices && choices.choices.length > 1 && (
               <Box>
                 <Typography sx={{fontWeight: 700, mb: 1}}>Pick your project</Typography>

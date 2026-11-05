@@ -96,7 +96,17 @@ export interface PathwayResult {pathway: PathwayView; state: StudentState}
 
 /** Projects with the same skills and different stories; the readiness check's goal suggests one. */
 export interface ProjectChoice {project: string; title: string; pitch: string; suggested: boolean; current: boolean; custom?: boolean}
-export interface ProjectChoices {choices: ProjectChoice[]; locked: boolean; topic: string}
+/** Why a project was suggested (engine/matching.py). Plain sentences; never stages or scores. */
+export interface ProjectMatch {
+  project: string; title: string; pitch: string;
+  /** Interests: the goal they picked and the words they typed. */
+  because: string[];
+  /** Skills: what the check is confident about and what they warm up on first. */
+  fit: string[];
+  /** What they typed, when no ready-made story matched it: an idea for "Make it yours". */
+  themeIdea: string | null;
+}
+export interface ProjectChoices {choices: ProjectChoice[]; locked: boolean; topic: string; match?: ProjectMatch | null}
 export interface ChooseResult extends ProjectChoices {state: StudentState}
 
 export interface StudentState {

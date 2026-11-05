@@ -24,7 +24,7 @@ export default function ProjectPicker({choices, locked, busy, onPick, onCustom}:
             <Box sx={{display: 'flex', alignItems: 'center', gap: 1, mb: 0.5, flexWrap: 'wrap'}}>
               {c.current && <CheckCircleIcon color="primary" fontSize="small" aria-hidden />}
               <Typography sx={{fontWeight: 700}}>{c.title}</Typography>
-              {c.suggested && <Chip label="Matches your goal" size="small" color="secondary" variant="outlined" />}
+              {c.suggested && <Chip label="Best match for you" size="small" color="secondary" variant="outlined" />}
             </Box>
             <Typography variant="body2" color="text.secondary">{c.pitch}</Typography>
           </ButtonBase>

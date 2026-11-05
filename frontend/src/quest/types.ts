@@ -1,4 +1,5 @@
 // Shapes from /api/quest (the readiness quest in diagnostic/). The quest never sends stages, scores or answer keys.
+import type {ProjectMatch} from '@/api/types';
 export interface Zone {id: string; name: string; story: string; done?: boolean; current?: boolean}
 export interface Choice {id: string; label: string}
 export interface QuestOptions {title: string; guide: string; message: string; buddies: Choice[]; goals: Choice[]; zones: Zone[]}
@@ -46,6 +47,8 @@ export interface QuestDone {
   message: string;
   goal_connection?: string;
   next_stop?: {zone: string; activity: {id: string; title: string} | null; project?: string};
+  /** Why the suggested project fits: interests chose the story, the check's results chose the start. */
+  match?: ProjectMatch | null;
   skill_tree: SkillNode[];
   zones: Zone[];
 }
@@ -53,6 +56,8 @@ export type QuestNext = NextStepResult | QuestDone;
 
 export interface QuestStart {
   student_id: string;
+  /** e.g. the interests text was dropped because it had personal details. */
+  notices?: string[];
   welcome: {title: string; message: string; buddies: Choice[]; goals: Choice[]; zones: Zone[]; game: Game};
   first: QuestNext;
 }

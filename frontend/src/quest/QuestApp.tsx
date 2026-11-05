@@ -2,13 +2,15 @@ import FlagIcon from '@mui/icons-material/Flag';
 import StarIcon from '@mui/icons-material/Star';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
-import {Alert, Box, Button, Chip, CircularProgress, Container, LinearProgress, Paper, Typography} from '@mui/material';
+import {Alert, Box, Button, Chip, CircularProgress, Container, LinearProgress, Paper, TextField, Typography} from '@mui/material';
 import {useCallback, useEffect, useRef, useState} from 'react';
 
 import type {ApiClient} from '@/api/client';
 
 import {InlineText} from '@/ui/markdown';
 import {expectedSeconds, SLOW_DOWN_MESSAGE, useCountdown, usePace} from '@/ui/pace';
+
+import MatchCard from '@/landing/MatchCard';
 
 import {ExplainView, initialResponse, ItemView, QuestionBody, responseReady} from './StepView';
 import type {AnswerResult, Feedback, Game, QuestDone, QuestOptions, Step, Zone} from './types';
@@ -21,6 +23,7 @@ const stepSeconds = (step: Step) => step.kind === 'explain' ? 0 : expectedSecond
 });
 
 const msg = (e: unknown) => (e instanceof Error ? e.message : 'Something went wrong. Try again.');
+const INTEREST_MAX_CHARS = 80;   // max_goal_chars in diagnostic.yaml
 
 function ZoneBar({zones}: {zones: Zone[]}) {
   return (
@@ -59,6 +62,9 @@ export default function QuestApp({client, resumeId, onStarted, onFinished, onSki
   const [game, setGame] = useState<Game | null>(null);
   const [buddy, setBuddy] = useState<string | null>(null);
   const [goal, setGoal] = useState<string | null>(null);
+  // Optional: what the student is into. The server screens it and drops it if it has personal details.
+  const [interests, setInterests] = useState('');
+  const [notices, setNotices] = useState<string[]>([]);
   const [value, setValue] = useState<unknown>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -92,8 +98,8 @@ export default function QuestApp({client, resumeId, onStarted, onFinished, onSki
   const start = async () => {
     setBusy(true); setError(null);
     try {
-      const r = await client.questStart(buddy, goal);
-      onStarted(r.student_id); setStudentId(r.student_id); setGame(r.welcome.game); show(r.first);
+      const r = await client.questStart(buddy, goal, interests.trim() || null);
+      onStarted(r.student_id); setStudentId(r.student_id); setGame(r.welcome.game); setNotices(r.notices ?? []); show(r.first);
     } catch (e) { setError(msg(e)); } finally { setBusy(false); }
   };
 
@@ -128,6 +134,7 @@ export default function QuestApp({client, resumeId, onStarted, onFinished, onSki
       </Box>
       <Container maxWidth="md" sx={{py: 3, display: 'grid', gap: 2}}>
         {error && <Alert severity="error" onClose={() => setError(null)}>{error}</Alert>}
+        {notices.map((n, i) => <Alert key={i} severity="info" onClose={() => setNotices(ns => ns.filter((_, j) => j !== i))}>{n}</Alert>)}
         {phase.name === 'loading' && !error && <Box sx={{display: 'grid', placeItems: 'center', py: 8}}><CircularProgress aria-label="Loading" /></Box>}
 
         {phase.name === 'welcome' && (
@@ -151,6 +158,11 @@ export default function QuestApp({client, resumeId, onStarted, onFinished, onSki
                   <Button key={g.id} role="radio" aria-checked={goal === g.id} variant={goal === g.id ? 'contained' : 'outlined'} onClick={() => setGoal(g.id)}>{g.label}</Button>
                 ))}
               </Box>
+            </Box>
+            <Box>
+              <TextField fullWidth label="What are you into? (optional)" placeholder="soccer, animals, video games, books"
+                value={interests} onChange={e => setInterests(e.target.value)} slotProps={{htmlInput: {maxLength: INTEREST_MAX_CHARS}}}
+                helperText="We use this to pick a project story for you. Don't include your name or other personal details." />
             </Box>
             <Box><ZoneBar zones={phase.options.zones} /></Box>
             <Box sx={{display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap'}}>
@@ -226,6 +238,7 @@ export default function QuestApp({client, resumeId, onStarted, onFinished, onSki
               </Paper>
             )}
             {!phase.result.next_stop?.activity && phase.result.goal_connection && <Typography color="text.secondary">{phase.result.goal_connection}</Typography>}
+            {phase.result.match && <MatchCard match={phase.result.match} />}
             {game && <GameBar game={game} />}
             <Box>
               <Typography sx={{fontWeight: 700, mb: 1}}>Your skill map</Typography>
