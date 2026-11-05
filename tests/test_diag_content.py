@@ -271,3 +271,17 @@ class ContentFilterOnQuestions(TempDirCase):
                                   'prompt: "total = 0 at the start. What is total after the loop?"')
         self.assertFalse(result.passed)
         self.assertTrue(any("code in its sentence" in p for p in result.problems), result.problems)
+
+
+class SimulatedWrongAnswers(unittest.TestCase):
+    """A simulated student's wrong answer must really score as wrong, or a guesser looks skilled."""
+
+    def test_every_wrong_answer_fails(self):
+        import random
+
+        from diagnostic.scoring import score_response
+        from diagnostic.simulation import _wrong
+
+        for item in content().items.values():
+            for seed in range(50):
+                self.assertFalse(score_response(item, _wrong(item, random.Random(seed))).passed, item.id)

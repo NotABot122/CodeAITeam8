@@ -14,6 +14,7 @@ human-rated answers from real children.
 """
 from __future__ import annotations
 
+import math
 import random
 from dataclasses import dataclass, field
 from typing import Any, Dict, List
@@ -136,10 +137,12 @@ def _wrong(item: Item, rng: random.Random) -> Any:
         i = rng.randrange(len(order) - 1)
         order[i], order[i + 1] = order[i + 1], order[i]
         return order
+    # Misplace enough cards to fall below the pass mark: with 5 cards and an 80% bar, one wrong card still passes.
     response = dict(item.answer)
-    flip = rng.choice(sorted(response))
-    other = [b.id for b in item.buckets if b.id != response[flip]]
-    response[flip] = rng.choice(other)
+    cards = sorted(response)
+    for flip in rng.sample(cards, math.floor(len(cards) * (1 - item.pass_credit) + 1e-9) + 1):
+        other = [b.id for b in item.buckets if b.id != response[flip]]
+        response[flip] = rng.choice(other)
     return response
 
 
