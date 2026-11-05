@@ -17,6 +17,12 @@ ITEM_TYPES = CHOICE_LIKE + (ORDER, SORT)
 # How a sort item is drawn. The answer model is the same: every card goes in one bucket.
 DISPLAYS = ("rows", "belt", "chips")   # tap table rows | sorting belt | word chips into boxes
 
+# How a question shows code. Code never goes inside the prompt sentence: it goes in `code` (a block,
+# shown under the prompt) or `table` (rows of data). Short names inside sentences use `backticks`.
+CODE_LANGS = ("python", "sql")
+OPTION_FORMATS = ("text", "code")      # code: every option or card is drawn in the code font
+DEFAULT_OPTION_FORMAT = {CHOICE: "text", SORT: "text", SPOT: "code", TRACE: "code", ORDER: "code"}
+
 # The point vector from the project spec (P_node). Every item feeds one facet.
 CONCEPTUAL, SYNTAX, PROBLEM_SOLVING = "conceptual", "syntax", "problem_solving"
 FACETS = (CONCEPTUAL, SYNTAX, PROBLEM_SOLVING)
@@ -58,6 +64,15 @@ class Bucket:
 
 
 @dataclass(frozen=True)
+class Table:
+    columns: Tuple[str, ...]
+    rows: Tuple[Tuple[str, ...], ...]
+
+    def public(self) -> Dict[str, Any]:
+        return {"columns": list(self.columns), "rows": [list(r) for r in self.rows]}
+
+
+@dataclass(frozen=True)
 class Item:
     id: str
     concept: Optional[str]          # None for boosters
@@ -75,6 +90,10 @@ class Item:
     feedback_wrong: Optional[str] = None
     pass_credit: float = 1.0
     display: Optional[str] = None   # sort items only: a game skin; never changes how it is scored
+    code: Optional[str] = None      # a code block shown under the prompt
+    code_lang: str = "python"
+    table: Optional[Table] = None   # rows of data shown under the prompt
+    option_format: str = "text"
 
     @property
     def guess_chance(self) -> float:
@@ -92,10 +111,16 @@ class Item:
 
     def public(self, rng: random.Random) -> Dict[str, Any]:
         """What the student's screen needs. Never includes the answer or misconception tags."""
-        payload: Dict[str, Any] = {"id": self.id, "type": self.type, "prompt": self.prompt}
+        payload: Dict[str, Any] = {"id": self.id, "type": self.type, "prompt": self.prompt,
+                                   "option_format": self.option_format}
+        if self.code:
+            payload["code"] = {"lang": self.code_lang, "text": self.code}
+        if self.table is not None:
+            payload["table"] = self.table.public()
         if self.type in CHOICE_LIKE:
             options = [{"id": o.id, "text": o.text} for o in self.options]
-            rng.shuffle(options)
+            if self.type != SPOT:       # a spot item's options are the lines of one program, in order
+                rng.shuffle(options)
             payload["options"] = options
         else:
             cards = [{"id": c.id, "text": c.text} for c in self.cards]

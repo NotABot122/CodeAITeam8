@@ -1,12 +1,16 @@
 """The evaluation team's `validate_submission` tool, backed by the diagnostic.
 
-Contract: evaluation/schemas/validate_submission.schema.json (v0.2 adds the four
-Weather Station concepts as sub-skills and the `personal_info` filter flag).
+Contract: evaluation/schemas/validate_submission.schema.json (v0.2).
 
-  input   lesson_id, level_id (the explain prompt id), attempt_no, submission_text,
-          rubric_id, optional student_id
-  output  results[] (one per targeted sub-skill: stage 0-3 or null, confidence,
-          rationale, evidence quotes), model_id, latency_ms, tokens, filter_flags
+  input   lesson_id, task_id (the explain prompt id; the v0.1 name level_id is still
+          accepted), attempt_no, submission_text, rubric_id, optional student_id
+  output  contract_version, rubric_id, results[] (one per targeted sub-skill: stage 0-3
+          or null, confidence, rationale, evidence quotes), scorable, needs_review,
+          filter_flags, model_id, latency_ms, tokens
+
+`scorable` is false when the text was not graded (stage null). That covers the
+contract's BLOCKING flags and, for children, prompt_injection and severe
+inappropriate content too. `needs_review` is true when a REVIEW flag is present.
 
 Rules kept from HARNESS_AND_MCP_STANDARD.md section 1.3:
   - unscorable input gets stage null and a flag, never a guessed stage;
@@ -26,10 +30,12 @@ from .ai.reader import ExplainReading, read_explanation
 from .content import Content
 from .models import ExplainPrompt
 
+CONTRACT_VERSION = "0.2"
 RUBRIC_ID = "WS-DIAG-v0.1-draft"
 TOOL_NAME = "validate_submission"
 MAX_SUBMISSION_CHARS = 8000
-REQUIRED_INPUT = ("lesson_id", "level_id", "attempt_no", "submission_text", "rubric_id")
+REQUIRED_INPUT = ("lesson_id", "task_id", "attempt_no", "submission_text", "rubric_id")
+REVIEW_FLAGS = frozenset({"prompt_injection", "inappropriate", "suspected_ai_paste"})
 
 
 class ToolError(RuntimeError):
@@ -41,7 +47,16 @@ def find_prompt(content: Content, prompt_id: str) -> ExplainPrompt:
         if prompt.id == prompt_id:
             return prompt
     known = ", ".join(sorted(p.id for p in content.explain.values()))
-    raise ValueError(f"unknown level_id {prompt_id!r}; available: {known}")
+    raise ValueError(f"unknown task_id {prompt_id!r}; available: {known}")
+
+
+def normalize_input(tool_input: Dict[str, Any]) -> Dict[str, Any]:
+    """Accept the deprecated v0.1 field name level_id for task_id."""
+    normalized = dict(tool_input)
+    legacy = normalized.pop("level_id", None)
+    if legacy is not None:
+        normalized.setdefault("task_id", legacy)
+    return normalized
 
 
 def check_input(tool_input: Dict[str, Any]) -> None:
@@ -71,7 +86,11 @@ def output_from_reading(prompt: ExplainPrompt, reading: ExplainReading) -> Dict[
         "evidence_quotes": list(reading.quotes) if reading.stage is not None else [],
     }
     return {
+        "contract_version": CONTRACT_VERSION,
+        "rubric_id": RUBRIC_ID,
         "results": [result],
+        "scorable": not reading.unscorable,
+        "needs_review": bool(REVIEW_FLAGS & set(reading.flags)),
         "model_id": reading.model_id,
         "latency_ms": reading.latency_ms,
         "tokens_in": reading.tokens_in,
@@ -83,8 +102,9 @@ def output_from_reading(prompt: ExplainPrompt, reading: ExplainReading) -> Dict[
 def validate_submission(tool_input: Dict[str, Any], content: Content,
                         provider: Optional[ModelProvider] = None) -> Dict[str, Any]:
     """Run the tool. Raises ValueError for bad input and ToolError when the model call fails."""
+    tool_input = normalize_input(tool_input)
     check_input(tool_input)
-    prompt = find_prompt(content, tool_input["level_id"])
+    prompt = find_prompt(content, tool_input["task_id"])
     zone = content.zone_for(prompt.concept)
     reading = read_explanation(prompt, zone.name, tool_input["submission_text"], provider, content.config)
     if reading.error is not None:

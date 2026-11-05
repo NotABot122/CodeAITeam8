@@ -49,6 +49,7 @@ _INJECTION = [re.compile(p) for p in _INJECTION_PATTERNS]
 
 # Mild rudeness: flagged, but a fair answer in the same text is still scored.
 _MILD_INSULTS = ("stupid", "idiot", "hate you", "shut up", "damn", "dumb")
+_MILD_INSULT_WORDS = re.compile(r"\b(" + "|".join(re.escape(w) for w in _MILD_INSULTS) + r")\b", re.IGNORECASE)
 _NAME_INTRO = re.compile(r"\b(my name is|i am called|i live (at|on|in)|my address is|my school is|i go to)\b", re.IGNORECASE)
 
 
@@ -123,6 +124,18 @@ def clean_goal_text(text: Optional[str], max_chars: int) -> Tuple[Optional[str],
     if result.unscorable or result.has(INAPPROPRIATE):
         return None, result.flags
     return collapsed, ()
+
+
+def authored_text_problem(text: str) -> Optional[str]:
+    """Why a line of authored, student-facing content is not fit to show, or None. Stricter than the
+    check on what students type: mild insults are also out (a student may write one; content never does).
+    Local rules only: content checks never make a network call."""
+    screened = screen_text(text, local_only=True)
+    if screened.blocked:
+        return screened.category
+    if _MILD_INSULT_WORDS.search(text):
+        return "mild_insult"
+    return None
 
 
 # Output ---------------------------------------------------------------------------

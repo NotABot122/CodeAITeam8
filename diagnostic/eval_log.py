@@ -16,6 +16,7 @@ import uuid
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from .contract import CONTRACT_VERSION
 from .paths import PathLike
 
 LOG_NAME = "eval_events.jsonl"
@@ -51,6 +52,7 @@ class EvalEventLog:
               latency_ms: int, filter_result: List[str], fallback: bool, error: Optional[str]) -> Dict[str, Any]:
         return {
             "timestamp": dt.datetime.now(dt.timezone.utc).isoformat(),
+            "contract_version": CONTRACT_VERSION,
             "run_id": self.run_id,
             "student_id": log_student_id(student_id),
             "lesson_id": lesson_id,
@@ -71,7 +73,9 @@ class EvalEventLog:
                          output.get("model_id", ""), output.get("latency_ms", 0), output.get("filter_flags", []),
                          fallback, error)
         row["attempt_no"] = attempt_no
+        row["rubric_id"] = output.get("rubric_id")
         row["output"] = output
+        row["needs_review"] = bool(output.get("needs_review", False))
         stages = {r["subskill"]: r["stage"] for r in output.get("results", [])}
         row["stages"] = stages
         for legacy in ("prompting", "evaluation", "prompt_revision"):    # v0.1 fields, when present

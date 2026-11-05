@@ -2,6 +2,7 @@ import AltRouteIcon from '@mui/icons-material/AltRoute';
 import FactCheckOutlinedIcon from '@mui/icons-material/FactCheckOutlined';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import TerminalIcon from '@mui/icons-material/Terminal';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
 import {Box, Button, Container, Paper, Typography} from '@mui/material';
 import type {ReactNode} from 'react';
 
@@ -22,8 +23,10 @@ function Step({n, icon, title, children}: {n: number; icon: ReactNode; title: st
 }
 
 /** The front page: what happens, the student's grade, then the readiness check. */
-export default function Landing({grade, onGrade, onStart, onSkip, resume}: {
+export default function Landing({grade, onGrade, onStart, onSkip, onImport, resume}: {
   grade: number | null; onGrade: (g: number) => void; onStart: () => void; onSkip: () => void;
+  /** Skip the readiness check with an earlier lesson's results. */
+  onImport: () => void;
   /** A saved student on this browser: where they left off. */
   resume: {label: string; onResume: () => void} | null;
 }) {
@@ -88,6 +91,14 @@ export default function Landing({grade, onGrade, onStart, onSkip, resume}: {
             </Button>
             {grade === null && <Typography variant="body2" color="text.secondary">Pick your grade first.</Typography>}
           </Box>
+        </Paper>
+        <Paper variant="outlined" component="section" aria-labelledby="import-label" sx={{p: {xs: 2, sm: 3}, borderRadius: '12px',
+          display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap'}}>
+          <Box sx={{flex: 1, minWidth: 240}}>
+            <Typography id="import-label" sx={{fontWeight: 700}}>Already did a lesson like this?</Typography>
+            <Typography color="text.secondary">Import your results from an earlier lesson and skip the readiness check.</Typography>
+          </Box>
+          <Button variant="outlined" size="large" startIcon={<UploadFileIcon />} onClick={onImport}>Import my results</Button>
         </Paper>
       </Container>
     </Box>

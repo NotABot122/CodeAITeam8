@@ -1,4 +1,6 @@
 # Zone: Loop Lab (loops). Grades 9-12. Code is Python, as in the lesson.
+# Layout rule (enforced by check-content): code goes in `code:` as a block, never inside the prompt
+# sentence. Short names and values inside sentences use `backticks`.
 # rep-3b is a poly-hierarchy item: it feeds count_with_rule (loops) and also
 # gives credit to if_else_compare (conditionals) when answered right.
 concept: loops
@@ -14,8 +16,11 @@ items:
   - id: rep-1a
     tier: 1
     type: choice
+    option_format: code
     nodes: [repeat_steps]
-    prompt: "rains = [2.0, 5.5, 1.0]. Which code prints every value in rains?"
+    prompt: "Which line prints every value in `rains`?"
+    code: |
+      rains = [2.0, 5.5, 1.0]
     options:
       - {id: a, text: "for r in rains: print(r)", correct: true}
       - {id: b, text: "if rains: print(rains[0])", misconception: confuses_if_with_repeat, why: "An if runs once. A loop runs once per item."}
@@ -26,21 +31,29 @@ items:
     tier: 1
     type: trace
     nodes: [repeat_steps]
-    prompt: "count = 0. Then: for day in range(3): count += 1. What is count after the loop?"
+    prompt: "What is `count` after this loop?"
+    code: |
+      count = 0
+      for day in range(3):
+          count += 1
     options:
       - {id: a, text: "3", correct: true}
-      - {id: b, text: "1", misconception: loop_runs_once, why: "range(3) runs the body three times."}
-      - {id: c, text: "0", misconception: ignores_task, why: "count goes up on every pass."}
-      - {id: d, text: "4", misconception: off_by_one, why: "range(3) gives 0, 1, 2: three passes."}
+      - {id: b, text: "1", misconception: loop_runs_once, why: "`range(3)` runs the body three times."}
+      - {id: c, text: "0", misconception: ignores_task, why: "`count` goes up on every pass."}
+      - {id: d, text: "4", misconception: off_by_one, why: "`range(3)` gives 0, 1, 2: three passes."}
     feedback_right: "Yes. Three passes, so 3."
   - id: rep-2a
     tier: 2
     type: trace
     nodes: [running_total]
-    prompt: "total = 0. Then: for r in [2, 5, 1]: total += r. What is total after the loop?"
+    prompt: "What is `total` after this loop?"
+    code: |
+      total = 0
+      for r in [2, 5, 1]:
+          total += r
     options:
       - {id: a, text: "8", correct: true}
-      - {id: b, text: "1", misconception: keeps_last_only, why: "+= adds to total. It does not replace it."}
+      - {id: b, text: "1", misconception: keeps_last_only, why: "`+=` adds to `total`. It does not replace it."}
       - {id: c, text: "5", misconception: keeps_biggest, why: "A running total adds every value."}
       - {id: d, text: "2", misconception: keeps_first_only, why: "The loop keeps adding after the first value."}
     feedback_right: "Yes. 2 + 5 + 1 is 8."
@@ -49,7 +62,7 @@ items:
     type: order
     nodes: [running_total]
     misconception: skips_start_value
-    prompt: "Put these lines in order so the function adds up rain_mm over all rows."
+    prompt: "Put these lines in order so the function adds up `rain_mm` over all rows."
     cards:
       - {id: s1, text: "total = 0.0"}
       - {id: s2, text: "for row in rows:"}
@@ -61,10 +74,15 @@ items:
     tier: 3
     type: trace
     nodes: [find_biggest]
-    prompt: "highest = None. Then: for t in [12, 30, 25]: if highest is None or t > highest: highest = t. What is highest after the loop?"
+    prompt: "What is `highest` after this loop?"
+    code: |
+      highest = None
+      for t in [12, 30, 25]:
+          if highest is None or t > highest:
+              highest = t
     options:
       - {id: a, text: "30", correct: true}
-      - {id: b, text: "25", misconception: keeps_last_only, why: "highest only changes when t is bigger. 25 is not bigger than 30."}
+      - {id: b, text: "25", misconception: keeps_last_only, why: "`highest` only changes when `t` is bigger. 25 is not bigger than 30."}
       - {id: c, text: "12", misconception: keeps_first_only, why: "The loop keeps checking after the first value."}
       - {id: d, text: "67", misconception: adds_instead, why: "This tracks the largest value. It does not add."}
     feedback_right: "Yes. 30 is the largest."
@@ -72,10 +90,15 @@ items:
     tier: 3
     type: trace
     nodes: [count_with_rule, if_else_compare]
-    prompt: "count = 0. Then: for t in [36, 30, 35, 41]: if t >= 35: count += 1. What is count after the loop?"
+    prompt: "What is `count` after this loop?"
+    code: |
+      count = 0
+      for t in [36, 30, 35, 41]:
+          if t >= 35:
+              count += 1
     options:
       - {id: a, text: "3", correct: true}
-      - {id: b, text: "2", misconception: at_least_means_over, why: ">= 35 includes 35, so it counts."}
-      - {id: c, text: "4", misconception: counts_every_day, why: "count only goes up when the if is True."}
+      - {id: b, text: "2", misconception: at_least_means_over, why: "`>= 35` includes 35, so it counts."}
+      - {id: c, text: "4", misconception: counts_every_day, why: "`count` only goes up when the if is True."}
       - {id: d, text: "1", misconception: counts_first_only, why: "The loop checks every value, not only the first."}
     feedback_right: "Yes. 36, 35 and 41 count."

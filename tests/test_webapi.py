@@ -152,6 +152,19 @@ class WebApiTests(unittest.TestCase):
             self.svc.build_theme(sid, "pokemon")
         self.assertEqual(cm.exception.status, 503)
 
+    def test_quest_interests_are_optional_bounded_and_screened(self):
+        with self.assertRaises(ApiError) as cm:
+            self.svc.quest_start("cloud", "not_sure", "x" * 81)
+        self.assertEqual(cm.exception.status, 400)
+        with self.assertRaises(ApiError):
+            self.svc.quest_start("cloud", "not_sure", {"text": "games"})
+        from diagnostic.store import DiagnosticStore
+        kept = self.svc.quest_start("cloud", "not_sure", "  video games  ")
+        self.assertEqual(DiagnosticStore(Path(self.tmp.name)).load(kept["student_id"]).goal_text, "video games")
+        dropped = self.svc.quest_start("cloud", "not_sure", "call me on 555-123-4567")
+        self.assertTrue(dropped["notices"])
+        self.assertIsNone(DiagnosticStore(Path(self.tmp.name)).load(dropped["student_id"]).goal_text)
+
 
 if __name__ == "__main__":
     unittest.main()

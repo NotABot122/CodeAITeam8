@@ -1,0 +1,2 @@
+# Vendored into the AgentCore deployment package for Linux arm64 (see package.py).
+PyYAML>=6.0,<7

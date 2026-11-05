@@ -108,7 +108,7 @@ game:
     explain_skip: "No problem. Moving on."
     bonus_intro: "One more question to confirm."
     flagged_text: "That answer was skipped. Please keep answers respectful and on topic."
-    goal_flagged: "A default goal was picked. You can change it later."
+    goal_flagged: "We didn't keep what you typed about your interests. Please leave out personal details. You can still pick your project later."
     finish: "Check complete, {buddy}."
   xp:
     try: 5               # for every answer, so effort is rewarded

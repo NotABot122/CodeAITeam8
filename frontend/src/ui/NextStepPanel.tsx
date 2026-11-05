@@ -21,7 +21,7 @@ export default function NextStepPanel({state, busy, error, onPick, onRestart}: {
           ) : (
             <Box key={i} sx={{display: 'grid', gap: 1}}>
               {o.kind === 'new_theme' && (
-                <TextField size="small" label="Your theme" placeholder="pokemon, soccer, space" value={theme} disabled={busy}
+                <TextField size="small" label="Your theme" placeholder="soccer, space, music" value={theme} disabled={busy}
                   slotProps={{htmlInput: {maxLength: 300}}} onChange={e => setTheme(e.target.value)} />
               )}
               <Button variant={i === 0 ? 'contained' : 'outlined'} size="large" disabled={busy || (o.kind === 'new_theme' && !theme.trim())}

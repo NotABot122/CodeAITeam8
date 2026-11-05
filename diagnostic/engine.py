@@ -30,8 +30,9 @@ from .ai.reader import ExplainReading, read_explanation
 from .content import Content, load_content
 from .contract import RUBRIC_ID, output_from_reading
 from .eval_log import EvalEventLog
+from .importer import imported_estimates, imported_points, list_samples, load_sample, parse_export
 from .models import ROLE_BONUS, InvalidResponse, ItemResult
-from .paths import PathLike, data_dir as default_data_dir, project_dir as default_project_dir
+from .paths import PathLike, content_dir, data_dir as default_data_dir, project_dir as default_project_dir
 from .placement import Placement, build_placement, start_concept
 from .report import teacher_report
 from .safety import clean_goal_text
@@ -169,7 +170,7 @@ class DiagnosticEngine:
     def teacher_report(self, student_id: str) -> Dict[str, Any]:
         """Teachers only: has stages, confidence and answers' mistakes. An interim report works mid-quest."""
         state, _ = self._load(student_id)
-        estimates = estimate_all(self.content.concepts(), state.results, self.content.config.scoring)
+        estimates = self._estimates(state)
         node_states = self._node_states(state)
         if state.placement:
             placement = self._placement(state)
@@ -177,7 +178,37 @@ class DiagnosticEngine:
             placement = build_placement(self.content, self.manifest, state, estimates, node_states, None)
         report = teacher_report(self.content, state, estimates, node_states, placement)
         report["finished"] = state.phase == COMPLETE
+        report["source"] = {"kind": "imported", "at": state.imported.get("at")} if state.imported \
+            else {"kind": "readiness_check"}
         return report
+
+    # Starting from an earlier lesson (diagnostic/importer.py) ------------------------------------
+    def import_samples(self) -> List[Dict[str, str]]:
+        """Synthetic sample students for demos: [{id, label, about}]."""
+        return list_samples(content_dir(self.project.root))
+
+    def load_sample(self, sample_id: str) -> Dict[str, Any]:
+        return load_sample(content_dir(self.project.root), sample_id)
+
+    def import_previous(self, data: Any) -> Dict[str, Any]:
+        """Create a student whose readiness record comes from an earlier lesson's results. Raises ImportRejected.
+        Returns the same closing screen as a finished quest, plus "student_id" and "notices"."""
+        record = parse_export(data, self.content)
+        cfg = self.content.config
+        student_id = self.store.new_student()
+        state = DiagnosticState(student_id=student_id, quest_id=cfg.id,
+                                goal_id=record.goal_id or self.content.default_goal().id, buddy=cfg.buddies[0][0],
+                                goal_text=record.interests,
+                                imported={"at": now_iso(), "concepts": record.concepts})
+        placement = build_placement(self.content, self.manifest, state, self._estimates(state),
+                                    self._node_states(state), None)
+        state.placement, state.phase, state.finished_at = placement.to_dict(), COMPLETE, now_iso()
+        self.store.save(state)
+        self.events.write("diagnostic_imported", student_id=student_id, project_id=self.project.id,
+                          selected=placement.route.next_task_id, stages=placement.stages)
+        payload = self._result_payload(state)
+        payload.update(student_id=student_id, notices=list(record.notices))
+        return self._student(payload)
 
     # Choosing the next step -------------------------------------------------------------
     def _choose_step(self, state: DiagnosticState) -> Step:
@@ -279,7 +310,7 @@ class DiagnosticEngine:
                 "new_badges": [{"id": b, "name": game.badge_name(self.content, b)} for b in badges]}
 
     def _log_reading(self, state: DiagnosticState, prompt_id: str, text: str, reading: ExplainReading) -> None:
-        tool_input = {"student_id": state.student_id, "lesson_id": self.content.config.id, "level_id": prompt_id,
+        tool_input = {"student_id": state.student_id, "lesson_id": self.content.config.id, "task_id": prompt_id,
                       "attempt_no": 1, "submission_text": text, "rubric_id": RUBRIC_ID}
         prompt = next(p for p in self.content.explain.values() if p.id == prompt_id)
         self.eval_log.write_validate(state.student_id, self.content.config.id, prompt_id, 1, tool_input,
@@ -299,13 +330,20 @@ class DiagnosticEngine:
     # Finishing -----------------------------------------------------------------------------
     def _node_states(self, state: DiagnosticState):
         th = self.content.config.thresholds
-        return self.content.tree.evaluate(accumulate_points(state.results, self.content.items), th.unlock, th.master)
+        points = imported_points(self.content, state.imported) if state.imported else \
+            accumulate_points(state.results, self.content.items)
+        return self.content.tree.evaluate(points, th.unlock, th.master)
+
+    def _estimates(self, state: DiagnosticState):
+        if state.imported:
+            return imported_estimates(self.content, state.imported)
+        return estimate_all(self.content.concepts(), state.results, self.content.config.scoring)
 
     def _placement(self, state: DiagnosticState) -> Placement:
         return Placement.from_dict(state.placement)
 
     def _finish(self, state: DiagnosticState, notices: List[str]) -> Dict[str, Any]:
-        estimates = estimate_all(self.content.concepts(), state.results, self.content.config.scoring)
+        estimates = self._estimates(state)
         node_states = self._node_states(state)
         advice_result = advise(self.content, state, estimates, node_states, self.provider)
         placement = build_placement(self.content, self.manifest, state, estimates, node_states, advice_result.advice,

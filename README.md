@@ -110,16 +110,17 @@ Start the server with `--dev` to record every AI call and show the **AI inspecto
 
 The first topic can be learned in four projects with the same four levels, checks and skills (database retrieval, conditionals, loops, functions):
 
-| Project | Readiness-check goal | Story |
-|---|---|---|
-| `weather-station` | Build a weather report; I'm not sure yet | A year of weather readings → a report for a meteorologist |
-| `monster-arena` | Make a game | Balance the monsters in a creature-battling game |
-| `wildlife-watch` | Find patterns in data | Tracking data from animals in three parks |
-| `library-helper` | Build tools people can use | A tool that helps library volunteers find and flag books |
+| Project | Readiness-check goal | Some of its interest words | Story |
+|---|---|---|---|
+| `weather-station` | Build a weather report; I'm not sure yet | weather, climate, science | A year of weather readings → a report for a meteorologist |
+| `monster-arena` | Make a game | game, video game, strategy | Balance the monsters in a creature-battling game |
+| `wildlife-watch` | Find patterns in data | animal, bird, nature | Tracking data from animals in three parks |
+| `library-helper` | Build tools people can use | book, reading, helping | A tool that helps library volunteers find and flag books |
 
 The three new projects were rendered from hand-written specs with the theme templates (`engine/themes/`, the same ones the AI theme builder uses, but no AI involved), then given function banks, a `mistakes.yaml` and outlines. Each has its spec in `theme.json`. They pass the content check; the expected values and the new texts are drafts for teacher review. The choices are listed in `projects/catalog.yaml` (`topics[0].choices`, with the goals each one matches).
 
-- The readiness check's goal suggests a project ("Matches your goal"). The check's placement is translated into that project (a Weather Station practice becomes the same concept's practice), and the result card names the real first problem.
+- **Interests pick the story, skills pick the start** (`engine/matching.py`). The goal the student taps and the optional "What are you into?" words are matched to each choice's `interests` in `projects/catalog.yaml` (a matching goal is worth 3 points, each matching word 2; ties keep catalog order, so no signal means Weather Station). Every story teaches the same skills, so skill never picks the story. It picks where the student starts: the check's placement, warm-up practice before a gap, and the pathway. The result and pathway screens show a "Why this project fits you" card with both reasons in plain words, with no stages or numbers. When the typed words match no story, the pathway screen suggests Make it yours.
+- The check's placement is translated into the chosen project (a Weather Station practice becomes the same concept's practice), and the result card names the real first problem.
 - The pathway screen has a project picker; the pathway's steps and message follow the choice. Students who skip the check pick a project first.
 - The choice can change until the student runs code in it. After that it stays until the project is finished; then the course moves on to the next topic (Lists and Dictionaries).
 - API: `GET /api/students/<id>/projects`, `POST /api/students/<id>/project {"project": "monster-arena"}`.
@@ -171,17 +172,33 @@ python3 -m engine.cli answer --student ID             # answer a quiz step
 
 For the UI: `docs/HANDOFF-adaptive-path.md` describes the `Course` API and its JSON.
 
-### Readiness quest
+### Readiness check
 
-New students can start with the readiness quest (`diagnostic/`, merged from the `diagnosis` branch). It's a short game that estimates a stage and a confidence for each lesson concept. When it ends, every concept the quest is confident about (confidence 0.8 or higher, not borderline) becomes the student's starting stage, and the lesson starts at the quest's placement. Less certain concepts start at Stage 0. The rule is in `projects/catalog.yaml`.
+New students can start with the readiness check (`diagnostic/`, grades 9-12, Python and SQL). It adapts as it goes: each idea starts with an easy question, a right answer moves up a level, and a miss gets one second try before the check moves on. It estimates a stage and a confidence for each concept. When it ends, every concept the check is confident about (confidence 0.8 or higher, not borderline, at least 2 right answers) becomes the student's starting stage, and the lesson starts at the check's placement. Less certain concepts start at Stage 0. The rule is in `projects/catalog.yaml`.
+
+Code in a question is shown as code: a line-numbered, highlighted block (Python or SQL) or a data table under the prompt, never run into the sentence. Short names in sentences are `inline code`. `check-content` enforces this.
 
 ```bash
-python3 -m diagnostic.cli play                         # take the quest (prints your STU-... id)
-python3 -m engine.cli placement --student STU-...      # apply it: starting stages and first problem
-python3 -m engine.cli show --student STU-...           # then work as usual
+python3 -m diagnostic.cli play                         # take the check in the terminal (prints your student id)
+python3 -m engine.cli placement --student ID           # apply it: starting stages and first problem
+python3 -m engine.cli show --student ID                # then work as usual
 ```
 
-The quest was written for grades 3 to 5, while these lessons target grades 9 to 12. Its questions and wording may need an older version.
+### Import results from an earlier lesson
+
+A student who already did a similar lesson (or a demo with no time for the check) can skip it: **Import my results** on the landing page takes a small results file or one of four made-up sample students, one per pathway. The result works exactly like a finished check, with the same trust rules. The format is `codeai-lesson-export` v1 (a stage, `correct` and `answered` per concept, plus an optional goal and interests); see `diagnostic/importer.py` and the samples in `projects/weather-station/diagnostic/samples/`.
+
+- A file with personal details (a name, email, birthday, school...) is turned away, and the message says which field. Other unknown fields and any ids are ignored and never stored. The student gets a new random id.
+- The interests text is screened like the check's own (personal details, filtered words and instructions to the AI are dropped, with a notice). Only stages reach the event log.
+- A stage backed by one or two questions, or one the answers contradict, isn't trusted, so a thin file starts the student at the beginning.
+
+```bash
+python3 -m engine.cli import --list                    # the sample students
+python3 -m engine.cli import --sample sample-connect-ideas
+python3 -m engine.cli import --file results.json
+```
+
+API: `GET /api/import/samples`, `POST /api/import {"sample": id}` or `{"data": {...}}`.
 
 ## The lesson
 
@@ -194,14 +211,11 @@ The quest was written for grades 3 to 5, while these lessons target grades 9 to 
 
 How adaptivity works: a passed problem counts toward the next stage when it took few enough attempts (Stage 1: 3 or fewer, Stage 2: 2 or fewer, Stage 3: first try with no hints). A student must reach Stage 1 on a concept to move past its level. A student who doesn't gets a practice problem for that concept. The rules are in `projects/weather-station/manifest.yaml`.
 
-## Readiness quest for young students (grades 3-5)
-
-`diagnostic/` is a tap-and-drag game that places a student before Level 1: it finds out how well they know the ideas under the lesson
-(finding information in a log, if/else, repeating, reusable helpers), shows them a skill tree, and starts the lesson in the right place.
+## The readiness check in more detail
 
 ```bash
-python3 -m diagnostic.cli play                       # play it, or add --profile mixed to watch a simulated child
-python3 -m diagnostic.cli handoff --student STU-... --apply   # then: python3 -m engine.cli show --student STU-...
+python3 -m diagnostic.cli play --profile mixed       # watch a simulated student
+python3 -m diagnostic.cli show-item dec-3a           # preview one question (code block and all)
 python3 -m evaluation.harness.run_diag_eval          # check it against the evaluation contracts (offline)
 ```
 
@@ -219,6 +233,18 @@ python3 -m unittest discover -s tests -t .
 A project is a folder under `projects/` with `manifest.yaml`, `dataset/`, `levels/`, `practice/`, and `reference/`. Each problem folder has `instructions.md`, `hints.yaml`, and `checks.py`. A new project with the same layout runs without engine changes.
 
 Expected answers are computed by a separate SQL checker (`reference/independent_checker.py`) and are marked `teacher_reviewed: false` until a teacher checks them.
+
+## Hosted on AgentCore Runtime (inbound OAuth)
+
+The diagnostic's `validate_submission` tool can run on Amazon Bedrock AgentCore Runtime. An inbound JWT authorizer (AgentCore Identity, with Amazon Cognito as the identity provider) rejects any call that lacks a valid access token.
+
+```bash
+python3 -m deploy.agentcore deploy     # Cognito, IAM role, S3, runtime (needs boto3 and AWS credentials)
+python3 -m deploy.agentcore demo       # no token -> 401, forged token -> 403, SigV4 -> denied, valid token -> 200
+python3 -m deploy.agentcore destroy
+```
+
+See [`deploy/agentcore/README.md`](deploy/agentcore/README.md).
 
 ## Not in this demo yet
 

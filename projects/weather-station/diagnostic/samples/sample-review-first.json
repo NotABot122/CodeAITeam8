@@ -1,0 +1,12 @@
+{
+  "format": "codeai-lesson-export",
+  "version": 1,
+  "goal": "make_helpers",
+  "interests": "books",
+  "concepts": {
+    "database_retrieval": {"stage": 0, "correct": 1, "answered": 5},
+    "conditionals": {"stage": 0, "correct": 1, "answered": 5},
+    "loops": {"stage": 1, "correct": 2, "answered": 4},
+    "functions": {"stage": 0, "correct": 0, "answered": 4}
+  }
+}

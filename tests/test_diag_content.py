@@ -46,10 +46,12 @@ class RealContent(unittest.TestCase):
     def test_student_view_never_contains_the_answer_key(self):
         import random
 
-        allowed = {"id", "type", "prompt", "options", "cards", "buckets", "display"}
+        allowed = {"id", "type", "prompt", "options", "cards", "buckets", "display", "code", "table", "option_format"}
         for item in content().items.values():
             payload = item.public(random.Random(1))
             self.assertLessEqual(set(payload), allowed, item.id)
+            if "code" in payload:
+                self.assertEqual(set(payload["code"]), {"lang", "text"}, item.id)
             for part in payload.get("options", []) + payload.get("cards", []) + payload.get("buckets", []):
                 self.assertEqual(set(part), {"id", "text"}, item.id)     # no answer, bucket or misconception keys
 
@@ -195,3 +197,91 @@ class SkillTreeRules(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class QuestionLayout(unittest.TestCase):
+    """Code and data are shown as blocks and tables, never run into the prompt sentence."""
+
+    def test_no_real_prompt_has_code_in_its_sentence(self):
+        from diagnostic.content import _code_in_sentence
+
+        for item in content().items.values():
+            self.assertFalse(_code_in_sentence(item.prompt), item.id)
+
+    def test_the_guard_catches_code_in_a_sentence_and_allows_backticks(self):
+        from diagnostic.content import _code_in_sentence
+
+        self.assertTrue(_code_in_sentence("The code is: if rain_mm > 0: print('x'). What does it print?"))
+        self.assertTrue(_code_in_sentence("count = 0. Then add one. What is count?"))
+        self.assertTrue(_code_in_sentence("The query is: SELECT * FROM t. Which rows come back?"))
+        self.assertFalse(_code_in_sentence("Today `rain_mm` is 3.2. What does this code print?"))
+        self.assertFalse(_code_in_sentence("Which `WHERE` clause keeps only `rain_mm > 0`?"))
+
+    def test_spot_lines_stay_in_program_order(self):
+        import random
+
+        for item in content().items.values():
+            if item.type == "spot":
+                for seed in range(5):
+                    shown = [o["id"] for o in item.public(random.Random(seed))["options"]]
+                    self.assertEqual(shown, [o.id for o in item.options], item.id)
+
+    def test_tables_are_rectangular_and_code_fits_a_phone(self):
+        from diagnostic.content import MAX_CODE_LINE_CHARS, MAX_CODE_LINES
+
+        for item in content().items.values():
+            if item.table is not None:
+                self.assertTrue(all(len(r) == len(item.table.columns) for r in item.table.rows), item.id)
+            if item.code:
+                lines = item.code.split("\n")
+                self.assertLessEqual(len(lines), MAX_CODE_LINES, item.id)
+                self.assertTrue(all(len(line) <= MAX_CODE_LINE_CHARS for line in lines), item.id)
+
+class ContentFilterOnQuestions(TempDirCase):
+    """check-content runs the content filter over every string a student reads, code included."""
+
+    def _check_with(self, file: str, old: str, new: str):
+        root = self.copy_project()
+        path = root / ITEMS / file
+        text = path.read_text(encoding="utf-8")
+        self.assertIn(old, text)
+        path.write_text(text.replace(old, new), encoding="utf-8")
+        return check_content(root)
+
+    def test_profanity_in_feedback_fails_the_check(self):
+        from engine.safety import CATEGORY_WORDS
+
+        word = CATEGORY_WORDS["profanity"][2]
+        result = self._check_with("loops.yaml", "Yes. Three passes, so 3.", f"Three passes, {word}.")
+        self.assertFalse(result.passed)
+        self.assertTrue(any("content filter blocks this text (profanity)" in p for p in result.problems), result.problems)
+
+    def test_a_mild_insult_in_a_wrong_answer_explanation_fails_the_check(self):
+        result = self._check_with("loops.yaml", "That prints only the first value.", "That is a dumb answer.")
+        self.assertFalse(result.passed)
+        self.assertTrue(any("mild_insult" in p for p in result.problems), result.problems)
+
+    def test_a_filtered_word_inside_a_code_block_fails_the_check(self):
+        result = self._check_with("loops.yaml", "      rains = [2.0, 5.5, 1.0]", "      weapons = [2.0, 5.5, 1.0]")
+        self.assertFalse(result.passed)
+        self.assertTrue(any("code" in p and "violence" in p for p in result.problems), result.problems)
+
+    def test_code_in_a_prompt_sentence_fails_the_check(self):
+        result = self._check_with("loops.yaml", 'prompt: "What is `total` after this loop?"',
+                                  'prompt: "total = 0 at the start. What is total after the loop?"')
+        self.assertFalse(result.passed)
+        self.assertTrue(any("code in its sentence" in p for p in result.problems), result.problems)
+
+
+class SimulatedWrongAnswers(unittest.TestCase):
+    """A simulated student's wrong answer must really score as wrong, or a guesser looks skilled."""
+
+    def test_every_wrong_answer_fails(self):
+        import random
+
+        from diagnostic.scoring import score_response
+        from diagnostic.simulation import _wrong
+
+        for item in content().items.values():
+            for seed in range(50):
+                self.assertFalse(score_response(item, _wrong(item, random.Random(seed))).passed, item.id)

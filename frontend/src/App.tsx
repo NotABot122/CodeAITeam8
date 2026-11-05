@@ -20,6 +20,7 @@ import QuestApp from './quest/QuestApp';
 import Landing from './landing/Landing';
 import PathwayScreen from './landing/PathwayScreen';
 import ChooseScreen from './landing/ChooseScreen';
+import ImportDialog from './landing/ImportDialog';
 import TeacherApp from './teacher/TeacherApp';
 import CoursePage from './ui/CoursePage';
 import NextStepPanel from './ui/NextStepPanel';
@@ -66,6 +67,7 @@ export default function App({client: injected}: {client?: ApiClient}) {
   }, []);
   // landing -> quest (readiness check) -> pathway (Strands Decider 2B) -> lesson. 'resume' continues a started quest.
   const [mode, setMode] = useState<'loading' | 'landing' | 'quest' | 'resume' | 'pathway' | 'choose' | 'lesson'>('loading');
+  const [importOpen, setImportOpen] = useState(false);
   const [grade, setGradeState] = useState<number | null>(savedGrade);
   const setGrade = (g: number) => { setGradeState(g); try { localStorage.setItem(GRADE_KEY, String(g)); } catch { /* private mode */ } };
   const [health, setHealth] = useState<Health | null>(null);
@@ -260,9 +262,16 @@ export default function App({client: injected}: {client?: ApiClient}) {
       onResume: () => setMode(resumeMode(state)),
     } : null;
     // Starting the check again makes a new student, so the old one is forgotten first.
-    return <Landing grade={grade} onGrade={setGrade} resume={saved}
-      onStart={() => { if (state) { store.clear(); setState(null); setOutcome(null); } setMode('quest'); }}
-      onSkip={() => void skipQuest()} />;
+    return (
+      <>
+        <Landing grade={grade} onGrade={setGrade} resume={saved}
+          onStart={() => { if (state) { store.clear(); setState(null); setOutcome(null); } setMode('quest'); }}
+          onSkip={() => void skipQuest()} onImport={() => setImportOpen(true)} />
+        {/* Importing earlier results also makes a new student, who goes straight to the pathway screen. */}
+        <ImportDialog client={client} open={importOpen} onClose={() => setImportOpen(false)}
+          onDone={s => { setImportOpen(false); store.clear(); setOutcome(null); adopt(s); setMode('pathway'); }} />
+      </>
+    );
   }
   if (mode === 'choose' && state) {
     return <ChooseScreen client={client} studentId={state.studentId} aiOn={!!health?.ai} aiReason={health?.aiReason ?? null} onStart={s => void startPathway(s)} />;

@@ -29,8 +29,8 @@ set with `$CODEAI_AI`). Where things are stored and which project is used come f
 ## How a quest works
 
 ```
- pick a buddy + goal (taps)
-        │
+ pick a buddy + goal (taps), optionally type what you're into
+        │                                      (or: import an earlier lesson's results and skip to PLACEMENT)
         ▼
  for each zone (one per concept):   ladder of questions, tier 1 → 3
         │   pass: go up a tier        miss: one "twin" question; two misses end the zone
@@ -45,6 +45,8 @@ set with `$CODEAI_AI`). Where things are stored and which project is used come f
  MODEL (optional)      ── reads evidence + goal + tree; may move a stage by ONE, only with the child's own words as proof
         ▼
  PLACEMENT             ── where to start, what to practice first, a kind message for the child, a note for the teacher
+        ▼
+ PROJECT MATCH         ── engine/matching.py: interests pick the story, the trusted results pick the start
 ```
 
 Typical length is 12-16 scored questions, about 14 minutes. A pass at tier N is evidence for Stage N.
@@ -82,6 +84,7 @@ get `teacher_report()`: stages, confidence, mistakes, the child's own words, the
 | `report.py` | The teacher report. |
 | `contract.py`, `eval_log.py`, `schema_check.py`, `tool_server.py` | The evaluation team's `validate_submission` tool, event-log rows, a dependency-free schema checker, and the MCP hook. |
 | `store.py`, `state.py`, `handoff.py` | Saving a quest; the saved shape; handing the student to `python -m engine.cli`. |
+| `importer.py` | An earlier lesson's results file (or a sample student) → a finished readiness record. Rejects personal details. |
 | `engine.py` | `DiagnosticEngine`: the orchestrator. Every public method returns a JSON-ready dict. |
 | `simulation.py` | Simulated children for tests, the demo and the harness. |
 | `cli.py`, `render.py`, `api.py` | Terminal, text rendering, and the optional HTTP layer. |
@@ -93,8 +96,20 @@ scoring, goals, game text), `tree.yaml`, `items/<concept>.yaml` and `boosters.ya
 
 Edit the YAML, then run `python3 -m diagnostic.cli check-content`. It enforces: exactly one right option, a misconception tag on every
 wrong option, at least two questions per concept and tier (a first question and a twin), every tree node targeted by a question, the
-primary node matching the question's zone and tier, reading level (sentence and word length), and no stage/score words in anything a
-student reads. `python3 -m diagnostic.cli show-item ID --answer` previews a question.
+primary node matching the question's zone and tier, reading level (sentence and word length), no stage/score words in anything a
+student reads, and nothing the content filter blocks (profanity, slurs, violence, drugs, personal details, mild insults) in any
+student-facing string, code and table cells included. `python3 -m diagnostic.cli show-item ID --answer` previews a question.
+
+**Code goes in its own block, never in the sentence.** `check-content` rejects a prompt with code in it.
+
+| Field | Use it for | Shown as |
+|---|---|---|
+| `prompt` | The question, in prose. Short names in `backticks` | A heading; backticks become inline code |
+| `code` (`code_lang: python` or `sql`) | A program or query, up to 12 lines of 60 characters | A line-numbered, highlighted block under the prompt |
+| `table` (`columns`, `rows`) | A few rows of data | A table under the prompt |
+| `option_format: code` | Options or cards that are code (the default for `trace`, `spot` and `order`) | The code font, indentation kept |
+
+A `spot` question's options are the program's lines in order (they are never shuffled), drawn as one numbered listing to tap.
 
 Add the CSTA codes to `tree.yaml` (`csta:`) once checked against `curriculum database/CSTA_2026_PK12_Standards_by_Grade.xlsx`.
 They are empty on purpose until verified. If you change the "tell the guide" prompts, regenerate the rubric:
@@ -154,8 +169,10 @@ Put authentication, TLS and rate limiting in front of it before any real use: st
 
 ## Privacy
 
-No names are collected: the nickname is a pick from a list. The optional goal text is screened; personal details cause it to be
-dropped. Student ids are 32 random hex characters, the same format as the lesson engine and the student app (the event log marks them `STU-`). The goal text and written answers are saved in the student's own record and never
+No names are collected: the nickname is a pick from a list. The optional "What are you into?" text is screened; personal details,
+filtered words or instructions to the AI cause it to be dropped, with a notice. It is matched to projects locally
+(`engine/matching.py`) and never logged. An imported results file with personal-detail fields is rejected; other unknown fields
+and any ids in it are never stored (`importer.py`). Student ids are 32 random hex characters, the same format as the lesson engine and the student app (the event log marks them `STU-`). The goal text and written answers are saved in the student's own record and never
 written to the event logs (apart from the short quotes the evaluation contract requires). Real answers for the benchmark go in a git-ignored file.
 
 ## Known limits

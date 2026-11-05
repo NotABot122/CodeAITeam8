@@ -1,5 +1,5 @@
 import type {AnswerResult, QuestNext, QuestOptions, QuestStart} from '@/quest/types';
-import type {AiCall, AiInfo, BlocksResult, ChooseResult, CourseView, Health, PathwayResult, ProjectChoices, StartResult, StudentState, SubmitResult, ThemeResult} from './types';
+import type {AiCall, AiInfo, BlocksResult, ChooseResult, CourseView, Health, ImportResult, ImportSample, PathwayResult, ProjectChoices, StartResult, StudentState, SubmitResult, ThemeResult} from './types';
 
 export class ApiError extends Error {
   constructor(message: string, readonly code: string, readonly status: number) {
@@ -11,10 +11,15 @@ export interface ApiClient {
   health(): Promise<Health>;
   newStudent(): Promise<StudentState>;
   questOptions(): Promise<QuestOptions>;
-  questStart(buddy: string | null, goal: string | null): Promise<QuestStart>;
+  /** `interests`: optional words about what the student is into; the server screens them. */
+  questStart(buddy: string | null, goal: string | null, interests?: string | null): Promise<QuestStart>;
   questNext(id: string): Promise<QuestNext>;
   questAnswer(id: string, response: unknown, elapsedMs: number | null): Promise<AnswerResult>;
   questFinish(id: string): Promise<unknown>;
+  /** Sample students for skipping the readiness check in a demo. */
+  importSamples(): Promise<{samples: ImportSample[]}>;
+  /** Skip the readiness check with an earlier lesson's results: a sample's id, or a results file's JSON. */
+  importPrevious(from: {sample: string} | {data: unknown}): Promise<ImportResult>;
   getState(id: string): Promise<StudentState>;
   getCourse(id: string): Promise<CourseView>;
   submit(id: string, code: string): Promise<SubmitResult>;
@@ -67,10 +72,12 @@ export function createHttpClient(base = ''): ApiClient {
     health: () => call('GET', '/api/health'),
     newStudent: () => call('POST', '/api/students'),
     questOptions: () => call('GET', '/api/quest/options'),
-    questStart: (buddy, goal) => call('POST', '/api/quest', {buddy, goal}),
+    questStart: (buddy, goal, interests) => call('POST', '/api/quest', interests ? {buddy, goal, interests} : {buddy, goal}),
     questNext: id => call('GET', `/api/quest/${encodeURIComponent(id)}/next`),
     questAnswer: (id, response, elapsedMs) => call('POST', `/api/quest/${encodeURIComponent(id)}/answer`, {response, elapsedMs}),
     questFinish: id => call('POST', `/api/quest/${encodeURIComponent(id)}/finish`, {}),
+    importSamples: () => call('GET', '/api/import/samples'),
+    importPrevious: from => call('POST', '/api/import', from),
     getState: id => call('GET', s(id)),
     getCourse: id => call('GET', `${s(id)}/course`),
     submit: (id, code) => call('POST', `${s(id)}/submit`, {code}),

@@ -1,0 +1,12 @@
+{
+  "format": "codeai-lesson-export",
+  "version": 1,
+  "goal": "build_game",
+  "interests": "strategy games",
+  "concepts": {
+    "database_retrieval": {"stage": 3, "correct": 5, "answered": 5},
+    "conditionals": {"stage": 3, "correct": 5, "answered": 5},
+    "loops": {"stage": 2, "correct": 4, "answered": 5},
+    "functions": {"stage": 2, "correct": 4, "answered": 5}
+  }
+}

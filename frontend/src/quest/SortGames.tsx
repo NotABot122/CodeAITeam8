@@ -11,6 +11,8 @@ type Props = {step: ItemStep; value: Placed; onChange: (v: Placed) => void; disa
 const INK = {color: 'text.primary', borderColor: 'divider', '&:hover': {borderColor: 'primary.dark', bgcolor: 'rgba(255,201,51,0.2)'}};
 const ON = {bgcolor: 'primary.main', color: 'primary.contrastText', '&:hover': {bgcolor: 'primary.main'}};
 const CODE = {fontFamily: 'var(--code-font)', whiteSpace: 'pre-wrap' as const};
+// Cards are already drawn in the code font, so `code` marks in their text are dropped.
+const show = (text: string) => text.replace(/`/g, '');
 
 /** Rows: tap the rows that belong in the first box. Untapped rows go in the last box. */
 export function initialRows(step: ItemStep): Placed {
@@ -31,7 +33,7 @@ export function RowsGame({step, value, onChange, disabled}: Props) {
             <Button key={card.id} aria-pressed={on} disabled={disabled} onClick={() => onChange({...value, [card.id]: on ? no.id : yes.id})}
               variant="outlined"
               sx={{...(on ? ON : INK), justifyContent: 'space-between', textTransform: 'none', py: 1.1, px: 2, textAlign: 'left', ...CODE}}>
-              <span>{card.text}</span>
+              <span>{show(card.text)}</span>
               <span aria-hidden>{on ? `✓ ${yes.text}` : ''}</span>
             </Button>
           );
@@ -63,13 +65,13 @@ export function BeltGame({step, value, onChange, disabled}: Props) {
         {[left, right].map(b => (
           <Box key={b.id} aria-label={`${b.text} lane, ${lane(b.id).length} cards`} sx={{minHeight: 96, p: 1, borderRadius: '12px', border: 2, borderStyle: 'dashed', borderColor: 'primary.main', bgcolor: 'rgba(255,201,51,0.12)'}}>
             <Typography sx={{fontWeight: 800, color: 'primary.dark', mb: 0.5}}>{b.text}</Typography>
-            {lane(b.id).map(c => <Box key={c.id} sx={{display: 'inline-block', m: 0.25, px: 1, py: 0.25, borderRadius: '8px', bgcolor: 'background.paper', border: 1, borderColor: 'divider', ...CODE}}>{c.text}</Box>)}
+            {lane(b.id).map(c => <Box key={c.id} sx={{display: 'inline-block', m: 0.25, px: 1, py: 0.25, borderRadius: '8px', bgcolor: 'background.paper', border: 1, borderColor: 'divider', ...CODE}}>{show(c.text)}</Box>)}
           </Box>
         ))}
       </Box>
       <Box aria-live="polite" sx={{textAlign: 'center', mb: 1.5, minHeight: 64}}>
         {next ? (
-          <Box sx={{display: 'inline-block', px: 3, py: 1.5, borderRadius: '14px', bgcolor: 'primary.main', color: 'primary.contrastText', fontWeight: 800, fontSize: 22, boxShadow: 3, ...CODE}}>{next.text}</Box>
+          <Box sx={{display: 'inline-block', px: 3, py: 1.5, borderRadius: '14px', bgcolor: 'primary.main', color: 'primary.contrastText', fontWeight: 800, fontSize: 22, boxShadow: 3, ...CODE}}>{show(next.text)}</Box>
         ) : <Typography sx={{fontWeight: 700}}>All sorted. Press Check, or undo to change one.</Typography>}
       </Box>
       <Box sx={{display: 'flex', gap: 1, justifyContent: 'center', flexWrap: 'wrap'}}>
@@ -87,7 +89,7 @@ export function ChipsGame({step, value, onChange, disabled}: Props) {
   const cards = step.cards!;
   const free = cards.filter(c => !value[c.id]);
   const chip = (id: string, text: string, onClick: () => void, on = false) => (
-    <Button key={id} size="small" aria-pressed={on} disabled={disabled} onClick={onClick} variant="outlined" sx={{...(on ? ON : INK), m: 0.25, textTransform: 'none', borderRadius: '999px', ...CODE}}>{text}</Button>
+    <Button key={id} size="small" aria-pressed={on} disabled={disabled} onClick={onClick} variant="outlined" sx={{...(on ? ON : INK), m: 0.25, textTransform: 'none', borderRadius: '999px', ...CODE}}>{show(text)}</Button>
   );
   const drop = (bucket: string) => {
     if (!held) return;
@@ -103,7 +105,7 @@ export function ChipsGame({step, value, onChange, disabled}: Props) {
       <Box sx={{display: 'grid', gap: 1}}>
         {step.buckets!.map(b => (
           <Box key={b.id} sx={{p: 1, borderRadius: '12px', border: 2, borderStyle: 'dashed', borderColor: held ? 'secondary.main' : 'divider'}}>
-            <Button disabled={disabled || !held} onClick={() => drop(b.id)} aria-label={`Put ${held ? cards.find(c => c.id === held)?.text : 'the chosen chip'} in ${b.text}`}
+            <Button disabled={disabled || !held} onClick={() => drop(b.id)} aria-label={`Put ${held ? show(cards.find(c => c.id === held)?.text ?? '') : 'the chosen chip'} in ${b.text}`}
               sx={{textTransform: 'none', fontWeight: 800, color: 'primary.dark', p: 0.5}}>{b.text}</Button>
             <Box>{cards.filter(c => value[c.id] === b.id).map(c => chip(c.id, c.text, () => { const v = {...value}; delete v[c.id]; onChange(v); }))}</Box>
           </Box>

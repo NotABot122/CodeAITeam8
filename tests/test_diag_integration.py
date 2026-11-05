@@ -26,8 +26,8 @@ from tests.diag_helpers import TempDirCase, content
 C = content()
 
 
-def tool_input(text, level_id="repeat-explain", **extra):
-    return {"lesson_id": C.config.id, "level_id": level_id, "attempt_no": 1, "submission_text": text,
+def tool_input(text, task_id="repeat-explain", **extra):
+    return {"lesson_id": C.config.id, "task_id": task_id, "attempt_no": 1, "submission_text": text,
             "rubric_id": RUBRIC_ID, **extra}
 
 
@@ -72,24 +72,28 @@ class ValidateSubmissionContract(unittest.TestCase):
         self.assertIn("parse_error", out["filter_flags"])
 
     def test_bad_input_is_rejected_with_a_clear_message(self):
-        for bad in ({}, tool_input("x", level_id="nope"), tool_input("x", attempt_no=0), tool_input("x", rubric_id="other"),
+        for bad in ({}, tool_input("x", task_id="nope"), tool_input("x", attempt_no=0), tool_input("x", rubric_id="other"),
                     tool_input("x", extra="field"), {**tool_input("x"), "submission_text": "y" * 9000}):
             with self.assertRaises(ValueError):
                 validate_submission(bad, C, None)
 
-    def test_each_explain_prompt_is_a_valid_level_id(self):
+    def test_each_explain_prompt_is_a_valid_task_id(self):
         for prompt in C.explain.values():
-            out = validate_submission(tool_input("you do it again for each day", level_id=prompt.id), C, None)
+            out = validate_submission(tool_input("you do it again for each day", task_id=prompt.id), C, None)
             self.assertEqual(out["results"][0]["subskill"], prompt.concept)
 
-    def test_old_concept_3_data_still_validates_against_the_v0_2_schemas(self):
-        schema = load_schema("validate_submission")["properties"]["output"]
-        old = {"results": [{"subskill": s, "stage": 1, "confidence": 0.5, "rationale": "r", "evidence_quotes": ["q"]}
-                           for s in ("prompting", "evaluation", "prompt_revision")],
-               "model_id": "m", "latency_ms": 1, "filter_flags": ["parse_error"]}
-        self.assertEqual(validate(old, schema), [])
-        old_row = json.loads((EVAL_ROOT / "results").glob("event_log_*.jsonl").__next__().read_text().splitlines()[0])
-        self.assertEqual(validate(old_row, load_schema("event_log")), [])
+    def test_the_v0_1_field_name_level_id_is_still_accepted(self):
+        legacy = tool_input("you do it again for each day")
+        legacy["level_id"] = legacy.pop("task_id")
+        self.assertEqual(validate_submission(legacy, C, None)["results"][0]["subskill"], "loops")
+
+    def test_v0_2_harness_rows_validate_against_the_event_log_schema(self):
+        rows = [json.loads(path.read_text(encoding="utf-8").splitlines()[0])
+                for path in sorted((EVAL_ROOT / "results").glob("event_log_*.jsonl"))]
+        v0_2 = [row for row in rows if row.get("contract_version") == "0.2" and row.get("tool") == "validate_submission"]
+        self.assertTrue(v0_2)
+        for row in v0_2:
+            self.assertEqual(validate(row, load_schema("event_log")), [], row["run_id"])
 
     def test_the_checker_actually_rejects_bad_data(self):
         schema = load_schema("validate_submission")["properties"]["output"]

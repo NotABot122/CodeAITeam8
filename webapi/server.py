@@ -6,10 +6,13 @@ Routes (JSON):
     GET  /api/health
     POST /api/students                      -> new student + state (skips the readiness quest)
     GET  /api/quest/options                 -> buddies, goals, zones
-    POST /api/quest                         {"buddy", "goal"} -> {student_id, welcome, first}
+    POST /api/quest                         {"buddy", "goal", "interests"?} -> {student_id, welcome, first}
     GET  /api/quest/<id>/next               -> next step, or {done: true, ...} (result is applied)
     POST /api/quest/<id>/answer             {"response", "elapsedMs"} -> feedback
     POST /api/quest/<id>/finish             -> end early (result is applied)
+    GET  /api/import/samples                -> {samples: [{id, label, about}]} (synthetic demo students)
+    POST /api/import                        {"sample": id} or {"data": {results file}} -> {result, state}
+                                            (skips the readiness check; see diagnostic/importer.py)
     GET  /api/students/<id>                 -> state
     GET  /api/students/<id>/course          -> the whole course: topics, finished work, ideas, what's next
     POST /api/students/<id>/submit          {"code": "..."} -> {outcome, state}
@@ -42,7 +45,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 from engine.ai import DEFAULT_THEME_MODEL_ID, BedrockProvider, FallbackProvider, ModelError, provider_from_env
-from engine.ai_trace import FEATURES, TraceLog, TracingProvider, current_student
+from engine.ai_trace import TraceLog, TracingProvider, current_student
 from engine.cli import DEFAULT_DATA, DEFAULT_PROJECT
 
 from .service import ApiError, Service
@@ -55,10 +58,12 @@ ROUTES = [
     ("GET", re.compile(r"^/api/health$"), lambda s, m, b: s.health()),
     ("POST", re.compile(r"^/api/students$"), lambda s, m, b: s.new_student()),
     ("GET", re.compile(r"^/api/quest/options$"), lambda s, m, b: s.quest_options()),
-    ("POST", re.compile(r"^/api/quest$"), lambda s, m, b: s.quest_start(b.get("buddy"), b.get("goal"))),
+    ("POST", re.compile(r"^/api/quest$"), lambda s, m, b: s.quest_start(b.get("buddy"), b.get("goal"), b.get("interests"))),
     ("GET", re.compile(rf"^/api/quest/{ID}/next$"), lambda s, m, b: s.quest_next(m[1])),
     ("POST", re.compile(rf"^/api/quest/{ID}/answer$"), lambda s, m, b: s.quest_answer(m[1], b.get("response"), b.get("elapsedMs"))),
     ("POST", re.compile(rf"^/api/quest/{ID}/finish$"), lambda s, m, b: s.quest_finish(m[1])),
+    ("GET", re.compile(r"^/api/import/samples$"), lambda s, m, b: s.import_samples()),
+    ("POST", re.compile(r"^/api/import$"), lambda s, m, b: s.import_previous(b.get("sample"), b.get("data"))),
     ("GET", re.compile(rf"^/api/students/{ID}$"), lambda s, m, b: s.state(m[1])),
     ("GET", re.compile(rf"^/api/students/{ID}/course$"), lambda s, m, b: s.course_view(m[1])),
     ("POST", re.compile(rf"^/api/students/{ID}/submit$"), lambda s, m, b: s.submit(m[1], b.get("code"))),

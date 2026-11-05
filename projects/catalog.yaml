@@ -14,13 +14,27 @@ topics:
     project: weather-station
     themeable: true            # students can ask for this one in their own theme
     concepts: [database_retrieval, conditionals, loops, functions]
-    # Same four levels and skills, different stories. The student picks one (the readiness check's goal
-    # suggests it). `goals` are the readiness check's goal ids (projects/weather-station/diagnostic/diagnostic.yaml).
+    # Same four levels and skills, different stories. The student picks one; engine/matching.py suggests it
+    # from their interests: `goals` are the readiness check's goal ids (projects/weather-station/diagnostic/
+    # diagnostic.yaml), and `interests` are words matched against what the student says they're into.
+    # Skills don't pick the story (every story teaches the same skills); they pick where the student starts.
     choices:
-      - {project: weather-station, goals: [weather_report, not_sure], pitch: "Turn a year of weather readings into a report for a meteorologist."}
-      - {project: monster-arena,   goals: [build_game],              pitch: "Balance the monsters in a creature-battling game before the next update."}
-      - {project: wildlife-watch,  goals: [find_facts],              pitch: "Find patterns in tracking data from animals in three parks."}
-      - {project: library-helper,  goals: [make_helpers],            pitch: "Build a tool that helps library volunteers find and flag books."}
+      - project: weather-station
+        goals: [weather_report, not_sure]
+        interests: [weather, climate, storm, rain, science, environment, forecast, earth, outdoors, hiking]
+        pitch: "Turn a year of weather readings into a report for a meteorologist."
+      - project: monster-arena
+        goals: [build_game]
+        interests: [game, gaming, video game, monster, creature, card game, board game, rpg, strategy, fantasy, dragon]
+        pitch: "Balance the monsters in a creature-battling game before the next update."
+      - project: wildlife-watch
+        goals: [find_facts]
+        interests: [animal, wildlife, nature, biology, bird, pet, dog, cat, zoo, ocean, park, insect, conservation]
+        pitch: "Find patterns in tracking data from animals in three parks."
+      - project: library-helper
+        goals: [make_helpers]
+        interests: [book, reading, library, story, writing, helping, volunteer, community, app, tool, school]
+        pitch: "Build a tool that helps library volunteers find and flag books."
   - id: collections
     title: Lists and Dictionaries
     project: weather-collections
