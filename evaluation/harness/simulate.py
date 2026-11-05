@@ -14,7 +14,7 @@ cleaner than real student work, so agreement measured on them overstates the
 real number (see evaluation/README.md, Benchmark plan).
 
 Profiles reference CSTA 2026 standards from
-curriculum database/CSTA_2026_PK12_Standards_by_Grade.xlsx
+documentation/curriculum/CSTA_2026_PK12_Standards_by_Grade.xlsx
 (https://csteachers.org/pk12standards/). The task targets HS-PRO-RD-18.
 """
 from __future__ import annotations

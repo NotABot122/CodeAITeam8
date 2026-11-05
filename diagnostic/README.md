@@ -111,7 +111,7 @@ student-facing string, code and table cells included. `python3 -m diagnostic.cli
 
 A `spot` question's options are the program's lines in order (they are never shuffled), drawn as one numbered listing to tap.
 
-Add the CSTA codes to `tree.yaml` (`csta:`) once checked against `curriculum database/CSTA_2026_PK12_Standards_by_Grade.xlsx`.
+Add the CSTA codes to `tree.yaml` (`csta:`) once checked against `documentation/curriculum/CSTA_2026_PK12_Standards_by_Grade.xlsx`.
 They are empty on purpose until verified. If you change the "tell the guide" prompts, regenerate the rubric:
 `python3 -m diagnostic.cli export-rubric` (a test fails if it is out of date).
 
