@@ -163,7 +163,30 @@ export interface Outcome {
   stuck?: string[];
 }
 
-export interface Health {ok: boolean; project: string; ai: boolean; aiReason: string | null; adaptive: boolean}
+export interface Health {ok: boolean; project: string; ai: boolean; aiReason: string | null; adaptive: boolean; dev?: boolean}
+
+/** Dev-only AI inspector (server started with --dev): one recorded model call. */
+export interface AiCall {
+  id: number;
+  at: string;
+  feature: {name: string; what: string};
+  model: string;
+  student: string | null;
+  system: string;
+  input: string;
+  maxTokens: number;
+  tools: {name: string; description: string; schema: unknown}[];
+  requireTool: boolean;
+  ok: boolean;
+  latencyMs: number;
+  outputText?: string | null;
+  toolName?: string | null;
+  toolInput?: unknown;
+  inputTokens?: number;
+  outputTokens?: number;
+  error?: string;
+}
+export interface AiInfo {ai: boolean; aiReason: string | null; model: string | null; modelSource?: string; safety?: string; features: {name: string; what: string; model: string | null}[]}
 export interface SubmitResult {outcome: Outcome; state: StudentState}
 export interface StartResult {message: string; built: boolean; state: StudentState}
 export interface ThemeResult {built: boolean; message: string; state: StudentState}

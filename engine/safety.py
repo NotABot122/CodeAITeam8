@@ -1,11 +1,13 @@
 """Content filtering for student input and model output.
 
-Two layers:
-1. Local rules (always on, no network): word lists by category and
-   personal contact information (emails, phone numbers).
-2. Model moderation (optional): a separate Bedrock call that classifies
-   free-text student requests. It runs as its own call so a request can't
-   talk the generator out of filtering.
+Layers:
+1. Amazon Bedrock Guardrail (engine/guardrail.py), when configured: these same rules converted into topics, word
+   filters, a personal-information filter and content/prompt-attack filters. Student text is checked as INPUT,
+   model text as OUTPUT.
+2. Local rules (no network): word lists by category and personal contact information (emails, phone numbers).
+   They decide when no guardrail is configured, when it can't answer, and in content checks (local_only).
+3. Model moderation (optional): a separate Bedrock call that classifies free-text theme requests. It runs as its
+   own call so a request can't talk the generator out of filtering.
 
 Any error counts as blocked (fail closed).
 """
@@ -73,7 +75,32 @@ class FilterResult:
         return not self.allowed
 
 
-def screen_text(text: str) -> FilterResult:
+# The Bedrock Guardrail used at runtime (set by the web server at start; None in content checks and tests).
+_guardrail = None
+
+
+def configure_guardrail(guardrail) -> None:
+    global _guardrail
+    _guardrail = guardrail
+
+
+def active_guardrail():
+    return _guardrail
+
+
+def screen_text(text: str, source: str = "INPUT", local_only: bool = False, code: bool = False) -> FilterResult:
+    """The Bedrock Guardrail when one is configured (source INPUT: student text, OUTPUT: model text), otherwise or
+    if it can't answer, the local rules. local_only: never a network call (content checks, authoring).
+    code: the text is student code, so the prompt-attack filter doesn't count (code reads like instructions, and
+    prompts already mark student code as data)."""
+    if not local_only and _guardrail is not None:
+        result = _guardrail.check(text, source, ignore=("instruction_override",) if code else ())
+        if result is not None:
+            return result
+    return local_screen(text)
+
+
+def local_screen(text: str) -> FilterResult:
     """Local rules only. Never makes a network call."""
     try:
         if EMAIL.search(text) or PHONE.search(text):
@@ -90,12 +117,12 @@ class ContentFilter:
     def __init__(self, provider: Optional[ModelProvider] = None):
         self.provider = provider
 
-    def screen(self, text: str) -> FilterResult:
-        return screen_text(text)
+    def screen(self, text: str, source: str = "INPUT", code: bool = False) -> FilterResult:
+        return screen_text(text, source, code=code)
 
     def screen_request(self, text: str) -> FilterResult:
-        """Local rules, then model moderation when a provider is set."""
-        local = screen_text(text)
+        """The guardrail (or local rules), then model moderation when a provider is set."""
+        local = screen_text(text, "INPUT")
         if local.blocked or self.provider is None:
             return local
         try:

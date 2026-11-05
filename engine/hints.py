@@ -98,7 +98,7 @@ class AIHinter:
              context: Optional[str] = None) -> Optional[HintResult]:
         """Return an AI hint, or None so the caller uses the pre-authored hint."""
         self.last_rejection = None
-        if self.filter.screen(code).blocked:
+        if self.filter.screen(code, code=True).blocked:
             self.last_rejection = "student code blocked by content filter"
             return None
         try:
@@ -108,7 +108,7 @@ class AIHinter:
             return None
         text = " ".join(reply.text.split())
         reason = check_hint(text, self.reference_source)
-        if reason is None and self.filter.screen(text).blocked:
+        if reason is None and self.filter.screen(text, "OUTPUT").blocked:
             reason = "blocked by content filter"
         if reason:
             self.last_rejection = reason

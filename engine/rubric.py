@@ -57,6 +57,6 @@ class RubricGrader:
         if not isinstance(stage, int) or isinstance(stage, bool) or not 0 <= stage <= 3:
             return RubricScore(None, None)
         if not isinstance(feedback, str) or not feedback.strip() or len(feedback) > MAX_FEEDBACK \
-                or "```" in feedback or self.filter.screen(feedback).blocked:
+                or "```" in feedback or self.filter.screen(feedback, "OUTPUT").blocked:
             feedback = None
         return RubricScore(stage, " ".join(feedback.split()) if feedback else None)

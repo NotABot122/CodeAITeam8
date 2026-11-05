@@ -102,7 +102,7 @@ def prefilter(text: Optional[str], min_words: int = 3) -> Prefilter:
     if EMAIL.search(stripped) or PHONE.search(stripped) or _NAME_INTRO.search(stripped):
         flags.append(PERSONAL_INFO)
         unscorable = True
-    screened = screen_text(stripped)
+    screened = screen_text(stripped, "INPUT")
     if screened.blocked and screened.category != "personal_information":
         flags.append(INAPPROPRIATE)
         unscorable = True
@@ -153,8 +153,8 @@ def check_student_text(text: Optional[str], banned_words: Tuple[str, ...], max_s
     for word in banned_words:
         if re.search(r"\b" + re.escape(word) + r"\b", low):
             reasons.append(f"uses '{word}'")
-    if screen_text(text).blocked:
-        reasons.append("failed the content word lists")
+    if screen_text(text, "OUTPUT").blocked:
+        reasons.append("failed the content filter")
     # Sentences get a little room (a model writes longer ones than an author); words get none.
     reasons += readability_problems(text, max_sentence_words + 4, max_word_length)
     return OutputCheck(not reasons, tuple(reasons))
