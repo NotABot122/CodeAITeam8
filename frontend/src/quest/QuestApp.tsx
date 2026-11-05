@@ -24,6 +24,7 @@ const stepSeconds = (step: Step) => step.kind === 'explain' ? 0 : expectedSecond
 
 const msg = (e: unknown) => (e instanceof Error ? e.message : 'Something went wrong. Try again.');
 const INTEREST_MAX_CHARS = 80;   // max_goal_chars in diagnostic.yaml
+const SETTLE_MS = 800;           // clicks on a new question are ignored this long (see `settled`)
 
 function ZoneBar({zones}: {zones: Zone[]}) {
   return (
@@ -70,6 +71,17 @@ export default function QuestApp({client, resumeId, onStarted, onFinished, onSki
   const [error, setError] = useState<string | null>(null);
   const [count, setCount] = useState(0);
   const pace = usePace();
+  // For a moment after a question appears, clicks on it are ignored, so a quick click carried over from the
+  // feedback screen's Next button can't answer it (order and row-sort questions start ready to check). Only time
+  // spent on the question itself is timed; the feedback screen never counts toward the slow-down.
+  const [settled, setSettled] = useState(false);
+  const shownAt = phase.name === 'step' ? phase.shownAt : 0;
+  useEffect(() => {
+    setSettled(false);
+    if (!shownAt) return;
+    const id = window.setTimeout(() => setSettled(true), Math.max(0, SETTLE_MS - (Date.now() - shownAt)));
+    return () => window.clearTimeout(id);
+  }, [shownAt]);
   const stepNow = phase.name === 'step' ? phase.step : null;
   const expected = stepNow ? stepSeconds(stepNow) : 0;
   const waitLeft = useCountdown(pace.slow && !!stepNow && stepNow.kind !== 'explain', expected,
@@ -104,7 +116,7 @@ export default function QuestApp({client, resumeId, onStarted, onFinished, onSki
   };
 
   const send = async (step: Step, response: unknown) => {
-    if (!studentId || phase.name !== 'step') return;
+    if (!studentId || phase.name !== 'step' || !settled) return;
     setBusy(true); setError(null);
     try {
       const elapsed = Date.now() - phase.shownAt;
@@ -186,9 +198,11 @@ export default function QuestApp({client, resumeId, onStarted, onFinished, onSki
 
               {phase.name === 'step' && phase.step.kind !== 'explain' && (
                 <>
-                  <ItemView step={phase.step} value={value} onChange={setValue} disabled={busy} />
+                  <Box sx={{pointerEvents: settled ? 'auto' : 'none'}}>
+                    <ItemView step={phase.step} value={value} onChange={setValue} disabled={busy} />
+                  </Box>
                   {pace.justSlowed && <Alert severity="warning" onClose={pace.dismiss}>{SLOW_DOWN_MESSAGE}</Alert>}
-                  <Box sx={{display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap'}}>
+                  <Box sx={{display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap', pointerEvents: settled ? 'auto' : 'none'}}>
                     <Button variant="contained" color="secondary" size="large" disabled={busy || waitLeft > 0 || !responseReady(phase.step, value)}
                       onClick={() => send(phase.step, value)} aria-describedby={waitLeft > 0 ? 'check-wait' : undefined}>
                       {waitLeft > 0 ? `Check (${waitLeft})` : 'Check'}

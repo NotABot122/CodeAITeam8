@@ -7,6 +7,9 @@
 // Rushing = answering in under 20% of that time (at least 1.5 s). Two rushed answers in the last three (one for a whole quiz
 // page) turns "slow mode" on: the student sees a message and the Check button waits for the expected time.
 // Three answers in a row that weren't rushed turn it off again, so careful students aren't held back.
+// Only time on the question itself is measured (from when it appears to Check). The feedback screen and its Next
+// button are never timed, and the readiness check ignores clicks on a question for its first 0.8 s so a quick click
+// carried over from Next can't answer it (QuestApp.tsx SETTLE_MS).
 import {useCallback, useEffect, useRef, useState} from 'react';
 
 const WORDS_PER_SECOND = 4;
