@@ -40,16 +40,26 @@ install -d -m 0700 -o $APP_USER -g $APP_USER $DATA
 install -d -m 0750 -o root -g $APP_USER $ETC
 
 # 3. The release: read-only for everyone but root ----------------------------------------------------------------
+[ -x $BASE/venv/bin/python ] && $BASE/venv/bin/python -c 'import sys; sys.exit(0 if sys.version_info >= (3, 11) else 1)' ||
+  { rm -rf $BASE/venv; $PY -m venv $BASE/venv; }
 DEST=$BASE/releases/$RELEASE
 if [ ! -d "$DEST" ]; then
-  mkdir "$DEST.partial"
+  rm -rf "$DEST.partial" && mkdir "$DEST.partial"
   tar -xzf "$TARBALL" -C "$DEST.partial"
+  $BASE/venv/bin/pip install -q --disable-pip-version-check -r "$DEST.partial/deploy/production/requirements.txt"
+  # Each project's weather database is built from its seed on first use, inside the project folder. The release is
+  # read-only to the service, so build them all now.
+  (cd "$DEST.partial" && PYTHONPATH=. $BASE/venv/bin/python -c '
+from pathlib import Path
+from engine.project import load_project
+for folder in sorted(Path("projects").iterdir()):
+    if (folder / "manifest.yaml").exists():
+        load_project(folder).ensure_dataset()
+')
   chown -R root:root "$DEST.partial"
   find "$DEST.partial" -type d -exec chmod 0755 {} + ; find "$DEST.partial" -type f -exec chmod 0644 {} +
   mv "$DEST.partial" "$DEST"
 fi
-[ -x $BASE/venv/bin/python ] && $BASE/venv/bin/python -c 'import sys; sys.exit(0 if sys.version_info >= (3, 11) else 1)' ||
-  { rm -rf $BASE/venv; $PY -m venv $BASE/venv; }
 $BASE/venv/bin/pip install -q --disable-pip-version-check -r "$DEST/deploy/production/requirements.txt"
 
 # 4. Student-code sandbox ------------------------------------------------------------------------------------------
