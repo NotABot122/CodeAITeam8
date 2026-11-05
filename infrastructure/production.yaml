@@ -18,10 +18,20 @@ Parameters:
   LatestAmi:
     Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
     Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
+  CloudFrontOriginGroup:
+    Type: String
+    Default: ''
+    Description: >-
+      The security group CloudFront makes for the VPC origin (CloudFront-VPCOrigins-Service-SG). It exists only after
+      the first deploy, so `python -m deploy.production infra` looks it up and deploys again with it. Until then
+      nothing can reach the instance.
   ReleaseParameter:
     Type: String
     Default: /codeai-team8/prod/release
     Description: SSM parameter holding the S3 key of the release to run. Written by `python -m deploy.production release`.
+
+Conditions:
+  HasOriginGroup: !Not [!Equals [!Ref CloudFrontOriginGroup, '']]
 
 Mappings:
   Managed:
@@ -120,14 +130,19 @@ Resources:
   ServerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: CodeAI server. HTTP 8080 from inside the VPC only (CloudFront VPC origin). No SSH.
+      GroupDescription: CodeAI server. HTTP 8080 from the CloudFront VPC origin only. No SSH.
       VpcId: !Ref Vpc
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 8080
-          ToPort: 8080
-          CidrIp: 10.42.0.0/16
       Tags: [{Key: Name, Value: codeai-prod-server}]
+  FromCloudFrontOnly:
+    Type: AWS::EC2::SecurityGroupIngress
+    Condition: HasOriginGroup
+    Properties:
+      GroupId: !Ref ServerSecurityGroup
+      Description: CloudFront VPC origin
+      IpProtocol: tcp
+      FromPort: 8080
+      ToPort: 8080
+      SourceSecurityGroupId: !Ref CloudFrontOriginGroup
 
   # Releases: code only (no student data). The deploy tool uploads; the instance reads.
   ReleaseBucket:

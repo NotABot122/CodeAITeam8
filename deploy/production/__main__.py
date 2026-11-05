@@ -80,11 +80,30 @@ def cmd_infra(publish_curriculum: bool) -> int:
     if publish_curriculum or not config.get("curriculum_version_id"):
         _storage_cli("publish-curriculum")
     storage = _outputs(STORAGE_STACK)
-    _cfn_deploy(APP_STACK, "infrastructure/production.yaml", {"AppRoleArn": storage["AppRoleArn"]})
+    params = {"AppRoleArn": storage["AppRoleArn"], "CloudFrontOriginGroup": _origin_group() or ""}
+    _cfn_deploy(APP_STACK, "infrastructure/production.yaml", params)
+    group = _origin_group()
+    if group and group != params["CloudFrontOriginGroup"]:     # first deploy: CloudFront made its group just now
+        say(f"Letting CloudFront's VPC origin group {group} reach the server ...")
+        _cfn_deploy(APP_STACK, "infrastructure/production.yaml", dict(params, CloudFrontOriginGroup=group))
     app = _outputs(APP_STACK)
     say(f"Infrastructure ready. URL {app['Url']} (serves nothing until the first release).")
     say(f"Commit {PROD_CONFIG.relative_to(ROOT)} so releases carry the production storage settings.")
     return 0
+
+
+def _origin_group() -> str:
+    """The security group CloudFront creates in our VPC for the VPC origin, or '' before the stack exists."""
+    try:
+        vpc = _boto("ec2").describe_vpcs(Filters=[{"Name": "tag:Name", "Values": ["codeai-prod"]}])["Vpcs"]
+    except Exception:
+        return ""
+    if not vpc:
+        return ""
+    groups = _boto("ec2").describe_security_groups(Filters=[
+        {"Name": "vpc-id", "Values": [vpc[0]["VpcId"]]},
+        {"Name": "group-name", "Values": ["CloudFront-VPCOrigins-Service-SG"]}])["SecurityGroups"]
+    return groups[0]["GroupId"] if groups else ""
 
 
 def _git(*args: str) -> str:

@@ -20,6 +20,8 @@ REGION=$(TOKEN=$(curl -sf -X PUT http://169.254.169.254/latest/api/token -H 'X-a
          curl -sf -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/placement/region)
 SECRET_ID=codeai-team8/prod/teacher-token
 say() { echo "[codeai install] $*"; }
+exec 9>/run/codeai-install.lock
+flock 9                      # first boot and a pushed release can arrive together; one install at a time
 
 # 1. Packages ---------------------------------------------------------------------------------------------------
 PY=""
@@ -62,6 +64,9 @@ visudo -cf /etc/sudoers.d/codeai >/dev/null
 install -d -m 0755 /etc/nftables
 cat > /etc/nftables/codeai-sandbox.nft <<EOF
 # Student code gets no network at all: not the internet, not instance metadata, not this server.
+# (The first two lines make reloading this file replace the table instead of adding a second rule.)
+table inet codeai_sandbox
+delete table inet codeai_sandbox
 table inet codeai_sandbox {
   chain output {
     type filter hook output priority 0; policy accept;
@@ -71,7 +76,6 @@ table inet codeai_sandbox {
 EOF
 grep -q codeai-sandbox.nft /etc/sysconfig/nftables.conf 2>/dev/null || echo 'include "/etc/nftables/codeai-sandbox.nft"' >> /etc/sysconfig/nftables.conf
 systemctl enable -q nftables
-nft list table inet codeai_sandbox >/dev/null 2>&1 && nft delete table inet codeai_sandbox
 nft -f /etc/nftables/codeai-sandbox.nft
 
 # 5. Settings: the teacher token comes from Secrets Manager and stays in a root:codeai 0640 file ---------------------
