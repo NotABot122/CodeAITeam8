@@ -15,6 +15,8 @@ A Team 8 hackathon prototype that helps students practice coding through a readi
 | Find code and resources | [Repository guide](documentation/REPOSITORY_GUIDE.md) |
 
 ## Quick start
+link: https://dag0zjv2d0yq1.cloudfront.net/
+Teacher test token: LpfcsmRXFlqLYOhNby2P0IoVCiObSaKHUc7NAHyM
 
 Requirements: Python 3.9+ and Node.js/npm compatible with the versions in [frontend/package.json](frontend/package.json). The demo works without AWS in rules-only mode. From the repository root:
 
