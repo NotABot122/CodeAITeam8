@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -17,6 +18,10 @@ from .quiz import QuizError, validate_questions
 REQUIRED_ITEMS = ("manifest.yaml", "levels", "reference")
 PROBLEM_FILES = ("instructions.md", "hints.yaml", "checks.py")
 QUIZ_FILES = ("instructions.md", "hints.yaml", "questions.yaml")
+# Optional per code problem: the functions the student should use, shown in the editor's function bank.
+FUNCTIONS_FILE = "functions.yaml"
+FUNCTION_FIELDS = {"call": True, "summary": True, "example": False}  # field -> required
+FUNCTION_CALL = re.compile(r"[A-Za-z_][A-Za-z0-9_.]*")
 REFERENCE_SOLUTION = "reference/solution.py"
 INDEPENDENT_CHECKER = "reference/independent_checker.py"
 EXPECTED_REPORTS = "reference/expected_reports.json"
@@ -44,6 +49,8 @@ class Problem:
     loop_check: Optional[str] = None
     format: str = "code"
     questions: List[dict] = field(default_factory=list)
+    # {"name", "call", "summary", "example"} per function. None: no functions.yaml; []: none needed.
+    functions: Optional[List[dict]] = None
 
     @property
     def is_quiz(self) -> bool:
@@ -133,6 +140,45 @@ def _read_hints(path: Path, label: str, errors: List[str]) -> List[str]:
     return [h.strip() for h in hints]
 
 
+def _read_functions(path: Path, label: str, errors: List[str]) -> Optional[List[dict]]:
+    """The function bank for one problem, or None if it has none. An empty file means the answer
+    needs no functions. `name` is what the reference solution must use, e.g. "execute" for
+    `conn.execute(sql, values)` or "description" for `cursor.description`."""
+    if not path.is_file():
+        return None
+    try:
+        data = yaml.safe_load(path.read_text()) or []
+    except yaml.YAMLError as exc:
+        errors.append(f"{label}: {FUNCTIONS_FILE} could not be read: {exc}")
+        return []
+    if not isinstance(data, list):
+        errors.append(f"{label}: {FUNCTIONS_FILE} must be a list of functions")
+        return []
+    out: List[dict] = []
+    for i, entry in enumerate(data, 1):
+        where = f"{label}: {FUNCTIONS_FILE} entry {i}"
+        if not isinstance(entry, dict):
+            errors.append(f"{where} must have call and summary")
+            continue
+        unknown = sorted(set(entry) - set(FUNCTION_FIELDS))
+        missing = [k for k, required in FUNCTION_FIELDS.items() if required and k not in entry]
+        bad = [k for k in FUNCTION_FIELDS if k in entry and not (isinstance(entry[k], str) and entry[k].strip())]
+        if unknown or missing or bad:
+            parts = ([f"unknown {', '.join(unknown)}"] if unknown else []) + \
+                    ([f"missing {', '.join(missing)}"] if missing else []) + \
+                    ([f"{', '.join(bad)} must be text"] if bad else [])
+            errors.append(f"{where}: {'; '.join(parts)}")
+            continue
+        match = FUNCTION_CALL.match(entry["call"].strip())
+        if not match:
+            errors.append(f"{where}: call must start with a name, like len(x) or conn.execute(sql)")
+            continue
+        out.append({"name": match.group(0).split(".")[-1], "call": entry["call"].strip(),
+                    "summary": entry["summary"].strip(),
+                    "example": entry["example"].rstrip() if "example" in entry else None})
+    return out
+
+
 def load_project(path) -> Project:
     """Load a project, or raise ProjectLoadError listing every problem found."""
     root = Path(path).resolve()
@@ -187,6 +233,7 @@ def load_project(path) -> Project:
             loop_check=entry.loop_check,
             format=problem_format,
             questions=questions,
+            functions=None if problem_format == "quiz" else _read_functions(folder / FUNCTIONS_FILE, label, errors),
         )
 
     if not (root / REFERENCE_SOLUTION).is_file():

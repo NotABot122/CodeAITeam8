@@ -1,0 +1,3 @@
+- 'Before the loop, set up a variable for each answer: counters at 0, the total at 0.0, the highest at None, and an empty list for flagged numbers.'
+- 'Write for entry, labels in entries: and use if "strong" in labels: to add 1 to a counter. Add entry["speed"] to the total on every pass.'
+- Replace the highest power when it is None or the new value is bigger. After the loop, sort the flagged list with .sort() and round the total with round(total, 1).

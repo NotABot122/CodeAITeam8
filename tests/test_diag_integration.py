@@ -4,6 +4,7 @@ from __future__ import annotations
 import contextlib
 import io
 import json
+import re
 import os
 import unittest
 from unittest import mock
@@ -208,7 +209,7 @@ class CommandLine(TempDirCase):
     def test_a_simulated_child_plays_and_the_report_and_handoff_commands_work(self):
         code, out, _ = self.run_cli("--ai", "mock", "play", "--profile", "mixed")
         self.assertEqual(code, 0)
-        student_id = next(w for w in out.split() if w.startswith("STU-"))
+        student_id = next(w for w in out.split() if re.fullmatch(r"[0-9a-f]{32}", w))
         code, report, _ = self.run_cli("report", "--student", student_id)
         self.assertEqual(code, 0)
         self.assertEqual(json.loads(report)["student_id"], student_id)
@@ -248,7 +249,7 @@ class CommandLine(TempDirCase):
 
         engine.start = start
         student_id = cli.run_quest(engine, ask, say)
-        self.assertTrue(student_id.startswith("STU-"))
+        self.assertRegex(student_id, r"^[0-9a-f]{32}$")  # same id format as the lesson engine and student app
         self.assertTrue(any("Rank:" in line for line in output))
 
     @staticmethod

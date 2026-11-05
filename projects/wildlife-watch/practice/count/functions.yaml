@@ -1,0 +1,14 @@
+# Function bank for Practice: Count Each Park.
+- call: conn.execute(sql, values)
+  summary: |-
+    Runs one SQL query and gives back a cursor holding the result. Use ? for each value and pass the values as a tuple.
+    A tuple with one value needs a comma: (park,).
+  example: |-
+    cursor = conn.execute("SELECT COUNT(*) FROM tagged_animals WHERE weight_kg > ?", (1,))
+- call: cursor.fetchone()
+  summary: |-
+    Gives back the first row of the result as a tuple, like (42,). Use [0] to get the value inside.
+    COUNT(*) always gives exactly one row, so fetchone() is all you need.
+  example: |-
+    row = cursor.fetchone()
+    how_many = row[0]

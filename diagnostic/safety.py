@@ -3,9 +3,9 @@
 Input (what students type):
   Flag names match evaluation/schemas/validate_submission.schema.json so the
   evaluation harness reads them unchanged: empty, too_short, gibberish,
-  prompt_injection, inappropriate, personal_info, suspected_ai_paste.
-  Rules follow evaluation/harness/validator.py, tuned for grades 3-5:
-  a lower "too short" bar (kids write short answers) and a spelling-tolerant
+  prompt_injection, inappropriate, personal_info.
+  Rules follow evaluation/harness/validator.py, tuned for short answers:
+  a lower "too short" bar (short answers are fine) and a spelling-tolerant
   gibberish check. The shared word lists come from engine.safety.
 
 Output (what the model wrote for students):
@@ -21,13 +21,13 @@ import re
 from dataclasses import dataclass
 from typing import List, Optional, Tuple
 
-from engine.safety import EMAIL, PHONE, screen_text
+from engine.safety import EMAIL, PHONE, looks_like_ai_paste, screen_text
 
 from .readability import readability_problems
 
 EMPTY, TOO_SHORT, GIBBERISH = "empty", "too_short", "gibberish"
 PROMPT_INJECTION, INAPPROPRIATE, PERSONAL_INFO = "prompt_injection", "inappropriate", "personal_info"
-SUSPECTED_AI_PASTE = "suspected_ai_paste"
+SUSPECTED_AI_PASTE = "suspected_ai_paste"   # review only: the answer is still scored
 
 HARNESS_MIN_WORDS = 8            # the evaluation harness's bar (used only for parity checks)
 GIBBERISH_CLUSTER_FRACTION = 0.4
@@ -49,14 +49,6 @@ _INJECTION = [re.compile(p) for p in _INJECTION_PATTERNS]
 
 # Mild rudeness: flagged, but a fair answer in the same text is still scored.
 _MILD_INSULTS = ("stupid", "idiot", "hate you", "shut up", "damn", "dumb")
-# Text pasted from an AI assistant: one strong signal or three weak ones (same rule as
-# evaluation/harness/validator.py). The flag asks a teacher to look; it never blocks or changes a stage.
-_AI_STRONG = [re.compile(p) for p in (
-    r"\bas an ai\b", r"\bas a (large )?language model\b", r"\bcertainly!", r"\bi hope this helps\b",
-    r"\bhere is (an|the) (improved|revised|refined) prompt\b")]
-_AI_WEAK = [re.compile(p) for p in (
-    r"\bcomprehensive\b", r"\badhering to\b", r"\bsemantic(ally)?\b", r"\bwcag\b", r"\bdeviates\b",
-    r"\bleverag(e|ing)\b", r"\bfurthermore\b", r"\brobust\b", r"\bseamless(ly)?\b")]
 _NAME_INTRO = re.compile(r"\b(my name is|i am called|i live (at|on|in)|my address is|my school is|i go to)\b", re.IGNORECASE)
 
 
@@ -117,8 +109,8 @@ def prefilter(text: Optional[str], min_words: int = 3) -> Prefilter:
         category = screened.category
     elif any(word in low for word in _MILD_INSULTS):
         flags.append(INAPPROPRIATE)          # flagged, still scorable
-    if any(p.search(low) for p in _AI_STRONG) or sum(bool(p.search(low)) for p in _AI_WEAK) >= 3:
-        flags.append(SUSPECTED_AI_PASTE)     # flagged, still scorable
+    if looks_like_ai_paste(stripped):
+        flags.append(SUSPECTED_AI_PASTE)     # flagged for the teacher, still scorable
     return Prefilter(tuple(flags), unscorable, category)
 
 

@@ -1,0 +1,133 @@
+# Likely mistakes for Wildlife Watch (engine/support.py). Same structure and ids as projects/weather-station/mistakes.yaml.
+# DRAFT for teacher review. checks lists each problem's checks ROOT CAUSE FIRST.
+
+mistakes:
+  # database_retrieval
+  ignores_one_filter:
+    concept: database_retrieval
+    label: Doesn't filter by every condition (park and number range)
+    tip: Your query keeps rows it shouldn't. Check that it filters by the park and by both ends of the number range.
+  forgets_end_date:
+    concept: database_retrieval
+    label: The number range leaves out an end, or repeats rows
+    tip: The range includes both the start number and the end number, each row once. Check whether your comparisons include the edges.
+  reads_wrong_column:
+    concept: database_retrieval
+    label: Rows aren't dictionaries with the five column names and values
+    tip: Each row should be a dictionary whose keys are the five column names. Check how you turn each database row into a dictionary.
+  unsorted_rows:
+    concept: database_retrieval
+    label: Rows aren't sorted by tag_number
+    tip: The rows need to come back with the smallest tag_number first. Which part of a query puts the results in order?
+  empty_is_error:
+    concept: database_retrieval
+    label: Breaks or returns the wrong thing when nothing matches
+    tip: Try a case where nothing matches. Your function should give back an empty result, not crash.
+  builds_sql_with_text:
+    concept: database_retrieval
+    label: Puts values into the SQL text instead of ? placeholders
+    tip: Put a ? in the SQL for each value and pass the values separately. Gluing text into the query breaks on names that contain quotes.
+
+  # conditionals
+  at_least_means_over:
+    concept: conditionals
+    label: Uses > where the rule says "or more" (edge value left out)
+    tip: The rule says "or more", so the edge value itself counts. Check which comparison you used at the edge.
+  stops_at_first_match:
+    concept: conditionals
+    label: Stops after the first matching rule, so a row can't get both labels
+    tip: A animal can be heavy and roamer at the same time. Check whether your code can give one row both labels.
+  wrong_default:
+    concept: conditionals
+    label: Gives "typical" at the wrong time
+    tip: A row is typical only when neither rule matches. Check when your code adds that label.
+  returns_text_not_list:
+    concept: conditionals
+    label: Returns a single label instead of a list of labels
+    tip: The function should give back a list of labels, even when there is only one label.
+  changes_the_input:
+    concept: conditionals
+    label: Changes the row it was given
+    tip: Your function changes the row it was given. Keep the labels in a new list and leave the row as it was.
+
+  # loops
+  keeps_last_only:
+    concept: loops
+    label: Replaces the total instead of adding to it
+    tip: The total has to grow on every pass of the loop. Check that each value is added to the total instead of replacing it.
+  keeps_first_only:
+    concept: loops
+    label: Doesn't keep the highest value seen so far
+    tip: To find the highest weight kg, compare each row with the highest one seen so far and keep the bigger one.
+  counts_every_day:
+    concept: loops
+    label: Counts every item instead of only the ones that match the rule
+    tip: Only rows that match the rule count. Check that your counter goes up only when the rule is true.
+  flagged_dates_wrong:
+    concept: loops
+    label: The list of flagged numbers is missing some, repeats them, or isn't sorted
+    tip: The flagged list holds every row that isn't typical, each once, smallest first. Check when you add a number and whether you sort the list.
+  empty_list_crash:
+    concept: loops
+    label: Breaks or gives wrong starting values for an empty list
+    tip: Try an empty list. The loop never runs, so your starting values are the answer. Check that they are right and that nothing crashes.
+  wrong_result_keys:
+    concept: loops
+    label: The summary dictionary has missing, extra or misspelled keys
+    tip: The summary needs exactly the six keys from the instructions, spelled the same way.
+  no_loop:
+    concept: loops
+    label: Doesn't go through the items with a loop
+    tip: This problem asks you to go through the items one at a time with a loop. Check how your code visits each one.
+
+  # functions
+  skips_a_helper:
+    concept: functions
+    label: Doesn't reuse the functions from earlier levels
+    tip: Use the functions you already wrote. Get the animals, label each one, then summarize.
+  changes_the_database:
+    concept: functions
+    label: Changes the database instead of only reading it
+    tip: The report should only read from the database. Check that your code doesn't add, change or remove rows.
+  keeps_state_between_calls:
+    concept: functions
+    label: Gives a different answer the second time it is called
+    tip: Calling the function twice should give the same report. Look for values that carry over from one call to the next.
+
+checks:
+  level-1:
+    check_rows_are_dictionaries: reads_wrong_column
+    check_only_requested_group: ignores_one_filter
+    check_exact_number_range: forgets_end_date
+    check_sorted_by_number: unsorted_rows
+    check_empty_ranges: empty_is_error
+    check_uses_placeholders: builds_sql_with_text
+  level-2:
+    check_returns_list_of_labels: returns_text_not_list
+    check_metric_a_boundary: at_least_means_over
+    check_metric_b_boundary: at_least_means_over
+    check_both_labels: stops_at_first_match
+    check_normal_row: wrong_default
+    check_does_not_change_row: changes_the_input
+  level-3:
+    check_keys: wrong_result_keys
+    check_total: keeps_last_only
+    check_max: keeps_first_only
+    check_flagged: flagged_dates_wrong
+    check_empty_input: empty_list_crash
+    loop_check: no_loop
+  level-4:
+    check_uses_your_functions: skips_a_helper
+    check_database_unchanged: changes_the_database
+    check_same_result_twice: keeps_state_between_calls
+    check_empty_report: empty_is_error
+  practice-band:
+    check_bands: at_least_means_over
+  practice-loop:
+    check_count_label: counts_every_day
+    loop_check: no_loop
+
+practice:
+  practice-count: [ignores_one_filter, builds_sql_with_text, empty_is_error]
+  practice-band: [at_least_means_over, stops_at_first_match, wrong_default]
+  practice-loop: [counts_every_day, keeps_last_only, empty_list_crash, no_loop]

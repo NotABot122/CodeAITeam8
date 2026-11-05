@@ -1,6 +1,7 @@
 // Shapes returned by webapi/ (a thin JSON layer over engine.session). Keep in sync with webapi/service.py.
 export type Stage = 0 | 1 | 2 | 3;
-export type NodeStatus = 'done' | 'current' | 'todo';
+/** paused: the level the student left for an inserted practice; they come back to it next. */
+export type NodeStatus = 'done' | 'current' | 'paused' | 'todo';
 
 export interface PathNode {
   id: string;
@@ -51,7 +52,52 @@ export interface ProblemView {
   hintCount: number;
   hintsSeen: number;
   attempts: number;
+  /** The functions this problem's answer should use. [] means it needs none; null means no bank was written. */
+  functions: FunctionInfo[] | null;
+  /** Why this practice problem is here: after a passed level, after repeated tries, or planned by the readiness check. */
+  inserted: 'after_level' | 'struggle' | 'planned' | null;
+  /** The level the student goes back to after this practice (only for 'struggle'). */
+  returnTo: {id: string; title: string} | null;
+  /** Adaptive support for code problems (engine/support.py): how much help this problem gets right now. */
+  support?: SupportView;
 }
+
+/** Help fades as the student's level rises: full -> guided -> light -> minimal. Being stuck adds a level of help. */
+export interface SupportView {
+  level: 'full' | 'guided' | 'light' | 'minimal' | 'legacy';
+  autoHintAfter: number | null;
+  functionBank: 'full' | 'names' | 'hidden';
+  errorDetail: 'full' | 'brief';
+  nameMistake: boolean;
+  stuck: boolean;
+  /** An outline of the function to write, offered until the student has started it. */
+  outline: {name: string; text: string} | null;
+  suggestBlocks: boolean;
+}
+
+export interface FunctionInfo {
+  call: string;
+  summary: string;
+  example: string | null;
+}
+
+/** The lesson pathway the Strands Decider 2B picked after the readiness check (student view: no stances or scores). */
+export interface PathwayView {
+  id: string;
+  title: string;
+  summary: string;
+  message: string;
+  decidedBy: 'ai' | 'rules';
+  grade: number | null;
+  standards: {id: string; skill: string}[];
+  steps: {title: string; status: 'done' | 'current' | 'todo'}[];
+}
+export interface PathwayResult {pathway: PathwayView; state: StudentState}
+
+/** Projects with the same skills and different stories; the readiness check's goal suggests one. */
+export interface ProjectChoice {project: string; title: string; pitch: string; suggested: boolean; current: boolean; custom?: boolean}
+export interface ProjectChoices {choices: ProjectChoice[]; locked: boolean; topic: string}
+export interface ChooseResult extends ProjectChoices {state: StudentState}
 
 export interface StudentState {
   studentId: string;
@@ -63,16 +109,22 @@ export interface StudentState {
   code: string;
   path: PathNode[];
   concepts: ConceptProgress[];
+  diagnostic: 'none' | 'in_progress' | 'finished' | 'applied';
   nextStep: NextStep | null;
   themed: boolean;
   aiAvailable: boolean;
+  pathway: PathwayView | null;
+  /** When "Make it yours" applies: now (first topic), later (it's ahead on the pathway), or null. */
+  themeable: 'now' | 'later' | null;
   streakLength: number;
   maxStage: number;
   stageNames: string[];
 }
 
 export type SubmitStatus =
-  | 'passed' | 'failed' | 'timeout' | 'syntax_error' | 'import_error' | 'ungraded';
+  | 'passed' | 'failed' | 'timeout' | 'syntax_error' | 'import_error' | 'ungraded'
+  // From POST /hint (a hint on request, not a submission):
+  | 'hint' | 'no_hints' | 'complete';
 
 export interface StageChange {
   concept: string;
@@ -104,9 +156,28 @@ export interface Outcome {
   notices: string[];
   questionResults: QuestionResult[];
   nextStep: NextStep | null;
+  /** Plain-language explanation of a Python error. */
+  explanation?: {text: string; line: number | null; kind: string; source: 'ai' | 'rules'} | null;
+  /** The likely mistake behind a failed run, at the levels that name it: where to look, never the fix. */
+  mistake?: {id: string; tip: string} | null;
+  stuck?: string[];
 }
 
 export interface Health {ok: boolean; project: string; ai: boolean; aiReason: string | null; adaptive: boolean}
 export interface SubmitResult {outcome: Outcome; state: StudentState}
 export interface StartResult {message: string; built: boolean; state: StudentState}
 export interface ThemeResult {built: boolean; message: string; state: StudentState}
+export type BlocksResult =
+  | {ok: true; workspace: import('../blocks/format').WorkspaceState; blockCount: number}
+  | {ok: false; reason: 'syntax_error' | 'unsupported' | 'too_long' | 'too_complex'; message: string; line: number | null};
+
+export interface CourseView {
+  studentId: string;
+  now: {project: string; isReview: boolean; complete: boolean};
+  topics: {id: string; title: string; status: 'done' | 'current' | 'upcoming'; concepts: string[]}[];
+  reviewsDone: string[];
+  concepts: {id: string; name: string; stage: number; stageName: string; inProject: boolean}[];
+  quest: {status: 'none' | 'in_progress' | 'finished' | 'applied'; seeded: string[]};
+  nextStep: string | null;
+  stageNames: string[];
+}

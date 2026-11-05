@@ -16,10 +16,15 @@ from engine.course import Course, CourseError
 from engine.progress import ProgressRecord
 from engine.project import Project
 from engine.session import SubmitOutcome, UnknownStudent
+from diagnostic.engine import NothingPending, NotFinished, UnknownQuest
+from diagnostic.models import InvalidResponse
+from diagnostic.store import InvalidStudentId
 from engine.stages import MAX_STAGE, STAGE_NAMES
 
+from .blocks import python_to_blocks
+
 # Ids become folder names under the data directory, so only this shape is accepted.
-STUDENT_ID = re.compile(r"^[0-9a-f]{32}$")
+STUDENT_ID = re.compile(r"^([0-9a-f]{32}|STU-[0-9a-f]{16,32})$")  # lesson-only students, or ones made by the readiness quest
 MAX_CODE_CHARS = 20_000
 MAX_THEME_CHARS = 300
 
@@ -35,7 +40,20 @@ def _status_of(problem_id: str, record: ProgressRecord) -> str:
         return "done"
     if not record.complete and problem_id == record.current_problem:
         return "current"
+    if not record.complete and problem_id == record.return_to:
+        return "paused"   # a practice was inserted after repeated tries; the student comes back here
     return "todo"
+
+
+# Why the current problem is a practice problem, from the routing reason that selected it.
+_INSERTED = {"practice_assigned": "after_level", "struggle_practice": "struggle", "planned_practice": "planned"}
+
+
+def _inserted(record: ProgressRecord) -> Optional[str]:
+    for entry in reversed(record.routing_log):
+        if entry.get("selected") == record.current_problem:
+            return _INSERTED.get(entry.get("reason"))
+    return None
 
 
 def _problem_extras(project: Project, problem_id: str, record: ProgressRecord) -> Dict[str, Any]:
@@ -47,6 +65,24 @@ def _problem_extras(project: Project, problem_id: str, record: ProgressRecord) -
         "hintCount": len(problem.hints),
         "hintsSeen": record.hints_seen.get(problem.id, 0),
         "attempts": record.attempts.get(problem.id, 0),
+        # Pre-authored, one per function the answer should use (functions.yaml).
+        # None when the problem has no bank; [] when the answer needs no functions.
+        "functions": None if problem.functions is None else
+        [{"call": f["call"], "summary": f["summary"], "example": f["example"]} for f in problem.functions],
+    }
+
+
+def pathway_view(record: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    """What the student sees of their pathway: no stance, stages, teacher note or routing details."""
+    if not record:
+        return None
+    current = record.get("current", 0)
+    return {
+        "id": record["id"], "title": record["title"], "summary": record["summary"],
+        "message": record["student_message"], "decidedBy": record["decided_by"], "grade": record.get("grade"),
+        "standards": [{"id": s["id"], "skill": s["skill"]} for s in record.get("standards") or []],
+        "steps": [{"title": s["title"], "status": "done" if i < current else "current" if i == current else "todo"}
+                  for i, s in enumerate(record.get("steps") or [])],
     }
 
 
@@ -90,6 +126,15 @@ class Service:
                 code = ""
         if state["problem"]:
             state["problem"].update(_problem_extras(project, state["problem"]["id"], record))
+            if state["problem"]["format"] == "code":
+                state["problem"]["support"] = engine.support_view(record, project.problem(state["problem"]["id"]), code)
+            inserted = _inserted(record) if manifest.practice(state["problem"]["id"]) is not None else None
+            # Only a practice inserted after repeated tries promises a way back to one known level.
+            back = record.return_to if inserted == "struggle" else None
+            state["problem"].update({
+                "inserted": inserted,
+                "returnTo": {"id": back, "title": project.problem(back).title} if back and manifest.has_problem(back) else None,
+            })
 
         levels = sorted(manifest.levels, key=lambda lv: lv.number)
         path: List[Dict[str, Any]] = []
@@ -112,6 +157,9 @@ class Service:
             "stageNames": [STAGE_NAMES[i] for i in range(MAX_STAGE + 1)],
             "themed": project.root.parent != course.projects_root and project.topic != "revision",
             "aiAvailable": self.provider is not None,
+            "pathway": pathway_view(course.store.profile(student_id).get("pathway")),
+            # When "Make it yours" applies: "now" (first topic), "later" (a pathway step on it is ahead), or None.
+            "themeable": course.theme_target(student_id),
         })
         return state
 
@@ -146,6 +194,36 @@ class Service:
                 raise ApiError(400, "bad_request", "The code has characters that can't be saved.") from None
             outcome = self._guard(lambda: self.course.submit(student_id, path))
             return {"outcome": self._outcome(outcome, project), "state": self._state(student_id)}
+
+    def hint(self, student_id: str, code: Any = None) -> Dict[str, Any]:
+        """A hint on request. For a code problem the current editor text is saved first, so the AI tutor
+        (when on) can phrase the hint from it. Not a submission: attempts don't change."""
+        self._check_id(student_id)
+        if code is not None and not isinstance(code, str):
+            raise ApiError(400, "bad_request", "The code must be text.")
+        if isinstance(code, str) and len(code) > MAX_CODE_CHARS:
+            raise ApiError(400, "code_too_long", f"The code is longer than {MAX_CODE_CHARS:,} characters.")
+        with self._lock(student_id):
+            project = self.course.project_for(student_id)
+            record, _ = self.course.engine(student_id).open(student_id)
+            path = None
+            if not record.complete and not project.problem(record.current_problem).is_quiz and isinstance(code, str):
+                path = start_workspace(self.data_dir, student_id, project)
+                try:
+                    path.write_text(code, encoding="utf-8")
+                except UnicodeEncodeError:
+                    raise ApiError(400, "bad_request", "The code has characters that can't be saved.") from None
+            outcome = self._guard(lambda: self.course.request_hint(student_id, path))
+            return {"outcome": self._outcome(outcome, project), "state": self._state(student_id)}
+
+    @staticmethod
+    def to_blocks(code: Any) -> Dict[str, Any]:
+        """Python -> block workspace for the editor's Blocks mode. Parses only; never runs the code."""
+        if not isinstance(code, str):
+            raise ApiError(400, "bad_request", "The code must be text.")
+        if len(code) > MAX_CODE_CHARS:
+            raise ApiError(400, "code_too_long", f"The code is longer than {MAX_CODE_CHARS:,} characters.")
+        return python_to_blocks(code)
 
     def answer(self, student_id: str, answers: Any) -> Dict[str, Any]:
         self._check_id(student_id)
@@ -192,14 +270,120 @@ class Service:
             self._guard(lambda: self.course.reset_theme(student_id))
             return self._state(student_id)
 
+    # Project choice --------------------------------------------------------------
+    def project_choices(self, student_id: str) -> Dict[str, Any]:
+        self._check_id(student_id)
+        return self._guard(lambda: self.course.project_choices(student_id))
+
+    def choose_project(self, student_id: str, project: Any) -> Dict[str, Any]:
+        self._check_id(student_id)
+        if not isinstance(project, str) or len(project) > 80:
+            raise ApiError(400, "bad_request", "Pick one of the projects in the list.")
+        with self._lock(student_id):
+            self._guard(lambda: self.course.choose_project(student_id, project))
+            return {"state": self._state(student_id), **self.course.project_choices(student_id)}
+
+    def course_view(self, student_id: str) -> Dict[str, Any]:
+        """The student's whole course at a glance: topics, finished work, ideas, and what's next."""
+        self._check_id(student_id)
+        with self._lock(student_id):
+            course = self.course
+            profile = course.store.profile(student_id)
+            engine = course.engine(student_id)
+            record, _ = engine.open(student_id)
+            project = engine.project
+            catalog = course.catalog
+            done_topics = {c.get("topic") for c in profile.get("completed") or [] if c.get("topic") != "revision"}
+            if record.complete and project.topic != "revision":
+                done_topics.add(project.topic)
+            topics = []
+            for t in catalog.topics:
+                if t.id in done_topics:
+                    status = "done"
+                elif project.topic == t.id and not record.complete:
+                    status = "current"
+                else:
+                    status = "upcoming"
+                topics.append({"id": t.id, "title": t.title, "status": status,
+                               "concepts": [catalog.name(c) for c in t.concepts]})
+            stages = {c: int(s) for c, s in (profile.get("concepts") or {}).items()}
+            for cid, st in record.concepts.items():
+                stages[cid] = max(stages.get(cid, 0), int(st.stage))
+            reviews = []
+            for c in profile.get("completed") or []:
+                if c.get("topic") == "revision" and c.get("revision_concept"):
+                    reviews.append(catalog.name(c["revision_concept"]))
+            diag = profile.get("diagnostic") or {}
+            return {
+                "studentId": student_id,
+                "now": {"project": project.title, "isReview": project.topic == "revision", "complete": record.complete},
+                "topics": topics,
+                "reviewsDone": reviews,
+                "concepts": [{"id": c, "name": n, "stage": stages.get(c, 0), "stageName": STAGE_NAMES[min(3, stages.get(c, 0))],
+                              "inProject": c in record.concepts and not record.complete}
+                             for c, n in catalog.concepts.items()],
+                "quest": {"status": course.diagnostic_status(student_id),
+                          "seeded": [catalog.name(c) for c, v in (diag.get("seeded") or {}).items() if v > 0]},
+                "nextStep": (profile.get("next_step") or {}).get("reason") if record.complete else None,
+                "stageNames": [STAGE_NAMES[i] for i in range(MAX_STAGE + 1)],
+            }
+
+    # Lesson pathway (Strands Decider 2B) ------------------------------------------
+    def pathway(self, student_id: str, grade: Any) -> Dict[str, Any]:
+        self._check_id(student_id)
+        if not isinstance(grade, int) or isinstance(grade, bool):
+            raise ApiError(400, "bad_request", "Pick your grade.")
+        with self._lock(student_id):
+            record = self._guard(lambda: self.course.decide_pathway(student_id, grade))
+            return {"pathway": pathway_view(record), "state": self._state(student_id)}
+
+    # Readiness quest ---------------------------------------------------------
+    def quest_options(self) -> Dict[str, Any]:
+        return self.course.diagnostic_options()
+
+    def quest_start(self, buddy: Any, goal: Any) -> Dict[str, Any]:
+        for value in (buddy, goal):
+            if value is not None and (not isinstance(value, str) or len(value) > 40):
+                raise ApiError(400, "bad_request", "Pick a buddy and a goal from the lists.")
+        options = self.course.diagnostic_options()
+        if buddy is not None and buddy not in {b["id"] for b in options["buddies"]}:
+            raise ApiError(400, "bad_request", "Pick a buddy from the list.")
+        if goal is not None and goal not in {g["id"] for g in options["goals"]}:
+            raise ApiError(400, "bad_request", "Pick a goal from the list.")
+        # The free-text goal is left out on purpose: the screen only offers taps.
+        return self._guard(lambda: self.course.diagnostic_start(buddy, goal, None))
+
+    def quest_next(self, student_id: str) -> Dict[str, Any]:
+        self._check_id(student_id)
+        with self._lock(student_id):
+            return self._guard(lambda: self.course.diagnostic_next(student_id))
+
+    def quest_answer(self, student_id: str, response: Any, elapsed_ms: Any) -> Dict[str, Any]:
+        self._check_id(student_id)
+        if elapsed_ms is not None and (not isinstance(elapsed_ms, int) or isinstance(elapsed_ms, bool) or not 0 <= elapsed_ms <= 3_600_000):
+            elapsed_ms = None
+        if isinstance(response, dict) and isinstance(response.get("text"), str) and len(response["text"]) > 1000:
+            raise ApiError(400, "bad_request", "That answer is too long.")
+        with self._lock(student_id):
+            return self._guard(lambda: self.course.diagnostic_answer(student_id, response, elapsed_ms))
+
+    def quest_finish(self, student_id: str) -> Dict[str, Any]:
+        self._check_id(student_id)
+        with self._lock(student_id):
+            return self._guard(lambda: self.course.diagnostic_finish(student_id))
+
     @staticmethod
     def _guard(fn):
         try:
             return fn()
         except CourseError as err:
             raise ApiError(400, "course_error", str(err)) from None
-        except UnknownStudent:
+        except (UnknownStudent, UnknownQuest, InvalidStudentId):
             raise ApiError(404, "unknown_student", "No student with that id.") from None
+        except InvalidResponse as err:
+            raise ApiError(422, "invalid_answer", str(err)) from None
+        except (NothingPending, NotFinished) as err:
+            raise ApiError(409, "quest_state", str(err)) from None
 
     # Serialising ------------------------------------------------------------
     @staticmethod
@@ -221,4 +405,7 @@ class Service:
             "notices": list(outcome.notices),
             "questionResults": list(outcome.question_results or []),
             "nextStep": outcome.next_step,
+            "explanation": outcome.explanation,
+            "mistake": outcome.mistake,
+            "stuck": list(outcome.stuck or []),
         }

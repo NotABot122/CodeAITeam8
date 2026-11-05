@@ -4,14 +4,27 @@
 
 Routes (JSON):
     GET  /api/health
-    POST /api/students                      -> new student + state
+    POST /api/students                      -> new student + state (skips the readiness quest)
+    GET  /api/quest/options                 -> buddies, goals, zones
+    POST /api/quest                         {"buddy", "goal"} -> {student_id, welcome, first}
+    GET  /api/quest/<id>/next               -> next step, or {done: true, ...} (result is applied)
+    POST /api/quest/<id>/answer             {"response", "elapsedMs"} -> feedback
+    POST /api/quest/<id>/finish             -> end early (result is applied)
     GET  /api/students/<id>                 -> state
+    GET  /api/students/<id>/course          -> the whole course: topics, finished work, ideas, what's next
     POST /api/students/<id>/submit          {"code": "..."} -> {outcome, state}
+    GET  /api/students/<id>/projects        -> {choices: [{project, title, pitch, suggested, current}], locked, topic}
+    POST /api/students/<id>/project         {"project": "monster-arena"} -> {state, choices, locked} (before it's started)
+    POST /api/students/<id>/pathway         {"grade": 9-12} -> {pathway, state} (Strands Decider 2B; once per student)
+    POST /api/students/<id>/hint            {"code": "..."} -> {outcome, state} (next hint; not a submission)
     POST /api/students/<id>/answer          {"answers": {"q1": 1, "q3": "text"}} -> {outcome, state}
     GET  /api/students/<id>/next            -> {nextStep}
     POST /api/students/<id>/next            {"option": 0, "theme": "..."} -> {message, built, state}
     POST /api/students/<id>/theme           {"request": "pokemon"} -> {built, message, state}
     POST /api/students/<id>/theme/reset     -> state
+    POST /api/blocks                        {"code": "..."} -> {ok, workspace, blockCount} or {ok: false, reason, message, line}
+Teacher routes (GET, need header X-Teacher-Token = $CODEAI_TEACHER_TOKEN; off if unset):
+    /api/teacher/overview, /api/teacher/students/<id>, /api/teacher/content-check
 Anything else is served from frontend/dist if it has been built.
 """
 from __future__ import annotations
@@ -19,6 +32,7 @@ from __future__ import annotations
 import argparse
 import json
 import mimetypes
+import os
 import re
 import sys
 import traceback
@@ -30,6 +44,7 @@ from engine.ai import ModelError, provider_from_env
 from engine.cli import DEFAULT_DATA, DEFAULT_PROJECT
 
 from .service import ApiError, Service
+from .teacher import Teacher, token_ok
 
 DIST = Path(__file__).resolve().parent.parent / "frontend" / "dist"
 MAX_BODY = 64 * 1024
@@ -37,17 +52,33 @@ ID = r"([^/]+)"
 ROUTES = [
     ("GET", re.compile(r"^/api/health$"), lambda s, m, b: s.health()),
     ("POST", re.compile(r"^/api/students$"), lambda s, m, b: s.new_student()),
+    ("GET", re.compile(r"^/api/quest/options$"), lambda s, m, b: s.quest_options()),
+    ("POST", re.compile(r"^/api/quest$"), lambda s, m, b: s.quest_start(b.get("buddy"), b.get("goal"))),
+    ("GET", re.compile(rf"^/api/quest/{ID}/next$"), lambda s, m, b: s.quest_next(m[1])),
+    ("POST", re.compile(rf"^/api/quest/{ID}/answer$"), lambda s, m, b: s.quest_answer(m[1], b.get("response"), b.get("elapsedMs"))),
+    ("POST", re.compile(rf"^/api/quest/{ID}/finish$"), lambda s, m, b: s.quest_finish(m[1])),
     ("GET", re.compile(rf"^/api/students/{ID}$"), lambda s, m, b: s.state(m[1])),
+    ("GET", re.compile(rf"^/api/students/{ID}/course$"), lambda s, m, b: s.course_view(m[1])),
     ("POST", re.compile(rf"^/api/students/{ID}/submit$"), lambda s, m, b: s.submit(m[1], b.get("code"))),
+    ("GET", re.compile(rf"^/api/students/{ID}/projects$"), lambda s, m, b: s.project_choices(m[1])),
+    ("POST", re.compile(rf"^/api/students/{ID}/project$"), lambda s, m, b: s.choose_project(m[1], b.get("project"))),
+    ("POST", re.compile(rf"^/api/students/{ID}/pathway$"), lambda s, m, b: s.pathway(m[1], b.get("grade"))),
+    ("POST", re.compile(rf"^/api/students/{ID}/hint$"), lambda s, m, b: s.hint(m[1], b.get("code"))),
     ("POST", re.compile(rf"^/api/students/{ID}/answer$"), lambda s, m, b: s.answer(m[1], b.get("answers"))),
     ("GET", re.compile(rf"^/api/students/{ID}/next$"), lambda s, m, b: {"nextStep": s.next_step(m[1])}),
     ("POST", re.compile(rf"^/api/students/{ID}/next$"), lambda s, m, b: s.start_next(m[1], b.get("option"), b.get("theme"))),
     ("POST", re.compile(rf"^/api/students/{ID}/theme$"), lambda s, m, b: s.build_theme(m[1], b.get("request"))),
     ("POST", re.compile(rf"^/api/students/{ID}/theme/reset$"), lambda s, m, b: s.reset_theme(m[1])),
+    ("POST", re.compile(r"^/api/blocks$"), lambda s, m, b: s.to_blocks(b.get("code"))),
 ]
 
 
-def make_handler(service: Service):
+def make_handler(service: Service, teacher_token=None):
+    teacher = Teacher(service)
+    teacher_routes = {
+        "/api/teacher/overview": lambda: teacher.overview(),
+        "/api/teacher/content-check": lambda: teacher.content_check(),
+    }
     class Handler(BaseHTTPRequestHandler):
         server_version = "CodeAI"
 
@@ -82,6 +113,16 @@ def make_handler(service: Service):
 
         def _api(self, method: str, path: str):
             try:
+                if path.startswith("/api/teacher/"):
+                    token_ok(teacher_token, self.headers.get("X-Teacher-Token"))
+                    if method != "GET":
+                        raise ApiError(405, "method_not_allowed", "Wrong method.")
+                    if path in teacher_routes:
+                        return self._send(200, teacher_routes[path]())
+                    m = re.match(r"^/api/teacher/students/([^/]+)$", path)
+                    if m:
+                        return self._send(200, teacher.student(m.group(1)))
+                    raise ApiError(404, "not_found", "No such endpoint.")
                 wrong_method = False
                 for verb, pattern, fn in ROUTES:
                     match = pattern.match(path)
@@ -143,7 +184,7 @@ def main(argv=None) -> int:
     parser.add_argument("--no-adaptive", action="store_true")
     args = parser.parse_args(argv)
     service = build_service(args.data_dir, args.ai, not args.no_adaptive)
-    httpd = ThreadingHTTPServer((args.host, args.port), make_handler(service))
+    httpd = ThreadingHTTPServer((args.host, args.port), make_handler(service, os.environ.get("CODEAI_TEACHER_TOKEN") or None))
     print(f"CodeAI student UI on http://{args.host}:{args.port}  (AI {'on' if service.provider else 'off'})")
     try:
         httpd.serve_forever()

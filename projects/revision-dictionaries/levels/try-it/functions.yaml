@@ -1,0 +1,9 @@
+# Function bank for Try It: Days per Station.
+- call: my_dict.get(key, default)
+  summary: |-
+    Looks up a key in a dictionary. If the key isn't there yet, it gives back the default instead of causing an error.
+    For counting, use 0 as the default and add one.
+  example: |-
+    tally = {}
+    tally["cat"] = tally.get("cat", 0) + 1
+    # tally is now {"cat": 1}

@@ -155,7 +155,7 @@
     {
       "completed": false,
       "submissions": 0,
-      "crashed": "RuntimeError: grader crashed (escapes Engine: session.py, line 175, in submit)",
+      "crashed": "RuntimeError: grader crashed (escapes Engine: session.py, line 188, in submit)",
       "path": [
         "level-1"
       ],
@@ -212,7 +212,7 @@
     {
       "completed": false,
       "submissions": 0,
-      "crashed": "RuntimeError: SDK bug (escapes Engine: session.py, line 214, in _ai_hint)",
+      "crashed": "RuntimeError: SDK bug (escapes Engine: session.py, line 254, in _ai_hint)",
       "path": [
         "level-1"
       ],

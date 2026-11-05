@@ -1,6 +1,6 @@
-# Weather Station readiness quest (grades 3-5)
+# Weather Station readiness check (grades 9-12)
 
-A tap-and-drag game that finds out where a young student stands on the four ideas the
+A short tap-and-drag check that finds out where a high school student stands on the four ideas the
 [Weather Station lesson](../projects/weather-station/) is built on: **finding information in a log**
 (`database_retrieval`), **if/else decisions** (`conditionals`), **repeating** (`loops`) and
 **reusable helpers** (`functions`). It scores answers by fixed rules, then (optionally) asks a
@@ -17,7 +17,7 @@ python3 -m diagnostic.cli play --profile mixed     # watch a simulated child (st
 python3 -m diagnostic.cli --ai mock play --profile mixed --teacher   # also use the offline model, print the teacher report
 python3 -m diagnostic.cli check-content            # validate the questions, skill tree and settings
 python3 -m diagnostic.cli tree                     # print the skill tree
-python3 -m diagnostic.cli handoff --student STU-… --apply   # start that student's Weather Station lesson in the right place
+python3 -m diagnostic.cli handoff --student ID --apply   # start that student's Weather Station lesson in the right place
 python3 -m unittest discover -s tests -t .         # the whole test suite (original lesson tests and these)
 python3 -m evaluation.harness.run_diag_eval        # the evaluation harness, offline
 ```
@@ -131,7 +131,7 @@ python3 -m evaluation.harness.run_diag_eval --benchmark evaluation/data/diag_ben
 |---|---|
 | `validate_submission` | `contract.py`; one result for the concept a "tell the guide" prompt targets; `null` stage + a flag for unscorable input; every stage has a quote from the child's words; also served by `evaluation/harness/mcp_server.py` for rubric `WS-DIAG-v0.1-draft`. |
 | `route_next` | `placement.Route` has exactly the contract's fields, including the `STANCE_*` values. |
-| Event log | `eval_log.py`; one row per tool call, `STU-` ids, no student text beyond the contract's quotes, goal never logged. |
+| Event log | `eval_log.py`; one row per tool call, ids marked `STU-` (log only), no student text beyond the contract's quotes, goal never logged. |
 | Hard requirements (standard §2.6) | 0 parse errors, 100% of empty/gibberish/too-short answers null, 0 injection cases at stage 3, all checked in the run. |
 
 Schema **v0.2** (additive, so Concept 3 data still validates): four more `subskill` values, a `personal_info` filter flag,
@@ -155,13 +155,12 @@ Put authentication, TLS and rate limiting in front of it before any real use: st
 ## Privacy
 
 No names are collected: the nickname is a pick from a list. The optional goal text is screened; personal details cause it to be
-dropped. Student ids look like `STU-` plus random hex. The goal text and written answers are saved in the student's own record and never
+dropped. Student ids are 32 random hex characters, the same format as the lesson engine and the student app (the event log marks them `STU-`). The goal text and written answers are saved in the student's own record and never
 written to the event logs (apart from the short quotes the evaluation contract requires). Real answers for the benchmark go in a git-ignored file.
 
 ## Known limits
 
-- The Weather Station lesson itself is high-school level (SQL). The quest measures the *ideas underneath it*, so most grade 3-5 students
-  will place at stage 0-2; the placement is a readiness path, not a claim they are ready for the lesson.
+- The check and the lesson both target grades 9-12. The questions read SQL and Python the way the lesson writes it; reading level and timing are assumptions until a pilot with real students.
 - `seconds_per_item` and `seconds_per_explain` in `diagnostic.yaml` are assumptions. Time a real class and update them.
 - Stage estimates rest on 3-4 questions per concept, so adjacent-stage errors are expected; the confidence says how much to trust each one.
 - The question bank is a first draft (24 questions) written for review by Teaching & Learning staff; wording and misconception tags

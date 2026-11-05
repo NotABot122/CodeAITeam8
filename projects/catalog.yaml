@@ -14,6 +14,13 @@ topics:
     project: weather-station
     themeable: true            # students can ask for this one in their own theme
     concepts: [database_retrieval, conditionals, loops, functions]
+    # Same four levels and skills, different stories. The student picks one (the readiness check's goal
+    # suggests it). `goals` are the readiness check's goal ids (projects/weather-station/diagnostic/diagnostic.yaml).
+    choices:
+      - {project: weather-station, goals: [weather_report, not_sure], pitch: "Turn a year of weather readings into a report for a meteorologist."}
+      - {project: monster-arena,   goals: [build_game],              pitch: "Balance the monsters in a creature-battling game before the next update."}
+      - {project: wildlife-watch,  goals: [find_facts],              pitch: "Find patterns in tracking data from animals in three parks."}
+      - {project: library-helper,  goals: [make_helpers],            pitch: "Build a tool that helps library volunteers find and flag books."}
   - id: collections
     title: Lists and Dictionaries
     project: weather-collections
@@ -33,6 +40,13 @@ revision:
 diagnostic:
   min_confidence: 0.8          # the diagnostic's own probability that its stage is right
   use_borderline: false        # concepts the diagnostic marks "borderline" are not used
+  min_correct_answers: 2       # a stage above 0 needs this many correct answers on the concept (no lucky guesses)
+
+# In-lesson intervention: after this many failed attempts on one level, insert that concept's practice
+# once, then return to the level. If the diagnostic had given the concept a stage above 0, the stage is
+# lowered to 0 and a diagnostic_mismatch event is logged. null turns it off.
+intervention:
+  struggle_after: 3
 
 # How a finished project is judged, per concept, from its problems' attempts and hints.
 # Change these after feedback; no code changes needed.
@@ -44,3 +58,68 @@ thresholds:
     min_attempts: 4
     min_hints: 2
     practice_counts: true      # being sent to a practice problem counts as struggling
+
+# Lesson pathways the Strands Decider 2B (engine/decider.py) picks from after the readiness check.
+# The rules decide which pathways a student can get (`requires`: the stage the readiness check must be
+# confident about, per concept; `needs_gap`: at least one concept the check is confident is a gap).
+# The model only picks among those, and the rules' own pick is used whenever the model is off or its
+# answer can't be used. Steps run in order. `project: revision` means the review project for the student's
+# weakest concept. `start` is the first problem; `readiness` means the readiness check's placement.
+pathways:
+  - id: review-first
+    stance: STANCE_REINFORCE
+    title: Build the basics first
+    summary: Start with a short review of the idea that needs the most work. Then build the Weather Station project one level at a time.
+    needs_gap: true
+    steps:
+      - {project: revision}
+      - {project: weather-station, start: level-1}
+      - {project: weather-collections}
+  - id: step-by-step
+    stance: STANCE_ADVANCE
+    title: Step by step
+    summary: Build the Weather Station project from where the readiness check placed you, with extra practice before the parts that need it. Then move on to lists and dictionaries.
+    steps:
+      - {project: weather-station, start: readiness}
+      - {project: weather-collections}
+  - id: connect-ideas
+    stance: STANCE_BRIDGE
+    title: Connect the ideas
+    summary: You already read data and make decisions well, so you start at Level 3, where loops and if statements work together on every record. Then move on to lists and dictionaries.
+    requires: {database_retrieval: 2, conditionals: 2, loops: 1}
+    steps:
+      - {project: weather-station, start: level-3}
+      - {project: weather-collections}
+  - id: full-project
+    stance: STANCE_PROJECT_SYNTHESIS
+    title: Jump to the full project
+    summary: You start at Level 4 and build the whole weather report, writing the helper functions it needs yourself. Then move on to lists and dictionaries.
+    requires: {database_retrieval: 2, conditionals: 2, loops: 2, functions: 1}
+    steps:
+      - {project: weather-station, start: level-4}
+      - {project: weather-collections}
+
+# Adaptive support (engine/support.py): help fades as a concept's stage rises. The weakest concept of a
+# problem picks the level. Being stuck on a problem gives one level MORE help there until it passes;
+# passing problems quickly gives one level LESS (momentum). Students can always ask for a hint.
+#   auto_hint_after: failed runs before a hint shows on its own (null: only when the student asks)
+#   function_bank: full | names (calls only) | hidden (behind a "show" button)
+#   outline: steps (commented outline of the function) | signature (def line only) | none
+#   error_detail: full (what happened + where to look) | brief (what happened)
+#   ai_explain: the AI tutor phrases error explanations from the student's code (rules otherwise)
+#   name_mistake: show the likely mistake's tip after a failed run
+#   suggest_blocks: suggest Blocks mode after errors several runs in a row
+support:
+  levels:
+    full:    {for_stage: 0, auto_hint_after: 1,    function_bank: full,   outline: steps,     error_detail: full,  ai_explain: true,  name_mistake: true,  suggest_blocks: true}
+    guided:  {for_stage: 1, auto_hint_after: 1,    function_bank: full,   outline: signature, error_detail: full,  ai_explain: true,  name_mistake: true,  suggest_blocks: true}
+    light:   {for_stage: 2, auto_hint_after: 2,    function_bank: names,  outline: none,      error_detail: brief, ai_explain: false, name_mistake: false, suggest_blocks: false}
+    minimal: {for_stage: 3, auto_hint_after: null, function_bank: hidden, outline: none,      error_detail: brief, ai_explain: false, name_mistake: false, suggest_blocks: false}
+  stuck:
+    same_code_twice: true          # the same failing code run again
+    errors_in_a_row: 2             # syntax/load errors or timeouts, runs in a row
+    failed_after_hint: true        # a failed run right after asking for a hint
+    counts_toward_practice: true   # each signal counts as one more try toward intervention.struggle_after
+  momentum:
+    passes_in_a_row: 2             # problems passed in at most max_attempts runs with no hints, in a row
+    max_attempts: 2

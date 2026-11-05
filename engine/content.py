@@ -1,6 +1,7 @@
 """Expected values and the content check for a project."""
 from __future__ import annotations
 
+import ast
 import json
 import sqlite3
 from dataclasses import dataclass, field
@@ -94,6 +95,25 @@ def check_content(project: Project, grader: Grader = None) -> ContentCheckResult
         if problem.loop_check:
             for message in find_loop_problems(project.reference_path.read_text(), problem.loop_check):
                 problems.append(f"reference solution fails the loop check for {problem.label}: {message}")
+
+    # 3. A function bank may only list things the reference solution really uses.
+    banks = [p for p in project.problems.values() if p.functions]
+    if banks:
+        used = set()
+        for node in ast.walk(ast.parse(project.reference_path.read_text())):
+            if isinstance(node, ast.Name):
+                used.add(node.id)
+            elif isinstance(node, ast.Attribute):
+                used.add(node.attr)
+        for problem in banks:
+            for fn in problem.functions:
+                if fn["name"] not in used:
+                    problems.append(f"{problem.label}: the function bank lists {fn['call']}, "
+                                    f"but the reference solution never uses {fn['name']}")
+
+    # 4. Adaptive support files (mistakes.yaml, outline.py): valid, plain-language, outlines aren't answers.
+    from .support import check_support_content
+    problems.extend(check_support_content(project))
 
     if has_reports and not stored.get("teacher_reviewed", False):
         notices.append("Expected values are unreviewed: a teacher has not checked them yet.")

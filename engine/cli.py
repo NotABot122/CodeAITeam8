@@ -9,7 +9,7 @@
   python -m engine.cli progress --student ID            stages for every concept, and position
   python -m engine.cli theme    --student ID "pokemon"  build this project in your own theme (Bedrock)
   python -m engine.cli theme    --student ID --reset    go back to the standard project
-  python -m engine.cli placement --student STU-...      after the readiness quest: set starting stages and problem
+  python -m engine.cli placement --student ID      after the readiness quest: set starting stages and problem
   python -m engine.cli check-content [--project DIR]    check a project's tests, answers, and quizzes
   python -m engine.cli generate-data                    rebuild the dataset from its seed
   python -m engine.cli generate-expected                recompute expected reports (marks them unreviewed)

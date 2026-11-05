@@ -1,12 +1,8 @@
 """Draft MCP server exposing the evaluation contract v0.2 (stdio transport).
 
 Tools:
-  - validate_submission : reference grader (harness/validator.py), or the Weather Station
-                          readiness diagnostic for rubrics marked "provider": "diagnostic"
+  - validate_submission : reference grader (harness/validator.py)
   - get_rubric          : returns the active task rubric so clients can show it
-
-Graders are imported lazily so each path loads only what it needs: the Concept 3
-reference grader needs boto3, the diagnostic runs without it.
 
 `route_next` is defined in schemas/route_next.schema.json but is NOT served
 here: routing is owned by teammates. The harness only calls it.
@@ -26,6 +22,8 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
+
+from .validator import CONTRACT_VERSION, normalize_input, validate_submission
 
 ROOT = Path(__file__).resolve().parents[1]
 PROTOCOL_VERSION = "2025-06-18"
@@ -51,7 +49,6 @@ def _inline_refs(node, defs):
 
 _IN = _inline_refs(_VS_SCHEMA["properties"]["input"], _VS_SCHEMA["$defs"])
 _OUT = _inline_refs(_VS_SCHEMA["properties"]["output"], _VS_SCHEMA["$defs"])
-CONTRACT_VERSION = _OUT["properties"]["contract_version"]["const"]
 
 TOOLS = [
     {
@@ -78,19 +75,23 @@ def _call(name: str, args: dict) -> dict:
             raise ValueError(f"unknown rubric_id; available: {sorted(_RUBRICS)}")
         return rubric
     if name == "validate_submission":
-        if "task_id" not in args and "level_id" in args:  # deprecated v0.1 name, accepted until v1.0
-            args = {**args, "task_id": args["level_id"]}
-            del args["level_id"]
+        raw = dict(args)  # tools with their own strict input check (the readiness diagnostic) get it unchanged
+        args = normalize_input(args)
         missing = [k for k in _IN["required"] if k not in args]
         if missing:
             raise ValueError(f"missing required fields: {missing}")
         rubric = _RUBRICS.get(args["rubric_id"])
         if rubric is None:
             raise ValueError(f"unknown rubric_id; available: {sorted(_RUBRICS)}")
+        # Rubrics marked "provider": "diagnostic" are served by the Weather Station readiness
+        # diagnostic (diagnostic/). Imports are lazy so each path loads only what it needs
+        # (the Concept 3 reference grader needs boto3; the diagnostic runs without it).
         if rubric.get("provider") == "diagnostic":
             from diagnostic.tool_server import validate_submission_tool
-            return validate_submission_tool(args)
+
+            return validate_submission_tool(raw)
         from .validator import validate_submission
+
         return validate_submission(args, rubric)
     raise ValueError(f"unknown tool: {name}")
 

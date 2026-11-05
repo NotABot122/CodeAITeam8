@@ -1,19 +1,32 @@
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import CodeIcon from '@mui/icons-material/Code';
+import ExtensionIcon from '@mui/icons-material/Extension';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import {Alert, Box, Button, CircularProgress, Container, Paper, Typography} from '@mui/material';
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {Alert, Box, Button, CircularProgress, Container, Paper, ToggleButton, ToggleButtonGroup, Tooltip, Typography, useTheme} from '@mui/material';
+import {lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 import {ApiError, createHttpClient, type ApiClient} from '@/api/client';
 import type {Health, Outcome, StudentState} from '@/api/types';
+import type {WorkspaceState} from '@/blocks/format';
+import type {Generated} from '@/blocks/python';
 
 import ConceptMeters from './ui/ConceptMeters';
 import CodeEditor from './ui/CodeEditor';
+import FunctionBank from './ui/FunctionBank';
 import {PracticeDialog, ThemeDialog} from './ui/Dialogs';
 import {Markdown} from './ui/markdown';
 import PathStrip from './ui/PathStrip';
+import QuestApp from './quest/QuestApp';
+import Landing from './landing/Landing';
+import PathwayScreen from './landing/PathwayScreen';
+import ChooseScreen from './landing/ChooseScreen';
+import TeacherApp from './teacher/TeacherApp';
+import CoursePage from './ui/CoursePage';
 import NextStepPanel from './ui/NextStepPanel';
 import QuizPanel, {quizReady, SubmitQuiz, type QuizAnswers} from './ui/QuizPanel';
-import Results from './ui/Results';
+import RubberDuck from './ui/RubberDuck';
+import Results, {HintCard} from './ui/Results';
+import {expectedPageSeconds, SLOW_DOWN_MESSAGE, useCountdown, usePace} from './ui/pace';
 
 const KEY = 'codeai.studentId';
 const store = {
@@ -21,11 +34,40 @@ const store = {
   set: (v: string) => { try { localStorage.setItem(KEY, v); } catch { /* private mode */ } },
   clear: () => { try { localStorage.removeItem(KEY); } catch { /* private mode */ } },
 };
+// The workspace is one file for every problem, so after an inserted practice the server's code is the
+// practice's. Each problem's last text is kept here and restored when the student comes back to it.
+const draftKey = (s: StudentState) => s.problem?.format === 'code' ? `codeai.draft.${s.studentId}.${s.project.id}.${s.problem.id}` : null;
+const drafts = {
+  get: (s: StudentState) => { const k = draftKey(s); try { return k ? localStorage.getItem(k) : null; } catch { return null; } },
+  set: (s: StudentState, code: string) => { const k = draftKey(s); try { if (k) localStorage.setItem(k, code); } catch { /* private mode */ } },
+};
+const GRADE_KEY = 'codeai.grade';
+const savedGrade = (): number | null => { try { const g = Number(localStorage.getItem(GRADE_KEY)); return g >= 9 && g <= 12 ? g : null; } catch { return null; } };
+const HINT_COST = "Using a hint is fine. It counts toward how this level is scored.";
 const msg = (e: unknown) => (e instanceof Error ? e.message : 'Something went wrong. Try again.');
+
+// Blockly is large, so it only loads when a student first picks Blocks.
+const BlockEditor = lazy(() => import('./blocks/BlockEditor'));
+type EditorMode = 'text' | 'blocks';
+const MODE_KEY = 'codeai.editorMode';
+const savedEditorMode = (): EditorMode => { try { return localStorage.getItem(MODE_KEY) === 'blocks' ? 'blocks' : 'text'; } catch { return 'text'; } };
+/** The block workspace to show: `workspace` null means start empty, and `problem` says why. */
+interface BlockLoad {key: number; loading: boolean; workspace: WorkspaceState | null; problem: string | null}
 
 export default function App({client: injected}: {client?: ApiClient}) {
   const client = useMemo(() => injected ?? createHttpClient(import.meta.env.VITE_API_BASE_URL ?? ''), [injected]);
   const [state, setState] = useState<StudentState | null>(null);
+  // The first screen is the readiness quest. 'resume' continues one that was started; 'lesson' is the coding screen.
+  const [teacher, setTeacher] = useState(() => location.hash === '#/teacher');
+  useEffect(() => {
+    const on = () => setTeacher(location.hash === '#/teacher');
+    window.addEventListener('hashchange', on);
+    return () => window.removeEventListener('hashchange', on);
+  }, []);
+  // landing -> quest (readiness check) -> pathway (Strands Decider 2B) -> lesson. 'resume' continues a started quest.
+  const [mode, setMode] = useState<'loading' | 'landing' | 'quest' | 'resume' | 'pathway' | 'choose' | 'lesson'>('loading');
+  const [grade, setGradeState] = useState<number | null>(savedGrade);
+  const setGrade = (g: number) => { setGradeState(g); try { localStorage.setItem(GRADE_KEY, String(g)); } catch { /* private mode */ } };
   const [health, setHealth] = useState<Health | null>(null);
   const [code, setCode] = useState('');
   const [outcome, setOutcome] = useState<Outcome | null>(null);
@@ -36,15 +78,76 @@ export default function App({client: injected}: {client?: ApiClient}) {
   const [stepBusy, setStepBusy] = useState(false);
   const [stepError, setStepError] = useState<string | null>(null);
   const [practiceShown, setPracticeShown] = useState(false);
+  const [showCourse, setShowCourse] = useState(false);
+  // A hint the student asked for (not one that came with a failed run).
+  const [asked, setAsked] = useState<{hint: string; source: Outcome['hintSource']} | null>(null);
+  const [hintBusy, setHintBusy] = useState(false);
+  const [outlineOff, setOutlineOff] = useState<string | null>(null);
+  // Pacing for lesson quizzes: a whole page is checked at once, so one rushed page turns the timer on.
+  const quizPace = usePace(1, 2);
+  const [quizShownAt, setQuizShownAt] = useState(() => Date.now());
+  const [quizTries, setQuizTries] = useState(0);
+  const quizQuestions = state?.problem?.format === 'quiz' ? state.problem.questions ?? [] : [];
+  const quizSeconds = expectedPageSeconds(quizQuestions.map(q => ({prompt: q.prompt, code: q.code, choices: q.choices, typed: q.type === 'explain'})));
+  // A retry only needs the changed answers re-read: half the time.
+  const quizWait = Math.round(quizTries > 0 ? quizSeconds / 2 : quizSeconds);
+  const quizLeft = useCountdown(quizPace.slow && quizQuestions.length > 0, quizWait, quizShownAt);
+  const quizProblem = state?.problem?.format === 'quiz' ? state.problem.id : null;
+  useEffect(() => { setQuizShownAt(Date.now()); setQuizTries(0); }, [quizProblem]);
   const [themeOpen, setThemeOpen] = useState(false);
   const [themeBusy, setThemeBusy] = useState(false);
   const [themeError, setThemeError] = useState<string | null>(null);
+  const [themeDone, setThemeDone] = useState<string | null>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const dark = useTheme().palette.mode === 'dark';
+  const [editorMode, setEditorMode] = useState<EditorMode>(savedEditorMode);
+  const [blocks, setBlocks] = useState<BlockLoad>({key: 0, loading: false, workspace: null, problem: null});
+  const [blockInfo, setBlockInfo] = useState<{emptySlots: number; looseBlocks: number}>({emptySlots: 0, looseBlocks: 0});
+  // Bumped whenever the code is replaced from the server (new problem, new project), so Blocks mode reloads.
+  const [codeEpoch, setCodeEpoch] = useState(0);
+  const codeRef = useRef(code);
+  codeRef.current = code;
+  const translation = useRef(0);
 
   const adopt = useCallback((s: StudentState, keepCode = false) => {
     setState(s);
-    if (!keepCode) setCode(s.code);
+    if (!keepCode) { setCode(drafts.get(s) ?? s.code); setCodeEpoch(n => n + 1); }
     store.set(s.studentId);
+  }, []);
+
+  useEffect(() => { if (state) drafts.set(state, code); }, [state, code]);
+  const problemId = state?.problem?.id;
+  useEffect(() => { setAsked(null); }, [problemId]);
+
+  // Text -> blocks. If the code has an error, or uses something blocks can't show, the workspace
+  // starts empty and says why. The student's text stays as it is until they change the blocks.
+  const toBlocks = useCallback(async (source: string) => {
+    const ticket = ++translation.current;
+    setBlocks(b => ({...b, loading: true}));
+    let next: Omit<BlockLoad, 'key'>;
+    try {
+      const r = await client.toBlocks(source);
+      next = r.ok ? {loading: false, workspace: r.workspace, problem: null} : {loading: false, workspace: null, problem: r.message};
+    } catch (e) {
+      next = {loading: false, workspace: null, problem: `Couldn't turn the code into blocks: ${msg(e)}`};
+    }
+    if (ticket === translation.current) setBlocks(b => ({key: b.key + 1, ...next}));
+  }, [client]);
+
+  const isCode = state?.problem?.format === 'code';
+  useEffect(() => {
+    if (editorMode === 'blocks' && isCode) void toBlocks(codeRef.current);
+  }, [editorMode, isCode, codeEpoch, toBlocks]);
+
+  const switchMode = (next: EditorMode | null) => {
+    if (!next || next === editorMode) return;
+    setEditorMode(next);
+    try { localStorage.setItem(MODE_KEY, next); } catch { /* private mode */ }
+  };
+
+  const onBlocks = useCallback((g: Generated, changed: boolean) => {
+    setBlockInfo({emptySlots: g.emptySlots, looseBlocks: g.looseBlocks});
+    if (changed) setCode(g.code);
   }, []);
 
   useEffect(() => {
@@ -54,10 +157,16 @@ export default function App({client: injected}: {client?: ApiClient}) {
         setHealth(await client.health());
         const saved = store.get();
         if (saved) {
-          try { if (!off) adopt(await client.getState(saved)); return; }
-          catch (e) { if (!(e instanceof ApiError && e.status === 404)) throw e; store.clear(); }
+          try {
+            const st = await client.getState(saved);
+            if (off) return;
+            adopt(st);
+            // The landing page always comes first; it offers "Continue" for a saved student.
+            setMode('landing');
+            return;
+          } catch (e) { if (!(e instanceof ApiError && e.status === 404)) throw e; store.clear(); }
         }
-        if (!off) adopt(await client.newStudent());
+        if (!off) setMode('landing');
       } catch (e) { if (!off) setLoadError(msg(e)); }
     })();
     return () => { off = true; };
@@ -65,18 +174,33 @@ export default function App({client: injected}: {client?: ApiClient}) {
 
   const run = async () => {
     if (!state || running) return;
-    setRunning(true); setError(null);
+    setRunning(true); setError(null); setAsked(null);
     try {
       const prevId = state.problem?.id;
+      if (state.problem?.format === 'quiz') quizPace.record(Date.now() - quizShownAt, quizWait);
       const res = state.problem?.format === 'quiz' ? await client.answer(state.studentId, answers) : await client.submit(state.studentId, code);
-      setOutcome(res.outcome);
-      // Keep what they typed unless a new problem loaded (then the starter code replaces it).
+      if (state.problem?.format === 'quiz') { setQuizShownAt(Date.now()); setQuizTries(n => n + 1); }
+      // Keep what they typed unless a new problem loaded (then its saved draft or starter code replaces it).
       const moved = res.state.problem?.id !== prevId;
+      // After repeated tries the practice dialog explains the move, so the old level's result isn't shown too.
+      setOutcome(moved && res.state.problem?.inserted === 'struggle' ? null : res.outcome);
       adopt(res.state, !moved);
       if (moved) setAnswers({});
       if (res.state.problem?.kind === 'practice' && moved) setPracticeShown(true);
       requestAnimationFrame(() => resultsRef.current?.scrollIntoView({block: 'nearest', behavior: 'smooth'}));
     } catch (e) { setError(msg(e)); } finally { setRunning(false); }
+  };
+
+  const askHint = async () => {
+    if (!state?.problem || hintBusy) return;
+    setHintBusy(true); setError(null);
+    try {
+      // The current text goes along so the AI tutor (when on) can phrase the hint from it.
+      const res = await client.hint(state.studentId, state.problem.format === 'code' ? code : undefined);
+      setAsked(res.outcome.hint ? {hint: res.outcome.hint, source: res.outcome.hintSource} : null);
+      if (!res.outcome.hint) setError('There are no more hints for this one.');
+      adopt(res.state, true);
+    } catch (e) { setError(msg(e)); } finally { setHintBusy(false); }
   };
 
   const pick = async (index: number, theme?: string) => {
@@ -92,8 +216,11 @@ export default function App({client: injected}: {client?: ApiClient}) {
     if (!state) return;
     setThemeBusy(true); setThemeError(null);
     try {
+      const later = state.themeable === 'later';
       const res = await client.buildTheme(state.studentId, request);
-      if (res.built) { adopt(res.state); setOutcome(null); setThemeOpen(false); }
+      // Built for later (the student is on a review first): stay put and say so. Otherwise open the new project.
+      if (res.built && later) { adopt(res.state, true); setThemeDone(res.message); }
+      else if (res.built) { adopt(res.state); setOutcome(null); setThemeOpen(false); }
       else setThemeError(res.message);
     } catch (e) { setThemeError(msg(e)); } finally { setThemeBusy(false); }
   };
@@ -105,16 +232,57 @@ export default function App({client: injected}: {client?: ApiClient}) {
     catch (e) { setThemeError(msg(e)); } finally { setThemeBusy(false); }
   };
 
-  const restart = async () => {
-    store.clear(); setOutcome(null); setLoadError(null);
-    try { adopt(await client.newStudent()); } catch (e) { setLoadError(msg(e)); }
+  const restart = () => {
+    store.clear(); setOutcome(null); setLoadError(null); setState(null); setMode('landing');
   };
 
+  const skipQuest = async () => {
+    try { adopt(await client.newStudent()); setMode('choose'); } catch (e) { setLoadError(msg(e)); }
+  };
+
+  const finishedQuest = async (id: string) => {
+    try { adopt(await client.getState(id)); setOutcome(null); setMode('pathway'); } catch (e) { setLoadError(msg(e)); }
+  };
+
+  const startPathway = async (next: StudentState | null) => {
+    try { adopt(next ?? await client.getState(state!.studentId)); setOutcome(null); setMode('lesson'); } catch (e) { setLoadError(msg(e)); }
+  };
+
+  if (teacher) return <TeacherApp onExit={() => { location.hash = ''; }} />;
   if (loadError) return <Container sx={{py: 6}}><Alert severity="error" action={<Button color="inherit" onClick={() => location.reload()}>Retry</Button>}>{loadError}</Alert></Container>;
-  if (!state) return <Box sx={{display: 'grid', placeItems: 'center', minHeight: '60vh'}}><CircularProgress aria-label="Loading" /></Box>;
+  // Where a saved student picks up: a half-done check, the pathway screen (check done, no pathway yet), or the lesson.
+  const resumeMode = (s: StudentState) => s.diagnostic === 'in_progress' ? 'resume' : s.diagnostic !== 'none' && !s.pathway ? 'pathway' : 'lesson';
+  if (mode === 'landing') {
+    const saved = state ? {
+      label: state.diagnostic === 'in_progress' ? 'your readiness check'
+        : state.diagnostic !== 'none' && !state.pathway ? 'choosing your pathway'
+        : state.pathway ? `${state.pathway.title}: ${state.project.title}` : state.project.title,
+      onResume: () => setMode(resumeMode(state)),
+    } : null;
+    // Starting the check again makes a new student, so the old one is forgotten first.
+    return <Landing grade={grade} onGrade={setGrade} resume={saved}
+      onStart={() => { if (state) { store.clear(); setState(null); setOutcome(null); } setMode('quest'); }}
+      onSkip={() => void skipQuest()} />;
+  }
+  if (mode === 'choose' && state) {
+    return <ChooseScreen client={client} studentId={state.studentId} aiOn={!!health?.ai} aiReason={health?.aiReason ?? null} onStart={s => void startPathway(s)} />;
+  }
+  if (mode === 'pathway' && state) {
+    return <PathwayScreen client={client} studentId={state.studentId} grade={grade} existing={state.pathway}
+      aiOn={!!health?.ai} aiReason={health?.aiReason ?? null}
+      onGrade={setGrade} onStart={s => void startPathway(s)} />;
+  }
+  if (mode === 'quest' || (mode === 'resume' && state)) {
+    return <QuestApp client={client} resumeId={mode === 'resume' ? state!.studentId : null}
+      onStarted={id => store.set(id)} onFinished={id => { store.set(id); void finishedQuest(id); }} onSkip={() => void skipQuest()} />;
+  }
+  if (!state || mode === 'loading') return <Box sx={{display: 'grid', placeItems: 'center', minHeight: '60vh'}}><CircularProgress aria-label="Loading" /></Box>;
 
   const p = state.problem;
   const themed = state.themed;
+  // Offer the outline until the student has started the function, or said no thanks.
+  const offered = p?.support?.outline;
+  const outline = offered && outlineOff !== offered.name && !new RegExp(`^\\s*def\\s+${offered.name}\\s*\\(`, 'm').test(code) ? offered : null;
   const quiz = p?.format === 'quiz' && p.questions ? p : null;
   return (
     <Box sx={{minHeight: '100vh', bgcolor: 'background.default'}}>
@@ -122,12 +290,15 @@ export default function App({client: injected}: {client?: ApiClient}) {
         <Container maxWidth="xl" sx={{display: 'flex', alignItems: 'center', gap: 2, py: 1.25}}>
           <Typography component="h1" variant="h5" sx={{flex: 1, display: 'flex', gap: 1.5, alignItems: 'baseline', flexWrap: 'wrap'}}>
             CodeAI <Typography component="span" sx={{opacity: 0.85, fontWeight: 400}}>{state.project.title}</Typography>
+            {state.pathway && <Typography component="span" variant="body2" sx={{opacity: 0.85}}>Pathway: {state.pathway.title}</Typography>}
           </Typography>
-          {state.project.topic === 'data-logic' && <Button color="inherit" startIcon={<AutoAwesomeIcon />} onClick={() => { setThemeError(null); setThemeOpen(true); }}>Make it yours</Button>}
+          <Button color="inherit" onClick={() => setShowCourse(v => !v)}>{showCourse ? 'My lesson' : 'My course'}</Button>
+          {state.themeable && <Button color="inherit" startIcon={<AutoAwesomeIcon />} onClick={() => { setThemeError(null); setThemeDone(null); setThemeOpen(true); }}>Make it yours</Button>}
         </Container>
       </Box>
 
       <Container maxWidth="xl" sx={{py: 2}}>
+        {showCourse ? <CoursePage client={client} studentId={state.studentId} onBack={() => setShowCourse(false)} /> : <>
         <Box sx={{display: 'flex', flexDirection: {xs: 'column', lg: 'row'}, gap: 2, alignItems: {lg: 'center'}, justifyContent: 'space-between'}}>
           <PathStrip path={state.path} />
           {!state.complete && p && (
@@ -154,33 +325,104 @@ export default function App({client: injected}: {client?: ApiClient}) {
                   <QuizPanel questions={quiz.questions!} answers={answers} onChange={setAnswers} results={outcome?.questionResults ?? []} disabled={running} />
                 </Box>
               ) : (
-                <CodeEditor value={code} onChange={setCode} onRun={run} disabled={running} />
+                <>
+                  <Box sx={{display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap'}}>
+                    <ToggleButtonGroup size="small" exclusive value={editorMode} onChange={(_, v: EditorMode | null) => switchMode(v)} aria-label="How to write your code">
+                      <ToggleButton value="text" sx={{px: 1.5, gap: 0.75}}><CodeIcon fontSize="small" />Text</ToggleButton>
+                      <ToggleButton value="blocks" sx={{px: 1.5, gap: 0.75}}><ExtensionIcon fontSize="small" />Blocks</ToggleButton>
+                    </ToggleButtonGroup>
+                    {editorMode === 'blocks' && !blocks.loading && (blockInfo.emptySlots > 0 || blockInfo.looseBlocks > 0) && (
+                      <Typography variant="caption" color="text.secondary" role="status">
+                        {[blockInfo.emptySlots && `${blockInfo.emptySlots} empty ${blockInfo.emptySlots === 1 ? 'slot runs' : 'slots run'} as None`,
+                          blockInfo.looseBlocks && `${blockInfo.looseBlocks} loose ${blockInfo.looseBlocks === 1 ? "block isn't" : "blocks aren't"} connected, so ${blockInfo.looseBlocks === 1 ? "it won't" : "they won't"} run`]
+                          .filter(Boolean).join(' · ')}
+                      </Typography>
+                    )}
+                  </Box>
+                  {editorMode === 'text' && p.support?.suggestBlocks && (
+                    <Alert severity="info" action={<Button color="inherit" size="small" onClick={() => switchMode('blocks')}>Try Blocks</Button>}>
+                      Python couldn't read your code a few times in a row. Blocks snap together, so Python can always read them. You can switch back anytime.
+                    </Alert>
+                  )}
+                  {editorMode === 'text' && outline && (
+                    <Alert severity="info" icon={false} sx={{alignItems: 'center'}}
+                      action={<Box sx={{display: 'flex', gap: 1}}>
+                        <Button color="inherit" size="small" variant="outlined" onClick={() => { setCode(c => `${c.replace(/\s*$/, '')}\n\n\n${outline.text}`); setOutlineOff(outline.name); }}>Add outline</Button>
+                        <Button color="inherit" size="small" onClick={() => setOutlineOff(outline.name)}>No thanks</Button>
+                      </Box>}>
+                      Not sure where to start? Add {outline.text.includes('# Step') ? 'an outline of the steps for' : 'the first line of'} <code>{outline.name}</code> to your code.
+                    </Alert>
+                  )}
+                  {editorMode === 'text' ? (
+                    <Box sx={{display: 'flex', flexDirection: {xs: 'column', sm: 'row'}, gap: 1.5, flex: '1 0 260px', minHeight: 0}}>
+                      {p.functions && <FunctionBank key={p.id} functions={p.functions} mode={p.support?.functionBank ?? 'full'} />}
+                      <Box sx={{flex: 1, minWidth: 0, display: 'flex'}}>
+                        <CodeEditor value={code} onChange={setCode} onRun={run} disabled={running} />
+                      </Box>
+                    </Box>
+                  ) : blocks.loading ? (
+                    <Box sx={{flex: '1 0 360px', display: 'grid', placeItems: 'center'}}><CircularProgress aria-label="Turning your code into blocks" /></Box>
+                  ) : (
+                    <>
+                      {blocks.problem && (
+                        <Alert severity="warning">
+                          {blocks.problem} So the block workspace starts empty. Your text code is unchanged until you add blocks here,
+                          and adding blocks replaces it. To keep it, switch back to Text and fix it there.
+                        </Alert>
+                      )}
+                      <Suspense fallback={<Box sx={{flex: '1 0 360px', display: 'grid', placeItems: 'center'}}><CircularProgress aria-label="Loading blocks" /></Box>}>
+                        <BlockEditor key={blocks.key} initial={blocks.workspace} onChange={onBlocks} dark={dark} />
+                      </Suspense>
+                    </>
+                  )}
+                </>
               )}
               {quiz ? (
                 <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
-                  <SubmitQuiz onClick={run} busy={running} disabled={!quizReady(quiz.questions!, answers)} />
+                  <SubmitQuiz onClick={run} busy={running} disabled={quizLeft > 0 || !quizReady(quiz.questions!, answers)} wait={quizLeft} />
+                  <HintButton left={p!.hintCount - p!.hintsSeen} total={p!.hintCount} busy={hintBusy} disabled={running} onClick={askHint} />
                   <Typography variant="caption" color="text.secondary" sx={{ml: 'auto'}}>Attempts: {p!.attempts}</Typography>
                 </Box>
               ) : (
               <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
-                <Button variant="contained" color="secondary" size="large" startIcon={running ? <CircularProgress size={18} color="inherit" /> : <PlayArrowIcon />} disabled={running} onClick={run}>
+                <Button variant="contained" color="secondary" size="large" startIcon={running ? <CircularProgress size={18} color="inherit" /> : <PlayArrowIcon />} disabled={running || (editorMode === 'blocks' && blocks.loading)} onClick={run}>
                   {running ? 'Checking…' : 'Run'}
                 </Button>
-                <Typography variant="caption" color="text.secondary">Ctrl/⌘ + Enter</Typography>
+                <HintButton left={p.hintCount - p.hintsSeen} total={p.hintCount} busy={hintBusy} disabled={running} onClick={askHint} />
+                {editorMode === 'text' && <Typography variant="caption" color="text.secondary">Ctrl/⌘ + Enter</Typography>}
                 <Typography variant="caption" color="text.secondary" sx={{ml: 'auto'}}>Attempts: {p.attempts}</Typography>
               </Box>
               )}
               {error && <Alert severity="error">{error}</Alert>}
+              {quiz && quizPace.justSlowed && <Alert severity="warning" onClose={quizPace.dismiss}>{SLOW_DOWN_MESSAGE}</Alert>}
+              {asked && <HintCard hint={asked.hint} source={asked.source} note={HINT_COST} />}
               <div ref={resultsRef}>{outcome && <Results outcome={outcome} />}</div>
             </Box>
 
           </Box>
         )}
+        </>}
       </Container>
 
       {practiceShown && <PracticeDialog state={state} onClose={() => setPracticeShown(false)} />}
       <ThemeDialog open={themeOpen} aiOn={!!health?.ai} aiReason={health?.aiReason ?? null} themed={themed} busy={themeBusy} error={themeError}
+        later={state.themeable === 'later'} done={themeDone}
         onBuild={build} onReset={resetTheme} onClose={() => setThemeOpen(false)} />
     </Box>
+  );
+}
+
+function HintButton({left, total, busy, disabled, onClick}: {left: number; total: number; busy: boolean; disabled: boolean; onClick: () => void}) {
+  if (total === 0) return null;
+  const none = left <= 0;
+  return (
+    <Tooltip title={none ? 'You have used every hint for this one.' : HINT_COST}>
+      <span>
+        <Button variant="outlined" size="large" disabled={disabled || busy || none} onClick={onClick}
+          startIcon={busy ? <CircularProgress size={18} color="inherit" /> : <RubberDuck fontSize="small" title="Ask Ducky" />}>
+          {none ? 'No hints left' : `Hint (${left} left)`}
+        </Button>
+      </span>
+    </Tooltip>
   );
 }

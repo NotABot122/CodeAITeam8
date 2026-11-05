@@ -1,38 +1,35 @@
-# Easy "breather" questions. They are never scored toward a stage; they only
+# Easy "breather" questions for grades 9-12. They are never scored toward a stage; they only
 # restore confidence after several misses in a row.
 boosters:
   - id: boost-1
     type: choice
-    prompt: "Rain falls from clouds. What falls from clouds on a wet day?"
+    prompt: "Which file extension does a Python file use?"
     options:
-      - {id: a, text: "Rain", correct: true}
-      - {id: b, text: "Sand"}
-      - {id: c, text: "Toys"}
-    feedback_right: "Yes! Rain falls from clouds."
-
+      - {id: a, text: ".py", correct: true}
+      - {id: b, text: ".jpg"}
+      - {id: c, text: ".mp3"}
+    feedback_right: "Yes. Python files end in .py."
   - id: boost-2
     type: choice
-    prompt: "Which one gives us light and warmth in the day?"
+    prompt: "A weather station measures rain in which unit?"
     options:
-      - {id: a, text: "The sun", correct: true}
-      - {id: b, text: "A puddle"}
-      - {id: c, text: "A cloud"}
-    feedback_right: "Yes! The sun shines on us."
-
+      - {id: a, text: "Millimeters", correct: true}
+      - {id: b, text: "Kilograms"}
+      - {id: c, text: "Seconds"}
+    feedback_right: "Yes. Rain is measured in millimeters."
   - id: boost-3
     type: choice
-    prompt: "A thermometer tells us how warm it is. What does it show?"
+    prompt: "What does print('hello') show?"
     options:
-      - {id: a, text: "A temperature number", correct: true}
-      - {id: b, text: "A song"}
-      - {id: c, text: "A map"}
-    feedback_right: "Yes! It shows how warm or cool it is."
-
+      - {id: a, text: "hello", correct: true}
+      - {id: b, text: "print"}
+      - {id: c, text: "Nothing"}
+    feedback_right: "Yes. print shows the text."
   - id: boost-4
     type: choice
-    prompt: "Which tool would you grab on a very rainy day?"
+    prompt: "Which of these is a list in Python?"
     options:
-      - {id: a, text: "An umbrella", correct: true}
-      - {id: b, text: "Sunglasses only"}
-      - {id: c, text: "A beach ball"}
-    feedback_right: "Yes! An umbrella keeps you dry."
+      - {id: a, text: "[1, 2, 3]", correct: true}
+      - {id: b, text: "'1, 2, 3'"}
+      - {id: c, text: "123"}
+    feedback_right: "Yes. Square brackets make a list."

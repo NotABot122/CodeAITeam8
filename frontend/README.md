@@ -16,18 +16,38 @@ cd frontend && npm install && npm run dev
 cd frontend && npm run build
 ```
 
+Teacher view: set `CODEAI_TEACHER_TOKEN=somesecret` before starting the server, then open `/#/teacher`.
+
 Remove `--ai off` (and install `boto3`, set AWS creds) to get AI hints and the "Make it yours" themes.
 
 ## What's here
+
+- `src/teacher/` – teacher view at `/#/teacher`: class overview (who is in the quest, coding, finished, needs help), where the class stands on each idea, a student detail with the quest report, and a content check. Needs `CODEAI_TEACHER_TOKEN` on the server (off if unset); the token is kept in session storage only.
+- `src/quest/` – the readiness quest, which is the front page (Storm Chaser Academy). Taps for choices, up/down buttons for ordering, a box pick for sorting. "Skip to coding" goes straight to the lesson.
 
 - `src/api/` – typed client and response shapes (mirror `webapi/service.py`)
 - `src/ui/PathStrip` – compact level path; an assigned practice problem shows as a badge on its level
 - `src/ui/QuizPanel`, `src/ui/NextStepPanel` – review quizzes and the "what's next" screen (from `engine.course`)
 - `src/ui/CodeEditor` – textarea with line numbers (Tab = 4 spaces, Esc then Tab leaves the box, Ctrl/Cmd+Enter runs)
+- `src/ui/CoursePage` – "My course" (header button): every topic as done / you are here / up next, the six ideas with their stage, finished reviews, what the readiness quest set, and what comes next. Backed by `GET /api/students/<id>/course`.
 - `src/ui/Results` – grader messages, hint (labelled AI or teacher-written), stage changes
 - `src/ui/ConceptMeters` – Missing / Beginning / Meeting / Exceeding for all six concepts, in a sideways-scrolling row
 - `src/ui/Dialogs` – "A quick practice first" pop-up and the theme dialog
 - `src/ui/markdown` – tiny renderer for the instructions (React nodes only, no innerHTML)
+- `src/ui/FunctionBank` – Text mode: the functions this problem's answer should use, left of the editor; choosing one opens a short description and example. Content comes from each problem's `functions.yaml`; `check-content` fails if an entry isn't used by the reference solution
+- `src/blocks/` – Blocks mode (Blockly 13, loaded only when a student picks Blocks):
+  - `format.ts` – the block list, field rules and operators, shared with `webapi/blocks.py`
+  - `python.ts` – blocks → Python, on Blockly's JSON (no Blockly needed), with Python's precedence rules
+  - `defs.ts`, `toolbox.ts`, `BlockEditor.tsx` – how the blocks look, the block bank, and the workspace
+
+### Text ↔ Blocks
+
+The toggle above the editor switches modes; the choice is kept in `localStorage`.
+Switching to Blocks sends the code to `POST /api/blocks`, which parses and compiles it (never runs it) and returns blocks.
+If the code has an error, or uses something blocks can't show yet (classes, lambdas, f-strings, try, `with`, default
+arguments, chained comparisons, and so on), the workspace starts empty with a message saying which line and why.
+The text stays exactly as written until the student changes a block; after that the code is regenerated from the blocks
+(comments are kept, blank lines and line wrapping are not). Empty slots run as `None`, and the UI says so.
 
 The UI never grades or routes; it shows what the engine returns. The student id is kept in `localStorage`.
 

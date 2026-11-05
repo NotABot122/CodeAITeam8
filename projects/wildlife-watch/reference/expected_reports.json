@@ -1,0 +1,77 @@
+{
+  "seed": 2026,
+  "teacher_reviewed": false,
+  "generated_by": "independent_checker",
+  "reports": [
+    {
+      "args": {
+        "group": "Pine Ridge",
+        "start": 1,
+        "end": 10
+      },
+      "report": {
+        "heavy_count": 5,
+        "roamer_count": 6,
+        "typical_count": 3,
+        "total_daily_km": 184.9,
+        "max_weight_kg": 470.2,
+        "flagged_tag_numbers": [
+          1,
+          2,
+          5,
+          7,
+          8,
+          9,
+          10
+        ]
+      }
+    },
+    {
+      "args": {
+        "group": "Cedar Lake",
+        "start": 3,
+        "end": 9
+      },
+      "report": {
+        "heavy_count": 4,
+        "roamer_count": 5,
+        "typical_count": 2,
+        "total_daily_km": 160.9,
+        "max_weight_kg": 526.0,
+        "flagged_tag_numbers": [
+          4,
+          5,
+          7,
+          8,
+          9
+        ]
+      }
+    },
+    {
+      "args": {
+        "group": "Red Canyon",
+        "start": 1,
+        "end": 12
+      },
+      "report": {
+        "heavy_count": 8,
+        "roamer_count": 6,
+        "typical_count": 2,
+        "total_daily_km": 168.3,
+        "max_weight_kg": 563.1,
+        "flagged_tag_numbers": [
+          1,
+          2,
+          4,
+          5,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+# Function bank for Level 4. The first three are your own functions from earlier levels.
+- call: get_books(conn, genre, start_number, end_number)
+  summary: |-
+    Your function from Level 1. Gives back the list of row dictionaries for one genre and number range. Call it once.
+- call: classify_book(entry)
+  summary: |-
+    Your function from Level 2. Gives back the list of labels for one row, like ["long"]. Call it once for each row.
+- call: summarize_books(entries)
+  summary: |-
+    Your function from Level 3. Takes a list of (row, labels) pairs and gives back the summary dictionary. Call it once, and return what it gives back.
+- call: my_list.append(item)
+  summary: |-
+    Adds one item to the end of a list. To add a pair, put it in brackets: my_list.append((a, b)).
+  example: |-
+    pairs = []
+    pairs.append(("apple", 3))

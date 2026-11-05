@@ -1,96 +1,92 @@
-# Zone: Weather Log Detective (database_retrieval)
+# Zone: Data Lookup (database_retrieval). Grades 9-12.
 # Author notes:
 #  - choice/spot/trace: mark exactly one option `correct: true`. Every wrong option needs a `misconception` tag.
 #  - order: list `cards` in the CORRECT order. The game shuffles them.
 #  - sort: each card names its correct `bucket`. A card may carry a `misconception` tag.
+#    Optional `display:` on a sort item picks a game skin (rows, belt, chips); scoring is identical.
 #  - Each tier needs at least two items (a first question and a twin).
+# The table matches the lesson: daily_readings(station_id, date, temp_high_c, temp_low_c, rain_mm).
 concept: database_retrieval
-
 explain:
   id: log-explain
   nodes: [filter_rows]
-  prompt: "Tell Nimbus: how do you find only the days you need in a big weather log?"
+  prompt: "Explain to Nimbus in a sentence or two: how would you get only the readings you need from a large table?"
   key_ideas:
-    - {id: looks_in_log, level: 1, label: "looks through the log", words: ["look at the log", "look through", "look in", "read the log", "check the log", "search", "find the day", "find the page"]}
-    - {id: keeps_matches, level: 2, label: "keeps only the matching rows", words: ["only the", "just the", "match", "station", "date", "filter", "keep", "skip", "pick the", "rainy days"]}
-    - {id: plans_edges, level: 3, label: "sorts or plans for nothing found", words: ["sort", "in order", "newest", "oldest", "nothing", "none", "no days", "no match", "empty"]}
-
+    - {id: looks_in_log, level: 1, label: "looks through the table", words: ["look at the log", "look through", "look in", "read the log", "check the log", "search", "find the day", "find the page", "select", "query", "table", "look up", "read the rows"]}
+    - {id: keeps_matches, level: 2, label: "keeps only the matching rows", words: ["only the", "just the", "match", "station", "date", "filter", "keep", "skip", "pick the", "rainy days", "where", "condition", "between"]}
+    - {id: plans_edges, level: 3, label: "sorts or plans for nothing found", words: ["sort", "in order", "newest", "oldest", "nothing", "none", "no days", "no match", "empty", "order by", "no rows", "empty list"]}
 items:
   - id: log-1a
     tier: 1
     type: choice
     nodes: [read_a_log]
-    prompt: "The log has one line for each day. Mon: sunny, 31. Tue: rainy, 22. Wed: sunny, 28. What was the weather on Tuesday?"
+    prompt: "daily_readings has the columns station_id, date, temp_high_c, rain_mm. Rows: (ST-A, 2026-01-02, 31.0, 0.0), (ST-A, 2026-01-03, 22.5, 14.2), (ST-B, 2026-01-03, 28.1, 0.0). How much rain fell at ST-A on 2026-01-03?"
     options:
-      - {id: a, text: "rainy", correct: true}
-      - {id: b, text: "22", misconception: reads_wrong_column, why: "22 is the temperature. The weather is the word."}
-      - {id: c, text: "sunny", misconception: reads_wrong_row, why: "Look at the line that starts with Tue."}
-      - {id: d, text: "31", misconception: reads_wrong_row, why: "Look at the line that starts with Tue."}
-    feedback_right: "Yes! Tue says rainy."
-
+      - {id: a, text: "14.2 mm", correct: true}
+      - {id: b, text: "22.5 mm", misconception: reads_wrong_column, why: "22.5 is the high temperature. Rain is the last column."}
+      - {id: c, text: "0.0 mm", misconception: reads_wrong_row, why: "That is a different row. Match both the station and the date."}
+      - {id: d, text: "28.1 mm", misconception: reads_wrong_row, why: "28.1 is ST-B's temperature. Match both the station and the date."}
+    feedback_right: "Yes. Match the row first, then read the column."
   - id: log-1b
     tier: 1
     type: choice
     nodes: [read_a_log]
-    prompt: "Pip reads the log. Mon: sunny, 31. Tue: rainy, 22. Wed: sunny, 28. How warm was it on Wednesday?"
+    prompt: "Same table: (ST-A, 2026-01-02, 31.0, 0.0), (ST-A, 2026-01-03, 22.5, 14.2), (ST-B, 2026-01-03, 28.1, 0.0). What was the high temperature at ST-B on 2026-01-03?"
     options:
-      - {id: a, text: "28", correct: true}
-      - {id: b, text: "sunny", misconception: reads_wrong_column, why: "Sunny is the weather. The warm number is next to it."}
-      - {id: c, text: "31", misconception: reads_wrong_row, why: "31 is Monday. Look at the Wed line."}
-      - {id: d, text: "22", misconception: reads_wrong_row, why: "22 is Tuesday. Look at the Wed line."}
-    feedback_right: "Right! Wed was 28."
-
+      - {id: a, text: "28.1", correct: true}
+      - {id: b, text: "0.0", misconception: reads_wrong_column, why: "0.0 is the rain. The high temperature is the third column."}
+      - {id: c, text: "22.5", misconception: reads_wrong_row, why: "22.5 is ST-A on that date. Check the station too."}
+      - {id: d, text: "31.0", misconception: reads_wrong_row, why: "31.0 is ST-A on a different date."}
+    feedback_right: "Right. ST-B on 2026-01-03 was 28.1."
   - id: log-2a
     tier: 2
     type: sort
+    display: rows
     nodes: [filter_rows]
-    prompt: "Pip wants Station A from Jan 1 to Jan 3. Drag each log line to Keep or Skip."
+    prompt: "The query is: SELECT * FROM daily_readings WHERE station_id = 'ST-A' AND date >= '2026-01-01' AND date <= '2026-01-03'. Sort each row into Returned or Not returned."
     buckets:
-      - {id: keep, text: "Keep"}
-      - {id: skip, text: "Skip"}
+      - {id: keep, text: "Returned"}
+      - {id: skip, text: "Not returned"}
     cards:
-      - {id: c1, text: "Station A, Jan 1", bucket: keep}
-      - {id: c2, text: "Station B, Jan 2", bucket: skip, misconception: ignores_one_filter}
-      - {id: c3, text: "Station A, Jan 3", bucket: keep, misconception: forgets_end_date}
-      - {id: c4, text: "Station A, Jan 4", bucket: skip, misconception: ignores_one_filter}
-      - {id: c5, text: "Station A, Jan 2", bucket: keep}
-    feedback_right: "Yes! Jan 3 counts too."
-    feedback_wrong: "Check the end day. Jan 3 is part of the trip, and the station has to match."
-
+      - {id: c1, text: "ST-A, 2026-01-01", bucket: keep}
+      - {id: c2, text: "ST-B, 2026-01-02", bucket: skip, misconception: ignores_one_filter}
+      - {id: c3, text: "ST-A, 2026-01-03", bucket: keep, misconception: forgets_end_date}
+      - {id: c4, text: "ST-A, 2026-01-04", bucket: skip, misconception: ignores_one_filter}
+      - {id: c5, text: "ST-A, 2026-01-02", bucket: keep}
+    feedback_right: "Yes. <= includes the end date, and the station has to match."
+    feedback_wrong: "Check the end date: <= includes 2026-01-03. Both conditions must be true."
   - id: log-2b
     tier: 2
     type: choice
     nodes: [filter_rows]
-    prompt: "Pip wants only the rainy days at Station B. Which rule finds them?"
+    prompt: "Which WHERE clause returns only the rainy days (rain_mm > 0) at station ST-B?"
     options:
-      - {id: a, text: "Station is B and weather is rainy", correct: true}
-      - {id: b, text: "Station is B or weather is rainy", misconception: mixes_and_or, why: "Or keeps extra days. We need both things true."}
-      - {id: c, text: "Station is A and weather is rainy", misconception: ignores_one_filter, why: "The station has to be B."}
-      - {id: d, text: "Weather is rainy", misconception: ignores_one_filter, why: "That also keeps rainy days at other stations."}
-    feedback_right: "Yes! Both things must be true."
-
+      - {id: a, text: "WHERE station_id = 'ST-B' AND rain_mm > 0", correct: true}
+      - {id: b, text: "WHERE station_id = 'ST-B' OR rain_mm > 0", misconception: mixes_and_or, why: "OR also returns dry days at ST-B and rainy days elsewhere. Both must be true."}
+      - {id: c, text: "WHERE station_id = 'ST-A' AND rain_mm > 0", misconception: ignores_one_filter, why: "The station has to be ST-B."}
+      - {id: d, text: "WHERE rain_mm > 0", misconception: ignores_one_filter, why: "That returns rainy days at every station."}
+    feedback_right: "Yes. AND means both conditions must hold."
   - id: log-3a
     tier: 3
     type: order
     nodes: [sort_and_edges]
     misconception: sorts_before_filtering
-    prompt: "Find Station A's coolest day this week. Drag the steps into the best order."
+    prompt: "Put the parts of a query that finds ST-A's coolest day in January in the right order."
     cards:
-      - {id: s1, text: "Open the log"}
-      - {id: s2, text: "Keep only Station A's lines for this week"}
-      - {id: s3, text: "Sort them from coolest to warmest"}
-      - {id: s4, text: "Read the first line"}
-    feedback_right: "Yes! Keep the right lines first, then sort."
-    feedback_wrong: "Try keeping the right lines before sorting them."
-
+      - {id: s1, text: "SELECT date, temp_high_c FROM daily_readings"}
+      - {id: s2, text: "WHERE station_id = 'ST-A' AND date LIKE '2026-01-%'"}
+      - {id: s3, text: "ORDER BY temp_high_c ASC"}
+      - {id: s4, text: "LIMIT 1"}
+    feedback_right: "Yes. Filter the rows, then sort, then take the first one."
+    feedback_wrong: "SQL filters with WHERE before it sorts with ORDER BY and keeps rows with LIMIT."
   - id: log-3b
     tier: 3
     type: choice
     nodes: [sort_and_edges]
-    prompt: "Pip asks for rainy days at Station C in July. The log has none. What should the answer be?"
+    prompt: "get_readings(conn, 'ST-C', '2026-07-01', '2026-07-31') matches no rows. What should it return?"
     options:
-      - {id: a, text: "An empty list: no days found", correct: true}
-      - {id: b, text: "An error that stops everything", misconception: empty_is_error, why: "Finding nothing is a real answer. It is not a mistake."}
-      - {id: c, text: "Every day in the log", misconception: ignores_filter, why: "Pip only asked for rainy days at Station C."}
-      - {id: d, text: "A made-up rainy day", misconception: invents_answer, why: "We never invent days. We show what the log has."}
-    feedback_right: "Yes! Nothing found is an empty list."
+      - {id: a, text: "An empty list: []", correct: true}
+      - {id: b, text: "Raise an error", misconception: empty_is_error, why: "No matching rows is a normal result, not a failure."}
+      - {id: c, text: "Every row in the table", misconception: ignores_filter, why: "The query still asks only for ST-C in July."}
+      - {id: d, text: "A placeholder row with zeros", misconception: invents_answer, why: "Never invent data. Return what the table has."}
+    feedback_right: "Yes. An empty list keeps the code that uses it simple."

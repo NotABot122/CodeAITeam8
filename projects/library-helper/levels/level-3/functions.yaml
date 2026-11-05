@@ -1,0 +1,20 @@
+# Function bank for Level 3. sum(), max(), min(), len() and sorted() aren't allowed here, so they aren't listed.
+- call: my_list.append(item)
+  summary: |-
+    Adds one item to the end of a list. It changes the list itself and gives back nothing.
+  example: |-
+    flagged = []
+    flagged.append(7)
+- call: my_list.sort()
+  summary: |-
+    Puts a list in order, smallest first. It changes the list itself and gives back nothing. (This is allowed; sorted() isn't.)
+  example: |-
+    numbers = [9, 2, 5]
+    numbers.sort()
+    # numbers is now [2, 5, 9]
+- call: round(number, 1)
+  summary: |-
+    Rounds a number to a number of decimal places. The second value is how many places to keep.
+  example: |-
+    round(12.345, 1)
+    # 12.3

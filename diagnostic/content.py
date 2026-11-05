@@ -12,7 +12,7 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 import yaml
 
-from .models import (CHOICE, CHOICE_LIKE, DEFAULT_FACET, FACETS, ITEM_TYPES, ORDER, TIERS, Bucket, Card,
+from .models import (DISPLAYS, CHOICE, CHOICE_LIKE, DEFAULT_FACET, FACETS, ITEM_TYPES, ORDER, SORT, TIERS, Bucket, Card,
                      ExplainPrompt, Goal, Item, KeyIdea, Node, Option, ScoringRules, Zone)
 from .paths import PathLike, content_dir
 from .readability import readability_problems
@@ -116,6 +116,11 @@ class Content:
 
 
 # Small validation helpers --------------------------------------------------
+
+def _card_text(value: Any, where: str, errors: "_Errors") -> str:
+    """Card text keeps its leading spaces: an order card can be an indented line of code."""
+    return value.rstrip() if errors.text(value, where, "text") else ""
+
 
 class _Errors:
     def __init__(self) -> None:
@@ -422,7 +427,7 @@ def _parse_item(entry: Any, where: str, concept: Optional[str], config: Config, 
         for index, raw in enumerate(_sequence(entry.get("cards"), f"{where} cards", errors), start=1):
             raw = _mapping(raw, f"{where} card #{index}", errors)
             cards.append(Card(errors.ident(raw.get("id"), f"{where} card #{index}"),
-                              errors.text(raw.get("text"), f"{where} card #{index}", "text"), raw.get("misconception")))
+                              _card_text(raw.get("text"), f"{where} card #{index}", errors), raw.get("misconception")))
         if len(cards) < 3:
             errors.add(where, "needs at least 3 cards")
         if len({c.id for c in cards}) != len(cards):
@@ -450,12 +455,16 @@ def _parse_item(entry: Any, where: str, concept: Optional[str], config: Config, 
                 errors.add(where, "every bucket needs at least one card")
             if not item_misconception and not any(c.misconception for c in cards):
                 errors.add(where, "sort questions need a misconception tag on the item or on a card")
+    display = entry.get("display")
+    if display is not None and (item_type != SORT or display not in DISPLAYS):
+        errors.add(where, f"display is only for sort questions and must be one of {', '.join(DISPLAYS)}")
 
     return Item(
         id=item_id, concept=None if booster else concept, tier=tier, type=item_type, prompt=prompt, nodes=nodes,
         facet=facet, options=tuple(options), cards=tuple(cards), buckets=tuple(buckets), answer=answer,
         misconception=item_misconception, feedback_right=entry.get("feedback_right"),
         feedback_wrong=entry.get("feedback_wrong"), pass_credit=config.pass_credit.get(item_type, 1.0),
+        display=display,
     )
 
 

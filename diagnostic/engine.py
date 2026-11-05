@@ -32,7 +32,7 @@ from .contract import RUBRIC_ID, output_from_reading
 from .eval_log import EvalEventLog
 from .models import ROLE_BONUS, InvalidResponse, ItemResult
 from .paths import PathLike, data_dir as default_data_dir, project_dir as default_project_dir
-from .placement import Placement, build_placement
+from .placement import Placement, build_placement, start_concept
 from .report import teacher_report
 from .safety import clean_goal_text
 from .scoring import accumulate_points, estimate_all, score_response
@@ -339,7 +339,9 @@ class DiagnosticEngine:
         node_states = self._node_states(state)
         start_nodes = [n for p in placement.concepts.values() for n in p.start_nodes]
         activity = self.project.problems.get(placement.route.next_task_id)
-        first_zone = self.content.zone_for(placement.focus_order[0]).name if placement.focus_order else None
+        first = start_concept(self.project.manifest, placement.route.next_task_id) or \
+            (placement.focus_order[0] if placement.focus_order else None)
+        first_zone = self.content.zone_for(first).name if first else None
         return self._student({
             "done": True,
             "message": placement.student_message,

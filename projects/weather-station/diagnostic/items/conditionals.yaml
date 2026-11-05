@@ -1,88 +1,82 @@
-# Zone: Decision Storm (conditionals)
+# Zone: Decision Point (conditionals). Grades 9-12. Code is Python, as in the lesson.
 concept: conditionals
-
 explain:
   id: decide-explain
   nodes: [if_else_compare]
-  prompt: "Tell Nimbus: what does an if rule do? You can use the heat wave rule."
+  prompt: "Explain to Nimbus: what does an if statement do? You can use the heat wave rule (35.0 or more)."
   key_ideas:
-    - {id: only_when, level: 1, label: "runs only when something is true", words: ["only if", "only when", "only runs", "sometimes", "depends", "check first", "decide", "choose", "when it is"]}
-    - {id: compares, level: 2, label: "compares and covers otherwise", words: ["35", "at least", "or more", "equal", "same as", "exactly", "otherwise", "else", "not hot", "more than"]}
-    - {id: many_rules, level: 3, label: "knows more than one rule can fit", words: ["both", "two rules", "at the same time", "more than one", "every rule", "each rule", "also"]}
-
+    - {id: only_when, level: 1, label: "runs only when something is true", words: ["only if", "only when", "only runs", "sometimes", "depends", "check first", "decide", "choose", "when it is", "if the condition", "true"]}
+    - {id: compares, level: 2, label: "compares and covers otherwise", words: ["35", "at least", "or more", "equal", "same as", "exactly", "otherwise", "else", "not hot", "more than", ">=", "greater than or equal", "false"]}
+    - {id: many_rules, level: 3, label: "knows more than one rule can fit", words: ["both", "two rules", "at the same time", "more than one", "every rule", "each rule", "also", "separate if", "two ifs", "not elif", "instead of elif"]}
 items:
   - id: dec-1a
     tier: 1
     type: choice
     nodes: [if_then]
-    prompt: "The rule says: if it is raining, bring an umbrella. It is raining today. What do you do?"
+    prompt: "The code is: if rain_mm > 0: print('Bring an umbrella'). Today rain_mm is 3.2. What does it print?"
     options:
       - {id: a, text: "Bring an umbrella", correct: true}
-      - {id: b, text: "Leave the umbrella at home", misconception: ignores_condition, why: "The rule is true today, so follow it."}
-      - {id: c, text: "Wait for the rule to change", misconception: ignores_condition, why: "Rules run when their if part is true."}
-      - {id: d, text: "Bring a sled", misconception: ignores_task, why: "The rule is about rain, so think umbrella."}
-    feedback_right: "Yes! It is raining, so the rule runs."
-
+      - {id: b, text: "Nothing", misconception: ignores_condition, why: "3.2 > 0 is True, so the print runs."}
+      - {id: c, text: "3.2", misconception: prints_value_instead, why: "The print shows the message, not the variable."}
+      - {id: d, text: "An error", misconception: ignores_task, why: "This is valid Python. The condition is simply True."}
+    feedback_right: "Yes. The condition is True, so the body runs."
   - id: dec-1b
     tier: 1
     type: choice
     nodes: [if_then]
-    prompt: "The rule says: if the temperature is 30 or more, say HOT. Today it is 25. What does the program say?"
+    prompt: "The code is: if temp >= 30: print('HOT'). Today temp is 25. What does it print?"
     options:
-      - {id: a, text: "Nothing. The rule does not run.", correct: true}
-      - {id: b, text: "HOT", misconception: runs_rule_always, why: "25 is not 30 or more, so the rule skips."}
-      - {id: c, text: "COLD", misconception: invents_else, why: "No rule here says COLD."}
-      - {id: d, text: "25", misconception: prints_value_instead, why: "The rule only says HOT when it runs."}
-    feedback_right: "Yes! The if part is not true, so nothing happens."
-
+      - {id: a, text: "Nothing. The condition is False.", correct: true}
+      - {id: b, text: "HOT", misconception: runs_rule_always, why: "25 >= 30 is False, so the body is skipped."}
+      - {id: c, text: "COLD", misconception: invents_else, why: "There is no else branch here."}
+      - {id: d, text: "25", misconception: prints_value_instead, why: "Only 'HOT' could be printed, and only when the condition is True."}
+    feedback_right: "Yes. False means the body is skipped."
   - id: dec-2a
     tier: 2
     type: sort
+    display: belt
     nodes: [if_else_compare]
-    prompt: "The rule says: a heat wave is 35 or more. Drag each day's temperature to the right box."
+    prompt: "The code is: is_heat_wave = temp_high_c >= 35.0. Sort each temperature into True or False."
     buckets:
-      - {id: heat, text: "Heat wave"}
-      - {id: notheat, text: "Not a heat wave"}
+      - {id: heat, text: "True"}
+      - {id: notheat, text: "False"}
     cards:
-      - {id: t34, text: "34", bucket: notheat}
-      - {id: t35, text: "35", bucket: heat, misconception: at_least_means_over}
-      - {id: t36, text: "36", bucket: heat}
-      - {id: t20, text: "20", bucket: notheat}
-      - {id: t38, text: "38", bucket: heat}
-    feedback_right: "Yes! 35 or more includes 35."
-    feedback_wrong: "Remember: 35 or more includes 35 itself."
-
+      - {id: t34, text: "34.9", bucket: notheat}
+      - {id: t35, text: "35.0", bucket: heat, misconception: at_least_means_over}
+      - {id: t36, text: "36.2", bucket: heat}
+      - {id: t20, text: "20.0", bucket: notheat}
+      - {id: t38, text: "38.4", bucket: heat}
+    feedback_right: "Yes. >= includes 35.0 itself."
+    feedback_wrong: "Remember that >= includes the boundary: 35.0 >= 35.0 is True."
   - id: dec-2b
     tier: 2
     type: choice
     nodes: [if_else_compare]
-    prompt: "The rule says: if rain is 20 or more, say HEAVY RAIN. Otherwise say OK. Today the rain is 20. What does it say?"
+    prompt: "The code is: if rain_mm >= 20.0: label = 'heavy_rain' else: label = 'ok'. Today rain_mm is 20.0. What is label?"
     options:
-      - {id: a, text: "HEAVY RAIN", correct: true}
-      - {id: b, text: "OK", misconception: at_least_means_over, why: "20 or more includes 20."}
-      - {id: c, text: "Both HEAVY RAIN and OK", misconception: both_branches, why: "Only one of the two can run."}
-      - {id: d, text: "Nothing", misconception: no_else, why: "Otherwise always catches the other days."}
-    feedback_right: "Yes! 20 counts as 20 or more."
-
+      - {id: a, text: "'heavy_rain'", correct: true}
+      - {id: b, text: "'ok'", misconception: at_least_means_over, why: "20.0 >= 20.0 is True."}
+      - {id: c, text: "Both values, one after the other", misconception: both_branches, why: "Exactly one branch of an if/else runs."}
+      - {id: d, text: "label is never set", misconception: no_else, why: "The else branch covers every other case, so label is always set."}
+    feedback_right: "Yes. 20.0 meets the condition."
   - id: dec-3a
     tier: 3
     type: trace
     nodes: [both_true]
-    prompt: "A day has 36 degrees and 25 mm of rain. Heat wave: 35 or more. Heavy rain: 20 or more. Which labels fit this day?"
+    prompt: "labels = []. If temp >= 35: labels.append('heat_wave'). Then, as a separate if, if rain >= 20: labels.append('heavy_rain'). temp is 36.1 and rain is 25.0. What is labels?"
     options:
-      - {id: a, text: "Heat wave and heavy rain", correct: true}
-      - {id: b, text: "Only heat wave", misconception: stops_at_first_match, why: "Each rule gets its own check, so both can be true."}
-      - {id: c, text: "Only heavy rain", misconception: stops_at_first_match, why: "Each rule gets its own check, so both can be true."}
-      - {id: d, text: "Normal", misconception: ignores_rules, why: "This day fits both rules, so it is not normal."}
-    feedback_right: "Yes! A day can fit two rules."
-
+      - {id: a, text: "['heat_wave', 'heavy_rain']", correct: true}
+      - {id: b, text: "['heat_wave']", misconception: stops_at_first_match, why: "These are two separate if statements, so both are checked."}
+      - {id: c, text: "['heavy_rain']", misconception: stops_at_first_match, why: "The first if is also True and runs first."}
+      - {id: d, text: "['normal']", misconception: ignores_rules, why: "Nothing in this code adds 'normal'."}
+    feedback_right: "Yes. Two separate ifs can both run."
   - id: dec-3b
     tier: 3
     type: spot
     nodes: [both_true]
-    prompt: "This helper should mark every heat wave day. A heat wave is 35 or more. Tap the step with the bug."
+    prompt: "This code should mark every heat wave day, which means 35.0 or more. Tap the line with the bug."
     options:
-      - {id: a, text: "Step 1: read the temperature", misconception: misreads_steps, why: "That step is fine. Look at the rule."}
-      - {id: b, text: "Step 2: if it is more than 35, say heat wave", correct: true}
-      - {id: c, text: "Step 3: otherwise say not a heat wave", misconception: misreads_steps, why: "That step is fine. Look at the rule."}
-    feedback_right: "Yes! More than 35 skips a day that is exactly 35."
+      - {id: a, text: "Line 1: temp = row['temp_high_c']", misconception: misreads_steps, why: "That line reads the value correctly. Look at the comparison."}
+      - {id: b, text: "Line 2: if temp > 35.0:", correct: true}
+      - {id: c, text: "Line 3: labels.append('heat_wave')", misconception: misreads_steps, why: "That line is fine. Look at the comparison."}
+    feedback_right: "Yes. > skips a day that is exactly 35.0. Use >=."

@@ -1,0 +1,79 @@
+{
+  "title": "Library Helper",
+  "story": "The school library wants a helper tool for its student volunteers. It should find the books on a range of shelves, flag the long ones and the popular ones, and build a report the librarian can use to plan displays and reading lists.",
+  "entity_singular": "book",
+  "entity_plural": "books",
+  "table": "library_books",
+  "group_column": "genre",
+  "group_description": "The section of the library",
+  "groups": [
+    "Mystery",
+    "Science",
+    "Adventure"
+  ],
+  "number_column": "shelf_number",
+  "name_column": "title",
+  "metric_a": {
+    "column": "pages",
+    "label": "long",
+    "unit": "pages",
+    "description": "Number of pages",
+    "minimum": 60.0,
+    "maximum": 900.0,
+    "threshold": 400.0
+  },
+  "metric_b": {
+    "column": "checkouts",
+    "label": "popular",
+    "unit": "checkouts",
+    "description": "Times checked out this year",
+    "minimum": 0.0,
+    "maximum": 80.0,
+    "threshold": 30.0
+  },
+  "normal_label": "regular",
+  "names": {
+    "Mystery": [
+      "The Clockwork Key",
+      "Fog on Harbor Street",
+      "The Missing Map",
+      "Whispers in the Attic",
+      "The Silver Locket",
+      "Case of the Quiet Bell",
+      "The Hidden Staircase Club",
+      "Midnight at the Museum Gate",
+      "The Lantern Code",
+      "Footprints in the Snow",
+      "The Vanishing Violin",
+      "Secret of Willow Pond"
+    ],
+    "Science": [
+      "How Bridges Stand",
+      "The Story of Atoms",
+      "Our Restless Planet",
+      "Inside the Cell",
+      "Weather Machines",
+      "The Math of Music",
+      "Rockets and Orbits",
+      "Tiny Life in a Drop",
+      "Electric Everything",
+      "The Living Ocean",
+      "Codes and Ciphers",
+      "Why the Sky Glows"
+    ],
+    "Adventure": [
+      "River of Stars",
+      "The Last Lighthouse",
+      "Across the Ice Fields",
+      "The Sky Pirates",
+      "Desert Compass",
+      "The Mountain Messenger",
+      "Island of Echoes",
+      "The Jungle Railway",
+      "Wings over the Canyon",
+      "The Lost Expedition",
+      "Storm Riders",
+      "The Coral Kingdom"
+    ]
+  }
+}

@@ -2,7 +2,7 @@ import {Box, Typography} from '@mui/material';
 
 import type {StudentState} from '@/api/types';
 
-const COLORS = ['#9a9ab0', '#e8a200', '#4c42cf', '#1a7f4b'];
+const COLORS = ['#9a9ab0', '#e8a200', '#d6456a', '#1a7f4b'];
 
 export default function ConceptMeters({state, highlight, row}: {state: StudentState; highlight: string[]; row?: boolean}) {
   return (

@@ -1,4 +1,4 @@
-"""A cheap reading-level check for kid-facing text. No dependencies."""
+"""A cheap reading-level check for student-facing text. No dependencies."""
 from __future__ import annotations
 
 import re

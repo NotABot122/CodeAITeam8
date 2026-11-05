@@ -1,7 +1,7 @@
 """Turn the evidence (and optional model advice) into a placement.
 
 The deterministic stage from the answers is the floor. The model may move a stage by
-at most one, and only when the child's own words, quoted exactly, support the move.
+at most one, and only when the student's own words, quoted exactly, support the move.
 Its focus order, stance and wording are used only after they pass checks; otherwise
 rules and fixed text from the content files take over. The student always gets a
 placement, with or without a model.
@@ -154,6 +154,17 @@ def _route(manifest: Manifest, finals: Mapping[str, int], stance: str, policy: s
     return Route(next_task, reason, policy, fallback, stance), ahead
 
 
+def start_concept(manifest: Manifest, task_id: Optional[str]) -> Optional[str]:
+    """The concept of the problem the lesson starts with (a level's first concept, or a practice's concept)."""
+    if not task_id:
+        return None
+    practice = manifest.practice(task_id)
+    if practice is not None:
+        return practice.concept
+    level = manifest.level(task_id)
+    return level.concepts[0] if level is not None and level.concepts else None
+
+
 # Entry point -----------------------------------------------------------------------------
 
 def build_placement(content: Content, manifest: Manifest, state: DiagnosticState,
@@ -196,7 +207,10 @@ def build_placement(content: Content, manifest: Manifest, state: DiagnosticState
     route, ahead = _route(manifest, stages, stance, policy, state.on_fallback or model_failed)
 
     cfg = content.config
-    student_message = game.default_student_message(content, state, focus)
+    # "First stop" names where the lesson really starts, not the weakest concept: the lesson never skips a level.
+    first = start_concept(manifest, route.next_task_id)
+    told = [first] + [c for c in focus if c != first] if first else focus
+    student_message = game.default_student_message(content, state, told)
     goal_connection = f"Your goal is: {goal.label}."
     teacher_note = _teacher_summary(content, concepts, focus, state)
     if advice is not None:

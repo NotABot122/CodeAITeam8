@@ -5,6 +5,7 @@ import RemoveIcon from '@mui/icons-material/Remove';
 import {Alert, Box, Container, Typography} from '@mui/material';
 import {useEffect, useState} from 'react';
 import {api, type Health, type OverviewItem, type Status, type TabId} from './api';
+import Diagnostic from './pages/Diagnostic';
 import Fallback from './pages/Fallback';
 import Hints from './pages/Hints';
 import Overview from './pages/Overview';
@@ -19,6 +20,7 @@ const STEPS: {id: TabId; title: string; item?: string}[] = [
   {id: 'fallback', title: 'When things fail', item: 'fallback'},
   {id: 'safety', title: 'Safety filters', item: 'filtering'},
   {id: 'hints', title: 'Hints', item: 'content_signoff'},
+  {id: 'diagnostic', title: 'Starting level', item: 'diagnostic_handoff'},
   {id: 'rating', title: 'Teacher review'},
 ];
 
@@ -97,6 +99,7 @@ export default function App() {
         {tab === 'fallback' && <Fallback />}
         {tab === 'safety' && <Safety ai={health?.ai ?? false} />}
         {tab === 'hints' && <Hints ai={health?.ai ?? false} />}
+        {tab === 'diagnostic' && <Diagnostic />}
         {tab === 'rating' && <Rating />}
       </Container>
     </Box>

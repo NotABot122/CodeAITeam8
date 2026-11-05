@@ -5,27 +5,31 @@
 # `count_with_rule` needs both a decision skill and a repeating skill, and
 # `combine_helpers` mirrors Level 4, which combines Levels 1-3.
 #
-# `csta` lists standard codes. It stays empty until a code is checked against
-# "curriculum database/CSTA_2026_PK12_Standards_by_Grade.xlsx" (grades 3-5).
+# `csta` lists standard codes (DRAFT mapping by the evaluation team from the standards' text; a teacher
+# should confirm it). Codes come from
+# "curriculum database/CSTA_2026_PK12_Standards_by_Grade.xlsx" (grades 9-12).
+# HS-PRO-VD-16 data structures, counting, totals, extremes; HS-PRO-RD-17 reading code with parameters
+# and returns; HS-ALG-PS-02 reworking repetition into functions and loops; HS-ALG-PS-03 correctness with
+# test cases (edges, empty input); HS-PRO-PD-12 modular programs.
 # `python3 -m diagnostic.cli check-content` reports nodes still missing codes.
 nodes:
   # Zone 1: find information in a log (database_retrieval)
-  - {id: read_a_log,      name: Read the weather log,        concept: database_retrieval, tier: 1, parents: [],                                   csta: []}
-  - {id: filter_rows,     name: Find the right days,         concept: database_retrieval, tier: 2, parents: [read_a_log],                         csta: []}
-  - {id: sort_and_edges,  name: Sort it and plan for empty,  concept: database_retrieval, tier: 3, parents: [filter_rows],                         csta: []}
+  - {id: read_a_log,      name: Read the weather log,        concept: database_retrieval, tier: 1, parents: [],                                   csta: [HS-PRO-VD-16]}
+  - {id: filter_rows,     name: Find the right days,         concept: database_retrieval, tier: 2, parents: [read_a_log],                         csta: [HS-PRO-VD-16]}
+  - {id: sort_and_edges,  name: Sort it and plan for empty,  concept: database_retrieval, tier: 3, parents: [filter_rows],                         csta: [HS-PRO-VD-16, HS-ALG-PS-03]}
 
   # Zone 2: make decisions (conditionals)
-  - {id: if_then,         name: If this, then that,          concept: conditionals,       tier: 1, parents: [],                                   csta: []}
-  - {id: if_else_compare, name: Compare and choose,          concept: conditionals,       tier: 2, parents: [if_then],                            csta: []}
-  - {id: both_true,       name: Edges and double rules,      concept: conditionals,       tier: 3, parents: [if_else_compare],                    csta: []}
+  - {id: if_then,         name: If this, then that,          concept: conditionals,       tier: 1, parents: [],                                   csta: [HS-PRO-RD-17]}
+  - {id: if_else_compare, name: Compare and choose,          concept: conditionals,       tier: 2, parents: [if_then],                            csta: [HS-PRO-RD-17]}
+  - {id: both_true,       name: Edges and double rules,      concept: conditionals,       tier: 3, parents: [if_else_compare],                    csta: [HS-PRO-RD-17, HS-ALG-PS-03]}
 
   # Zone 3: repeat steps (loops)
-  - {id: repeat_steps,    name: Repeat for each one,         concept: loops,              tier: 1, parents: [],                                   csta: []}
-  - {id: running_total,   name: Keep a running total,        concept: loops,              tier: 2, parents: [repeat_steps],                       csta: []}
-  - {id: find_biggest,    name: Remember the biggest,        concept: loops,              tier: 3, parents: [running_total],                      csta: []}
-  - {id: count_with_rule, name: Count only what fits a rule, concept: loops,              tier: 3, parents: [if_else_compare, running_total],     csta: []}
+  - {id: repeat_steps,    name: Repeat for each one,         concept: loops,              tier: 1, parents: [],                                   csta: [HS-PRO-VD-16]}
+  - {id: running_total,   name: Keep a running total,        concept: loops,              tier: 2, parents: [repeat_steps],                       csta: [HS-PRO-VD-16]}
+  - {id: find_biggest,    name: Remember the biggest,        concept: loops,              tier: 3, parents: [running_total],                      csta: [HS-PRO-VD-16]}
+  - {id: count_with_rule, name: Count only what fits a rule, concept: loops,              tier: 3, parents: [if_else_compare, running_total],     csta: [HS-PRO-VD-16, HS-PRO-RD-17]}
 
   # Zone 4: reusable helpers (functions)
-  - {id: named_steps,     name: Name a set of steps,         concept: functions,          tier: 1, parents: [],                                   csta: []}
-  - {id: inputs_outputs,  name: What goes in and comes out,  concept: functions,          tier: 2, parents: [named_steps],                        csta: []}
-  - {id: combine_helpers, name: Team up the helpers,         concept: functions,          tier: 3, parents: [inputs_outputs, filter_rows, count_with_rule], csta: []}
+  - {id: named_steps,     name: Name a set of steps,         concept: functions,          tier: 1, parents: [],                                   csta: [HS-ALG-PS-02, HS-PRO-PD-12]}
+  - {id: inputs_outputs,  name: What goes in and comes out,  concept: functions,          tier: 2, parents: [named_steps],                        csta: [HS-PRO-RD-17]}
+  - {id: combine_helpers, name: Team up the helpers,         concept: functions,          tier: 3, parents: [inputs_outputs, filter_rows, count_with_rule], csta: [HS-PRO-PD-12]}

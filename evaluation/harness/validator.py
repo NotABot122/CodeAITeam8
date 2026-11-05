@@ -47,11 +47,23 @@ _INAPPROPRIATE_WORDS = {"stupid", "idiot", "hate you", "shut up", "damn"}
 # Signals that text was pasted from an AI assistant rather than written by the
 # student. One strong signal or two weak ones raise the flag. Heuristic only:
 # the flag asks for teacher review and never changes a stage.
+try:  # one detector for the whole repo (engine/safety.py); the local lists are the fallback outside the repo
+    from engine.safety import looks_like_ai_paste as _looks_like_ai_paste
+except ImportError:  # pragma: no cover
+    _looks_like_ai_paste = None
+
 _AI_STRONG = [r"\bas an ai\b", r"\bas a (large )?language model\b", r"\bcertainly!", r"\bi hope this helps\b",
               r"\bhere is (an|the) (improved|revised|refined) prompt\b"]
 _AI_WEAK = [r"\bcomprehensive\b", r"\badhering to\b", r"\bsemantic(ally)?\b", r"\bwcag\b", r"\bdeviates\b",
             r"\bleverag(e|ing)\b", r"\bfurthermore\b", r"\brobust\b", r"\bseamless(ly)?\b",
             r"\bcss grid\b", r"\bhtml5\b", r"\bcss3\b"]
+
+
+if _looks_like_ai_paste is None:
+    def _looks_like_ai_paste(text: str) -> bool:
+        low = text.lower()
+        return (sum(bool(re.search(p, low)) for p in _AI_STRONG) >= 1
+                or sum(bool(re.search(p, low)) for p in _AI_WEAK) >= 3)
 
 
 def prefilter(text: str) -> list[str]:
@@ -77,9 +89,7 @@ def prefilter(text: str) -> list[str]:
         flags.append("prompt_injection")
     if any(w in low for w in _INAPPROPRIATE_WORDS):
         flags.append("inappropriate")
-    strong = sum(bool(re.search(p, low)) for p in _AI_STRONG)
-    weak = sum(bool(re.search(p, low)) for p in _AI_WEAK)
-    if strong >= 1 or weak >= 3:
+    if _looks_like_ai_paste(stripped):
         flags.append("suspected_ai_paste")
     return flags
 
@@ -175,11 +185,12 @@ def _output(rubric, results, flags, model_id, latency=0, tin=0, tout=0) -> dict:
 
 
 def normalize_input(tool_input: dict) -> dict:
-    """Accept the deprecated v0.1 field name level_id."""
+    """Accept either task_id (v0.2) or level_id (v0.1) and fill in the other."""
     d = dict(tool_input)
     if "task_id" not in d and "level_id" in d:
         d["task_id"] = d["level_id"]
-    d.pop("level_id", None)
+    if "level_id" not in d and "task_id" in d:
+        d["level_id"] = d["task_id"]  # tools written against v0.1 (e.g. the readiness diagnostic) still read level_id
     return d
 
 
