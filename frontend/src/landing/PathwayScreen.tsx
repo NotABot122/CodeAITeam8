@@ -49,7 +49,7 @@ export default function PathwayScreen({client, studentId, grade: initialGrade, e
 
   useEffect(() => { headingRef.current?.focus(); }, [pathway?.id]);
 
-  // The project choice opens once the pathway is known (the readiness check's goal suggests one).
+  // The project choice opens once the pathway is known (the student's interests suggest one).
   useEffect(() => {
     if (!pathway || choices) return;
     client.projectChoices(studentId).then(setChoices).catch(() => setChoices(null));

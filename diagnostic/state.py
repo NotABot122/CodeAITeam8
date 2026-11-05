@@ -86,7 +86,7 @@ class DiagnosticState:
     finished_at: Optional[str] = None
     elapsed_ms_total: int = 0
     # Set when the result came from an earlier lesson instead of this quest (diagnostic/importer.py):
-    # {"source", "at", "concepts": {concept: {"stage", "correct", "answered"}}}. Results is then empty.
+    # {"at", "concepts": {concept: {"stage", "correct", "answered"}}}. Results is then empty.
     imported: Optional[Dict[str, Any]] = None
     schema_version: int = SCHEMA_VERSION
 

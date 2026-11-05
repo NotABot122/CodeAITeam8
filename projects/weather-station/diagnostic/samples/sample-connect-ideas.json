@@ -1,7 +1,6 @@
 {
   "format": "codeai-lesson-export",
   "version": 1,
-  "source": "Sample data for demos",
   "goal": "find_facts",
   "interests": "birds and ocean animals",
   "concepts": {

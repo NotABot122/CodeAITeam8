@@ -54,7 +54,7 @@ export function ThemeDialog({open, aiOn, aiReason, themed, busy, error, onBuild,
           <>
             <Typography sx={{mb: 2}}>Tell us what you're into and we'll rebuild the same project around it. Same concepts, your theme.</Typography>
             {later && <Typography variant="body2" color="text.secondary" sx={{mb: 2}}>You'll finish what you're working on first, then start your themed project.</Typography>}
-            <TextField autoFocus fullWidth label="I like…" placeholder="pokemon, soccer, space" value={text} disabled={busy}
+            <TextField autoFocus fullWidth label="I like…" placeholder="soccer, space, music" value={text} disabled={busy}
               slotProps={{htmlInput: {maxLength: 300}}} onChange={e => setText(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter' && text.trim() && !busy) onBuild(text); }} />
             {busy && <Typography role="status" sx={{mt: 2}} color="text.secondary">Building your project. This takes about half a minute…</Typography>}

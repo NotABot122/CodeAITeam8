@@ -10,13 +10,14 @@ Privacy and safety:
 - Only the fields below are read. A file with personal details (a name, email, birthday...) is rejected
   with a message saying which field, so the person exporting can remove it. Any other unknown field is
   ignored and never stored. Any id in the file is ignored: the student gets a new random STU- id.
-- Free text (`interests`, `source`) is screened like the quest's own goal text: personal details,
+- The one free-text field (`interests`) is screened like the quest's own goal text: personal details,
   filtered words or instructions to the AI mean it is dropped, with a notice.
-- Nothing from the file is written to the event log except the stages.
+- Only what the course needs is kept (data minimization): no labels, dates, class names or notes.
+- Nothing from the file is written to the event log except the stages. Notices name only our own field
+  names, never text from the file.
 
 Format (codeai-lesson-export, version 1):
     {"format": "codeai-lesson-export", "version": 1,
-     "source": "Intro unit, fall",                 optional, at most 80 characters
      "goal": "build_game",                         optional, a readiness-check goal id
      "interests": "soccer and video games",        optional, at most 80 characters
      "concepts": {"loops": {"stage": 2, "correct": 5, "answered": 6}, ...}}
@@ -36,7 +37,7 @@ from .models import CONCEPTUAL, MAX_STAGE, ConceptEstimate, NodePoints
 from .safety import clean_goal_text
 
 FORMAT, VERSION = "codeai-lesson-export", 1
-FIELDS = {"format", "version", "source", "goal", "interests", "concepts"}
+FIELDS = {"format", "version", "goal", "interests", "concepts"}
 CONCEPT_FIELDS = {"stage", "correct", "answered"}
 # Keys that hold personal details. A file with any of them is rejected, never silently cleaned.
 PERSONAL_KEYS = {"name", "first_name", "last_name", "full_name", "student_name", "nickname", "email", "e_mail",
@@ -63,12 +64,20 @@ class ImportRecord:
     concepts: Dict[str, Dict[str, int]]          # concept -> {stage, correct, answered}
     goal_id: Optional[str]
     interests: Optional[str]
-    source: Optional[str]
     notices: List[str] = field(default_factory=list)
 
 
 def _key(name: Any) -> str:
     return re.sub(r"[^a-z]+", "_", str(name).lower()).strip("_")
+
+
+def _shown(keys: List[str], limit: int = 6) -> str:
+    """Field names to repeat in a message. A key that doesn't look like a field name (it could hold someone's
+    details) is counted, not shown."""
+    plain = [k for k in keys if re.fullmatch(r"[A-Za-z][A-Za-z0-9_ -]{0,29}", k)]
+    others = len(keys) - len(plain)
+    parts = plain[:limit] + ([f"{others} other field{'s' if others > 1 else ''}"] if others else [])
+    return ", ".join(parts) + (f" and {len(plain) - limit} more" if len(plain) > limit else "")
 
 
 def _whole(value: Any, low: int, high: int) -> Optional[int]:
@@ -86,7 +95,7 @@ def parse_export(data: Any, content: Content) -> ImportRecord:
             if isinstance(entry, dict):
                 personal += sorted({str(k) for k in entry if _key(k) in PERSONAL_KEYS} - set(personal))
     if personal:
-        raise ImportRejected([f"The file has personal details ({', '.join(personal)}). Remove them and try again. "
+        raise ImportRejected([f"The file has personal details ({_shown(personal)}). Remove them and try again. "
                               "We only need results per idea."])
     problems: List[str] = []
     notices: List[str] = []
@@ -96,7 +105,7 @@ def parse_export(data: Any, content: Content) -> ImportRecord:
     if any(_key(k) in ID_KEYS for k in data):
         notices.append("The id in the file wasn't used. You get a new private id.")
     if ignored:
-        notices.append("These fields aren't used and weren't kept: " + ", ".join(ignored[:6]) + ".")
+        notices.append("These fields aren't used and weren't kept: " + _shown(ignored) + ".")
 
     known = content.concepts()
     concepts: Dict[str, Dict[str, int]] = {}
@@ -105,7 +114,7 @@ def parse_export(data: Any, content: Content) -> ImportRecord:
     else:
         unknown = sorted(str(c) for c in concepts_raw if c not in known)
         if unknown:
-            notices.append("These ideas aren't part of this course and weren't used: " + ", ".join(unknown[:6]) + ".")
+            notices.append("These ideas aren't part of this course and weren't used: " + _shown(unknown) + ".")
         for concept in known:
             entry = concepts_raw.get(concept)
             if entry is None:
@@ -124,9 +133,9 @@ def parse_export(data: Any, content: Content) -> ImportRecord:
                 problems.append(f"{concept}: correct can't be more than answered.")
             if stage is not None and answered is not None and correct is not None and correct <= answered:
                 concepts[concept] = {"stage": stage, "correct": correct, "answered": answered}
-            extra = sorted(set(entry) - CONCEPT_FIELDS)
+            extra = sorted(str(e) for e in set(entry) - CONCEPT_FIELDS)
             if extra:
-                notices.append(f"{concept}: these fields weren't kept: {', '.join(str(e) for e in extra[:4])}.")
+                notices.append(f"{concept}: these fields weren't kept: {_shown(extra, 4)}.")
         if not concepts and not problems:
             problems.append("None of the ideas in the file are part of this course.")
 
@@ -135,22 +144,18 @@ def parse_export(data: Any, content: Content) -> ImportRecord:
         notices.append("The goal in the file isn't one of ours, so you can pick a project yourself.")
         goal = None
 
-    def text(name: str) -> Optional[str]:
-        value = data.get(name)
-        if value is None:
-            return None
-        if not isinstance(value, str):
-            problems.append(f"{name} must be text.")
-            return None
-        cleaned, _ = clean_goal_text(value, MAX_TEXT_CHARS)
-        if value.strip() and cleaned is None:
-            notices.append(f"We didn't keep the {name} text: it had personal details or words we filter out.")
-        return cleaned
-
-    interests, source = text("interests"), text("source")
+    interests = data.get("interests")
+    if interests is not None and not isinstance(interests, str):
+        problems.append("interests must be text.")
+        interests = None
+    if interests is not None:
+        cleaned, _ = clean_goal_text(interests, MAX_TEXT_CHARS)
+        if interests.strip() and cleaned is None:
+            notices.append("We didn't keep the interests text: it had personal details or words we filter out.")
+        interests = cleaned
     if problems:
         raise ImportRejected(problems)
-    return ImportRecord(concepts, goal, interests, source, notices)
+    return ImportRecord(concepts, goal, interests, notices)
 
 
 # Turning imported results into the readiness check's own evidence ---------------------------------------

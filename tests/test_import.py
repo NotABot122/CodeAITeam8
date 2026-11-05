@@ -121,11 +121,24 @@ class CourseImportTests(TempDirMixin, unittest.TestCase):
 
     def test_the_event_log_gets_stages_but_nothing_from_the_file(self):
         course = self.course()
-        course.import_previous(data=good(source="Room 12 unit 2", interests="birds and owls"))
+        course.import_previous(data=good(interests="birds and owls", class_name="Room 12 unit 2"))
         log = "\n".join(p.read_text() for p in Path(self.tmp).rglob("events.jsonl"))
         self.assertIn("diagnostic_imported", log)
         for text in ("Room 12", "owls", "birds"):
             self.assertNotIn(text, log)
+
+    def test_only_what_the_course_needs_is_stored(self):
+        course = self.course()
+        sid = course.import_previous(data=good(class_name="Room 12", notes="likes to sit near the window"))["student_id"]
+        saved = json.dumps(DiagnosticStore(self.tmp).load(sid).to_dict())
+        for text in ("Room 12", "window", "class_name"):
+            self.assertNotIn(text, saved)
+        self.assertEqual(set(DiagnosticStore(self.tmp).load(sid).imported), {"at", "concepts"})
+
+    def test_messages_never_repeat_odd_keys_that_could_hold_someones_details(self):
+        record = parse_export(good(**{"Jo Smith, 14, Room 12": True}), content())
+        self.assertNotIn("Jo Smith", " ".join(record.notices))
+        self.assertIn("1 other field", " ".join(record.notices))
 
     def test_every_shipped_sample_is_clean_and_lands_on_a_different_pathway(self):
         course = self.course()

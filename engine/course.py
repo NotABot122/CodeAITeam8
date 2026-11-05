@@ -517,7 +517,7 @@ class Course:
         return match_view(story, skills, title, pitch)
 
     def core_project_for(self, student_id: str) -> str:
-        """The student's first-topic project: a catalog folder name, or the path of a theme they built."""
+        """The student's first-topic project: their choice, a theme they built, or the story that fits their interests."""
         chosen = self.store.profile(student_id).get("core_project") if student_id else None
         if chosen in self.core_choices():
             return chosen
@@ -535,7 +535,7 @@ class Course:
     def project_choices(self, student_id: str) -> dict:
         self._require(student_id)
         current = self.core_project_for(student_id)
-        # Only a readiness-check goal suggests a project; students who skipped it get no "matches your goal" tag.
+        # Only a readiness check (or an import) suggests a project; students who skipped it get no "best match" tag.
         suggested = self.suggested_project(student_id) if self._goal(student_id) else None
         out = []
         if current not in self.core_choices():         # a theme the student built

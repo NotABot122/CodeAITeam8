@@ -1,7 +1,6 @@
 {
   "format": "codeai-lesson-export",
   "version": 1,
-  "source": "Sample data for demos",
   "goal": "make_helpers",
   "interests": "books",
   "concepts": {

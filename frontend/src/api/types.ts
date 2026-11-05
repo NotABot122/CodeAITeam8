@@ -94,7 +94,7 @@ export interface PathwayView {
 }
 export interface PathwayResult {pathway: PathwayView; state: StudentState}
 
-/** Projects with the same skills and different stories; the readiness check's goal suggests one. */
+/** Projects with the same skills and different stories; the student's interests suggest one (engine/matching.py). */
 export interface ProjectChoice {project: string; title: string; pitch: string; suggested: boolean; current: boolean; custom?: boolean}
 /** Why a project was suggested (engine/matching.py). Plain sentences; never stages or scores. */
 export interface ProjectMatch {

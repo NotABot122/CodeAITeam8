@@ -178,8 +178,8 @@ class DiagnosticEngine:
             placement = build_placement(self.content, self.manifest, state, estimates, node_states, None)
         report = teacher_report(self.content, state, estimates, node_states, placement)
         report["finished"] = state.phase == COMPLETE
-        report["source"] = {"kind": "imported", "from": state.imported.get("source"), "at": state.imported.get("at")} \
-            if state.imported else {"kind": "readiness_check"}
+        report["source"] = {"kind": "imported", "at": state.imported.get("at")} if state.imported \
+            else {"kind": "readiness_check"}
         return report
 
     # Starting from an earlier lesson (diagnostic/importer.py) ------------------------------------
@@ -199,7 +199,7 @@ class DiagnosticEngine:
         state = DiagnosticState(student_id=student_id, quest_id=cfg.id,
                                 goal_id=record.goal_id or self.content.default_goal().id, buddy=cfg.buddies[0][0],
                                 goal_text=record.interests,
-                                imported={"source": record.source, "at": now_iso(), "concepts": record.concepts})
+                                imported={"at": now_iso(), "concepts": record.concepts})
         placement = build_placement(self.content, self.manifest, state, self._estimates(state),
                                     self._node_states(state), None)
         state.placement, state.phase, state.finished_at = placement.to_dict(), COMPLETE, now_iso()
