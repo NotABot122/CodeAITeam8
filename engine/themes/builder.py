@@ -18,6 +18,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional
 
+from .. import s3_storage
 from ..ai import ModelError, ModelProvider, ToolSpec
 from ..content import check_content, generate_expected
 from ..project import ProjectLoadError, load_project
@@ -159,6 +160,7 @@ class ThemeBuilder:
             if not result.passed:
                 raise ProjectLoadError(result.problems)
             staging.rename(final)
+            s3_storage.changed(final)
         except Exception as exc:  # the quality gate: nothing broken reaches a student
             shutil.rmtree(staging, ignore_errors=True)
             detail = "; ".join(getattr(exc, "errors", [str(exc)]))[:300]

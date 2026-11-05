@@ -10,6 +10,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional
 
+from . import s3_storage
 from .stages import ConceptState
 
 FIELDS = ("student_id", "project_id", "concepts", "current_problem", "origin_level", "attempts",
@@ -142,6 +143,7 @@ class JsonProgressStore(ProgressStore):
 
     def register_student(self, student_id: str) -> None:
         (self.root / student_id).mkdir(parents=True, exist_ok=False)
+        s3_storage.changed(self.root / student_id)
 
     def load(self, student_id: str, project_id: str) -> Optional[ProgressRecord]:
         path = self._path(student_id, project_id)
@@ -164,11 +166,14 @@ class JsonProgressStore(ProgressStore):
             if os.path.exists(tmp):
                 os.remove(tmp)
             raise
+        s3_storage.changed(path)
 
     def quarantine(self, student_id: str, project_id: str) -> None:
         path = self._path(student_id, project_id)
         if path.exists():
-            path.rename(path.with_name(f"{project_id}.corrupt-{time.strftime('%Y%m%d-%H%M%S')}.json"))
+            kept = path.with_name(f"{project_id}.corrupt-{time.strftime('%Y%m%d-%H%M%S')}.json")
+            path.rename(kept)
+            s3_storage.moved(path, kept)
 
     def _profile(self, student_id: str) -> Path:
         return self.root / student_id / "profile.json"
@@ -188,6 +193,7 @@ class JsonProgressStore(ProgressStore):
         with os.fdopen(fd, "w") as handle:
             json.dump(data, handle, indent=2)
         os.replace(tmp, path)
+        s3_storage.changed(path)
 
     def active_project(self, student_id: str) -> Optional[str]:
         value = self.profile(student_id).get("active_project")

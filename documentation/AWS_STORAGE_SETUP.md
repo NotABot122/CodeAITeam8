@@ -1,35 +1,95 @@
-# AWS storage setup (prototype)
+# AWS storage (S3)
 
-## What exists
+The app stores three things in S3:
 
-The standards loader can optionally read one pinned version of the CSTA JSON standards file from S3. It loads the checked-in JSON by default for offline development. The JSON was exported from the existing workbook; the workbook is retained as an import/reference source. Lessons, questions, rubrics and project manifests remain checked-in files: moving the workbook does not make those objects dynamically sourced from S3. The pathway chooser uses relevant workbook standards, but its generated or selected material is not automatically verified against the workbook.
+| What | Where | Who can read it |
+|---|---|---|
+| Student data: progress, readiness-check answers, code, built themes, event logs | `codeai-team8-student-data-<account>-<region>`, encrypted with the KMS key `alias/codeai-team8-student-data` | Only the app role `CodeAITeam8App-<region>` |
+| CSTA standards (curriculum), one pinned object version | `codeai-team8-curriculum-<account>-<region>`, `standards/csta.json` | The app role reads; the person publishing uploads |
+| The readiness check's AgentCore deployment package (code, no student data) | `codeai-team8-agentcore-code-<account>-<region>` (made by `python -m deploy.agentcore deploy`) | The AgentCore runtime role |
 
-The app currently saves progress, profiles, diagnostic state, workspaces, themes and event logs on local disk. The included CloudFormation template creates a private S3 bucket and a DynamoDB table, but **the application does not yet read or write student data in DynamoDB**. Do not use the table as if student-data migration were complete. Runtime authentication and school-specific data controls must be designed before production use.
+The first two come from [infrastructure/curriculum-and-progress.yaml](../infrastructure/curriculum-and-progress.yaml). The third is
+made by [deploy/agentcore/provision.py](../deploy/agentcore/provision.py) (see [its README](../deploy/agentcore/README.md)).
 
-## Create infrastructure
+## Set it up
 
-In the team's AWS account, choose a region, an owner for the resources and a budget. Install AWS CLI v2 and boto3, configure AWS IAM Identity Center or an execution role, and confirm the active account with `aws sts get-caller-identity`. Deploy after reviewing the template:
-
-```sh
-aws cloudformation deploy --stack-name codeai-storage --template-file infrastructure/curriculum-and-progress.yaml --region "$AWS_REGION"
-aws cloudformation describe-stacks --stack-name codeai-storage --region "$AWS_REGION" --query 'Stacks[0].Outputs'
-```
-
-The bucket has versioning, encryption, blocked public access and a TLS-only policy. The on-demand table has encryption and point-in-time recovery. Both are retained if the stack is deleted. These resources and recovery incur AWS charges. The template creates no IAM identities and grants no app access.
-
-Review the JSON standards and upload the approved file with a curriculum publisher role. Record the returned VersionId in deployment configuration (use a consistent region):
+Run these as the account's admin role (here `WSParticipantRole`), in `us-west-2`, from the repo root.
 
 ```sh
-aws s3api put-object --bucket "$CURRICULUM_BUCKET" --key standards/csta.json --body 'documentation/curriculum/csta-standards.json' --region "$AWS_REGION" --query VersionId --output text
-export CODEAI_CURRICULUM="s3://$CURRICULUM_BUCKET/standards/csta.json"
-export CODEAI_CURRICULUM_VERSION_ID="<the returned VersionId>"
-export CODEAI_AWS_REGION="$AWS_REGION"
+ROLE=$(aws sts get-caller-identity --query Arn --output text | sed -E 's#:sts::([0-9]+):assumed-role/([^/]+)/.*#:iam::\1:role/\2#')
+aws cloudformation deploy --stack-name codeai-storage --region us-west-2 \
+  --template-file infrastructure/curriculum-and-progress.yaml --capabilities CAPABILITY_NAMED_IAM \
+  --parameter-overrides AppRunnerRoleArn=$ROLE KeyAdminRoleArn=$ROLE --tags project=codeai-team8
+~/.venvs/codeai/bin/python -m engine.s3_storage configure            # writes config/aws_storage.json
+~/.venvs/codeai/bin/python -m engine.s3_storage publish-curriculum   # uploads the standards JSON, pins the version
 ```
 
-The application role needs `s3:GetObjectVersion` scoped to this object; the publisher needs separate write access. Use IAM roles and temporary credentials, not keys in source control. `CODEAI_CURRICULUM` and its version are server configuration, not student-provided inputs. Invalid or unavailable S3 data raises CurriculumError; the pathway caller currently proceeds without standards, so an S3 outage does not guarantee curriculum-grounded decisions. Add an explicit teacher-visible status and release policy before classroom deployment.
+- **`AppRunnerRoleArn`** is the role the server runs as. It is the only principal that can assume the app role.
+- **`KeyAdminRoleArn`** is the role that manages the KMS key. It must be the role deploying the stack.
 
-## Proposed student data model (not wired)
+Restart the server. It prints `Student data: s3://...` and `/api/health` shows `storage`. On its first start it uploads
+what is already in `.codeai-data/`. `python -m engine.s3_storage status` counts what is in the bucket, as the app
+role. Set `CODEAI_S3_STORAGE=off` to run on local disk only.
 
-Use the table as a starting point for a migration with partition key `PK = STUDENT#<opaque-id>` and sort keys such as `PROFILE`, `LEVEL#<project>#<level>`, and `DIAGNOSTIC#<id>`. Record course/version, student level, stage evidence, attempts, hint count, last activity and route decisions; do not infer mastery from an ungraded result. Store larger code artifacts separately with access-controlled references. Design cohort and teacher queries explicitly rather than scanning all student items; include school/section authorization and a retention policy. Add conditional writes to prevent lost concurrent updates and define migration, recovery, deletion, and data minimization before wiring the API. Existing local diagnostics, logs and workspaces must be included in the migration or explicitly kept on persistent storage.
+The KMS key costs about $1 a month. Storage and requests for a class are a few cents.
 
-Retention rates require a defined cohort and time window; start with aggregate reporting rather than treating a rate as a student's mastery. Do not deploy student information until access controls, school policy and recovery are reviewed.
+## How it works
+
+`.codeai-data/` stays the server's working copy: the engine, the readiness check and the grader read and write files
+there, as before. [engine/s3_storage.py](../engine/s3_storage.py) copies each changed file to the student-data
+bucket in a background thread, about half a second after the write. A stop (Ctrl-C or SIGTERM) waits for the queue
+to empty. On start the server restores the folder from the bucket:
+
+- Files that exist only in S3 are downloaded (a new or wiped machine).
+- Local files that changed since they were last saved are re-sent (from a crash or an S3 outage). A manifest,
+  `.codeai-data/.s3-sync.json`, keeps track of this and is never uploaded.
+
+If S3 can't be reached at start, the server runs on local disk and says so. If S3 fails while running, changes wait
+and are retried, and `/api/health` shows how many are waiting. Run one server per bucket. Two servers would each keep
+their own working copy.
+
+Copied: `progress/`, `workspace/`, `themes/` and `logs/`. Not copied: temporary files, `__pycache__`, generated
+`.db` files (rebuilt from their seed), and `agentcore/`.
+
+The curriculum is read once per server start from the pinned version (`CODEAI_CURRICULUM` and
+`CODEAI_CURRICULUM_VERSION_ID`, set from the config file). Publishing a new version does not change a running server
+until the config is updated and the server restarts. If the S3 copy can't be read, the pathway is chosen without
+standards (`CurriculumError`), and the server never falls back to the local file silently.
+
+## What is stored about a student
+
+| Data | Personal details? |
+|---|---|
+| Student id | A random 32-character id. No name, email, school or login. |
+| Grade, buddy, goal, stages, attempts, hints, mistakes, pathway | No. |
+| Interests ("What are you into?", up to 80 characters) | Dropped if it has an email, a phone number, "my name is", "I live", "my school is" and similar, or blocked words. |
+| What they told the guide (readiness check) | The same check. A flagged answer is not stored, only that it was flagged. |
+| "Make it yours" request | Screened by the Bedrock Guardrail, which blocks email, phone and address details, and by the local rules. |
+| Code | Email addresses and phone numbers are replaced with `[removed]` before the file is saved, and the student is told why. |
+| Event logs | Lesson events: allow-listed fields only, with the pseudonymous id, and no free text. Evaluation log: a hash of the input, plus the short quotes the reader used from answers that passed the checks above. |
+| Imported results | Files with personal-detail keys are rejected (`diagnostic/importer.py`). |
+
+The checks can't catch everything, for example a first name typed into a code comment or an interests box. That is
+why the storage itself is locked down:
+
+- **Bucket:** private (all public access blocked, ACLs off) and TLS only. A bucket-policy deny stops every principal
+  except the app role from reading, writing, listing or deleting objects. Verified with the IAM policy simulator: the
+  workshop admin role, which allows `*`, gets an explicit deny.
+- **KMS key:** the key policy has no account-wide statement. Only the app role can encrypt or decrypt, and only through
+  S3. The admin role can manage the key but not use it.
+- **Versions:** overwritten or deleted objects are removed for good after 30 days (`NoncurrentVersionDays`).
+- **This machine:** the server sets its umask to 077 and tightens `.codeai-data/` to the server's user (folders
+  0700, files 0600).
+- **Prompts:** Bedrock model-invocation logging is off in this account, so prompts that include student code aren't
+  stored by AWS.
+
+Account admins can still change these policies. That is true of any AWS account, and CloudTrail records it.
+
+## Before a real classroom
+
+- Run the server as its own role (an EC2 instance profile or ECS task role), set `AppRunnerRoleArn` to it, and keep
+  people out of that role.
+- Set a retention period with the school. Current objects are kept until deleted.
+- Add a "delete this student" tool that removes every version under `progress/<id>/` and `workspace/<id>/`.
+- The AI inspector (`--dev`) shows every student's prompts to anyone who can open the page. Keep it off.
+- Teacher pages need `CODEAI_TEACHER_TOKEN`. Student pages rely on the 128-bit student id staying private.

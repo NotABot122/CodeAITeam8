@@ -25,7 +25,7 @@ import shutil
 import sys
 from pathlib import Path
 
-from . import REPO_ROOT
+from . import REPO_ROOT, s3_storage
 from .ai import ModelError, provider_from_env
 from .content import check_content, generate_expected
 from .course import Course, CourseError
@@ -50,6 +50,7 @@ def start_workspace(data_dir: Path, student_id: str, project) -> Path:
             shutil.copyfile(project.starter_path, path)
         else:
             path.touch()
+        s3_storage.changed(path)
     return path
 
 

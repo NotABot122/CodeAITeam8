@@ -19,6 +19,7 @@ import uuid
 from pathlib import Path
 from typing import Optional
 
+from engine import s3_storage
 from engine.progress import JsonProgressStore
 
 from .paths import PathLike
@@ -84,8 +85,11 @@ class DiagnosticStore:
             if os.path.exists(tmp):
                 os.remove(tmp)
             raise
+        s3_storage.changed(path)
 
     def quarantine(self, student_id: str) -> None:
         path = self._path(student_id)
         if path.exists():
-            path.rename(path.with_name(f"diagnostic.corrupt-{time.strftime('%Y%m%d-%H%M%S')}.json"))
+            kept = path.with_name(f"diagnostic.corrupt-{time.strftime('%Y%m%d-%H%M%S')}.json")
+            path.rename(kept)
+            s3_storage.moved(path, kept)

@@ -33,6 +33,15 @@ CATEGORY_WORDS = {
 }
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 PHONE = re.compile(r"(?<![\d-])(?:\+?1[\s.-]?)?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}(?![\d-])")
+CONTACT_PLACEHOLDER = "[removed]"
+
+
+def remove_contact_details(text: str) -> "tuple[str, int]":
+    """Replace email addresses and phone numbers with [removed] before student text is saved anywhere.
+    Returns (text, how many were removed). The programs students write never need either."""
+    text, emails = EMAIL.subn(CONTACT_PLACEHOLDER, text)
+    text, phones = PHONE.subn(CONTACT_PLACEHOLDER, text)
+    return text, emails + phones
 
 _PATTERNS = {
     category: re.compile(r"(?<![A-Za-z])(?:" + "|".join(re.escape(w) for w in words) + r")(?![A-Za-z])",

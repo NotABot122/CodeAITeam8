@@ -16,6 +16,8 @@ import uuid
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from engine import s3_storage
+
 from .contract import CONTRACT_VERSION
 from .paths import PathLike
 
@@ -46,6 +48,7 @@ class EvalEventLog:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         with self.path.open("a", encoding="utf-8") as handle:
             handle.write(json.dumps(row, ensure_ascii=False) + "\n")
+        s3_storage.changed(self.path)
         return row
 
     def _base(self, student_id: str, lesson_id: str, task_id: str, tool: str, tool_input: Any, model_id: str,

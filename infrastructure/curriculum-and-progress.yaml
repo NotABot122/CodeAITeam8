@@ -1,13 +1,37 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Private versioned curriculum and a future student-progress table for CodeAI.
+Description: >-
+  CodeAI storage. A versioned curriculum bucket, and a private student-data bucket encrypted with its own KMS key.
+  Only the app role (created here) can read or write student data or use the key.
+  See documentation/AWS_STORAGE_SETUP.md.
+
+Parameters:
+  AppRunnerRoleArn:
+    Type: String
+    Description: The IAM role the CodeAI server runs as. It is the only principal allowed to assume the app role.
+  KeyAdminRoleArn:
+    Type: String
+    Description: >-
+      The role that manages the student-data key. It can change or schedule deletion of the key but cannot encrypt or
+      decrypt with it. Must be the role deploying this stack (KMS refuses a key its creator could not manage).
+  NoncurrentVersionDays:
+    Type: Number
+    Default: 30
+    MinValue: 1
+    Description: Days an overwritten or deleted student-data object is kept before S3 removes it for good.
+
 Resources:
+  # Curriculum: CSTA standards, published as pinned object versions. Not student data.
   CurriculumBucket:
     Type: AWS::S3::Bucket
     DeletionPolicy: Retain
     UpdateReplacePolicy: Retain
     Properties:
+      BucketName: !Sub 'codeai-team8-curriculum-${AWS::AccountId}-${AWS::Region}'
       VersioningConfiguration:
         Status: Enabled
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
@@ -34,32 +58,159 @@ Resources:
             Condition:
               Bool:
                 'aws:SecureTransport': false
-  StudentProgress:
-    Type: AWS::DynamoDB::Table
+
+  # The app's own identity. The server assumes it for every S3 call; nothing else can touch student data.
+  AppRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'CodeAITeam8App-${AWS::Region}'
+      Description: CodeAI server access to the student-data bucket and the curriculum. Nothing else.
+      MaxSessionDuration: 3600
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Ref AppRunnerRoleArn
+            Action: 'sts:AssumeRole'
+      Policies:
+        - PolicyName: storage
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Sid: StudentData
+                Effect: Allow
+                Action: ['s3:GetObject', 's3:PutObject', 's3:DeleteObject']
+                Resource: !Sub 'arn:aws:s3:::codeai-team8-student-data-${AWS::AccountId}-${AWS::Region}/*'
+              - Sid: StudentDataList
+                Effect: Allow
+                Action: 's3:ListBucket'
+                Resource: !Sub 'arn:aws:s3:::codeai-team8-student-data-${AWS::AccountId}-${AWS::Region}'
+              - Sid: CurriculumRead
+                Effect: Allow
+                Action: ['s3:GetObject', 's3:GetObjectVersion']
+                Resource: !Sub '${CurriculumBucket.Arn}/standards/*'
+
+  # Student data key. No account-wide "enable IAM policies" statement: only the app role can encrypt or decrypt,
+  # so an IAM admin policy alone does not open student data. The admin role can manage the key but not use it.
+  StudentDataKey:
+    Type: AWS::KMS::Key
     DeletionPolicy: Retain
     UpdateReplacePolicy: Retain
     Properties:
-      BillingMode: PAY_PER_REQUEST
-      AttributeDefinitions:
-        - AttributeName: PK
-          AttributeType: S
-        - AttributeName: SK
-          AttributeType: S
-      KeySchema:
-        - AttributeName: PK
-          KeyType: HASH
-        - AttributeName: SK
-          KeyType: RANGE
-      PointInTimeRecoverySpecification:
-        PointInTimeRecoveryEnabled: true
-      SSESpecification:
-        SSEEnabled: true
+      Description: CodeAI student data (S3). Usable only by the CodeAI app role.
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: KeyAdministrationOnly
+            Effect: Allow
+            Principal:
+              AWS: !Ref KeyAdminRoleArn
+            Action:
+              - 'kms:Create*'
+              - 'kms:Describe*'
+              - 'kms:Enable*'
+              - 'kms:List*'
+              - 'kms:Put*'
+              - 'kms:Update*'
+              - 'kms:Revoke*'
+              - 'kms:Disable*'
+              - 'kms:Get*'
+              - 'kms:Delete*'
+              - 'kms:TagResource'
+              - 'kms:UntagResource'
+              - 'kms:ScheduleKeyDeletion'
+              - 'kms:CancelKeyDeletion'
+              - 'kms:RotateKeyOnDemand'
+            Resource: '*'
+          - Sid: AppUsesTheKeyThroughS3Only
+            Effect: Allow
+            Principal:
+              AWS: !GetAtt AppRole.Arn
+            Action: ['kms:Encrypt', 'kms:Decrypt', 'kms:ReEncrypt*', 'kms:GenerateDataKey*', 'kms:DescribeKey']
+            Resource: '*'
+            Condition:
+              StringEquals:
+                'kms:ViaService': !Sub 's3.${AWS::Region}.amazonaws.com'
+  StudentDataKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: alias/codeai-team8-student-data
+      TargetKeyId: !Ref StudentDataKey
+
+  # Student data: progress, readiness-check answers, code workspaces, built themes, pseudonymous event logs.
+  StudentDataBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Sub 'codeai-team8-student-data-${AWS::AccountId}-${AWS::Region}'
+      VersioningConfiguration:
+        Status: Enabled
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: 'aws:kms'
+              KMSMasterKeyID: !GetAtt StudentDataKey.Arn
+            BucketKeyEnabled: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: ForgetOldVersions
+            Status: Enabled
+            NoncurrentVersionExpiration:
+              NoncurrentDays: !Ref NoncurrentVersionDays
+            ExpiredObjectDeleteMarker: true
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 1
+  StudentDataBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref StudentDataBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: DenyInsecureTransport
+            Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource:
+              - !GetAtt StudentDataBucket.Arn
+              - !Sub '${StudentDataBucket.Arn}/*'
+            Condition:
+              Bool:
+                'aws:SecureTransport': false
+          - Sid: OnlyTheAppTouchesStudentData
+            Effect: Deny
+            Principal: '*'
+            Action:
+              - 's3:GetObject*'
+              - 's3:PutObject*'
+              - 's3:DeleteObject*'
+              - 's3:ListBucket*'
+              - 's3:RestoreObject'
+              - 's3:ReplicateObject'
+            Resource:
+              - !GetAtt StudentDataBucket.Arn
+              - !Sub '${StudentDataBucket.Arn}/*'
+            Condition:
+              ArnNotEquals:
+                'aws:PrincipalArn': !GetAtt AppRole.Arn
+
 Outputs:
   CurriculumBucketName:
     Value: !Ref CurriculumBucket
-  CurriculumBucketArn:
-    Value: !GetAtt CurriculumBucket.Arn
-  StudentProgressTableName:
-    Value: !Ref StudentProgress
-  StudentProgressTableArn:
-    Value: !GetAtt StudentProgress.Arn
+  StudentDataBucketName:
+    Value: !Ref StudentDataBucket
+  StudentDataKeyArn:
+    Value: !GetAtt StudentDataKey.Arn
+  AppRoleArn:
+    Value: !GetAtt AppRole.Arn

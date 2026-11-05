@@ -38,6 +38,7 @@ import json
 import mimetypes
 import os
 import re
+import signal
 import sys
 import traceback
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -235,17 +236,47 @@ def main(argv=None) -> int:
     parser.add_argument("--dev", action="store_true",
                         help="dev/demo only: record every AI call and show the AI inspector panel in the UI")
     args = parser.parse_args(argv)
+    mirror = start_storage(Path(args.data_dir))
     service = build_service(args.data_dir, args.ai, not args.no_adaptive, dev=args.dev, guardrail=not args.no_guardrail)
     httpd = ThreadingHTTPServer((args.host, args.port), make_handler(service, os.environ.get("CODEAI_TEACHER_TOKEN") or None))
     g = service.guardrail
     print(f"CodeAI student UI on http://{args.host}:{args.port}  (AI {'on' if service.provider else 'off'}; "
           f"themes: {getattr(service.theme_provider, 'model_id', None) or 'team model'}; "
-          f"safety: {g.label if g else 'local rules'})")
+          f"safety: {g.label if g else 'local rules'}; storage: {mirror.describe() if mirror else 'local disk only'})")
+    signal.signal(signal.SIGTERM, _stop_on_sigterm)   # so a stop still sends pending student data to S3
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
         pass
+    finally:
+        if mirror is not None and not mirror.close(timeout=20):
+            print(f"Not everything reached S3 before shutdown ({mirror.pending()} files); they are sent on the next "
+                  "start.", file=sys.stderr)
     return 0
+
+
+def _stop_on_sigterm(signum, frame):
+    raise KeyboardInterrupt
+
+
+def start_storage(data_dir: Path):
+    """Keep student data private on this machine, and in the S3 student-data bucket when it is configured
+    (engine/s3_storage.py). If S3 can't be reached, the server still starts on local disk and says so."""
+    from engine import s3_storage
+    s3_storage.lock_down(data_dir)
+    cfg = s3_storage.load_config()
+    if cfg is None:
+        return None
+    s3_storage.apply_curriculum_settings(cfg)
+    try:
+        mirror, summary = s3_storage.start(data_dir, cfg)
+    except Exception as exc:
+        print(f"S3 storage not used ({type(exc).__name__}: {exc}); student data stays on local disk only.",
+              file=sys.stderr)
+        return None
+    print(f"Student data: s3://{cfg.bucket} ({summary['in_bucket']} objects; restored {summary['downloaded']} "
+          f"files, {summary['queued']} local files to send)")
+    return mirror
 
 
 if __name__ == "__main__":

@@ -127,8 +127,8 @@ class Curriculum:
             if not version:
                 raise CurriculumError("S3 curriculum requires CODEAI_CURRICULUM_VERSION_ID")
             try:
-                import boto3
-                client = boto3.client("s3", region_name=os.environ.get("CODEAI_AWS_REGION") or None)
+                from .s3_storage import app_client
+                client = app_client("s3")          # the app role (CODEAI_APP_ROLE_ARN) when set
                 response = client.get_object(Bucket=parsed.netloc, Key=parsed.path.lstrip("/"), VersionId=version)
                 body = response["Body"]
                 try:

@@ -54,7 +54,7 @@ The app also supports alternative project choices, a text/blocks editor, an opti
 
 ## AWS and data
 
-AI features require `boto3`, AWS credentials, model access, and the appropriate region. See [Bedrock and safety notes](documentation/archive/prototype-reference.md#safety-amazon-bedrock-guardrail). The server's default data directory is `.codeai-data/`; progress, diagnostics, workspaces, and logs are local files. The curriculum loader reads checked-in CSTA JSON by default and can read a versioned S3 JSON object when configured. Shared cloud student storage is not yet connected. See the [AWS setup guide](documentation/AWS_STORAGE_SETUP.md).
+AI features require `boto3`, AWS credentials, model access, and the appropriate region. See [Bedrock and safety notes](documentation/archive/prototype-reference.md#safety-amazon-bedrock-guardrail). The server's working copy of student data is `.codeai-data/` (readable only by the server's own user). When `config/aws_storage.json` exists, every change is also saved to a private S3 bucket encrypted with its own KMS key, which only the app role can read or write, and the server restores from it on start. The curriculum is then read from a pinned S3 object version. Email addresses and phone numbers are taken out of student code before it is saved. See the [AWS storage guide](documentation/AWS_STORAGE_SETUP.md) for setup and what is stored.
 
 ## Tests and evaluation
 
