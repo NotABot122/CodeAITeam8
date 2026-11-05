@@ -1,4 +1,6 @@
-"""Strands Decider 2B: picks a student's lesson pathway after the readiness check (PROJECT_SPEC.md 4.3).
+"""The pathway decider: picks a student's lesson pathway after the readiness check (PROJECT_SPEC.md 4.3).
+
+It runs on the team's Bedrock model (engine.ai), not a separately deployed decider model.
 
 Two stages, as in the spec:
 1. Deterministic (point and DAG classifier): from the readiness check's confident stages, work out which
@@ -27,7 +29,7 @@ from .ai_trace import record_retrieval
 from .curriculum import Curriculum, Standard, level_for_grade
 from .safety import screen_text
 
-NAME = "Strands Decider 2B"
+NAME = "pathway decider"
 STANCES = ("STANCE_REINFORCE", "STANCE_ADVANCE", "STANCE_BRIDGE", "STANCE_PROJECT_SYNTHESIS")
 GRADES = (9, 10, 11, 12)
 MAX_STUDENT_CHARS = 320
@@ -239,7 +241,7 @@ def _clean(text: Any, limit: int) -> Optional[str]:
     return text
 
 
-class StrandsDecider:
+class PathwayDecider:
     def __init__(self, pathways: Sequence[Pathway], provider: Optional[ModelProvider] = None,
                  curriculum: Optional[Curriculum] = None):
         self.pathways = list(pathways)

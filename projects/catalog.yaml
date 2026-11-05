@@ -73,7 +73,7 @@ thresholds:
     min_hints: 2
     practice_counts: true      # being sent to a practice problem counts as struggling
 
-# Lesson pathways the Strands Decider 2B (engine/decider.py) picks from after the readiness check.
+# Lesson pathways the pathway decider (engine/decider.py) picks from after the readiness check.
 # The rules decide which pathways a student can get (`requires`: the stage the readiness check must be
 # confident about, per concept; `needs_gap`: at least one concept the check is confident is a gap).
 # The model only picks among those, and the rules' own pick is used whenever the model is off or its

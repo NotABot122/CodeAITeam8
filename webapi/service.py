@@ -397,7 +397,7 @@ class Service:
                 "stageNames": [STAGE_NAMES[i] for i in range(MAX_STAGE + 1)],
             }
 
-    # Lesson pathway (Strands Decider 2B) ------------------------------------------
+    # Lesson pathway (the pathway decider) ----------------------------------------
     def pathway(self, student_id: str, grade: Any) -> Dict[str, Any]:
         self._check_id(student_id)
         if not isinstance(grade, int) or isinstance(grade, bool):

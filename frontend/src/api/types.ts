@@ -81,7 +81,7 @@ export interface FunctionInfo {
   example: string | null;
 }
 
-/** The lesson pathway the Strands Decider 2B picked after the readiness check (student view: no stances or scores). */
+/** The lesson pathway the pathway decider picked after the readiness check (student view: no stances or scores). */
 export interface PathwayView {
   id: string;
   title: string;

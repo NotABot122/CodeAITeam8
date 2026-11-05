@@ -27,7 +27,7 @@ export interface ApiClient {
   projectChoices(id: string): Promise<ProjectChoices>;
   /** Pick a project (before it's started). Placement and pathway follow the choice. */
   chooseProject(id: string, project: string): Promise<ChooseResult>;
-  /** After the readiness check: the Strands Decider 2B picks and starts a lesson pathway (once per student). */
+  /** After the readiness check: the pathway decider picks and starts a lesson pathway (once per student). */
   pathway(id: string, grade: number): Promise<PathwayResult>;
   /** The next hint for the current problem. Not a submission; it does count as a hint used. */
   hint(id: string, code?: string): Promise<SubmitResult>;

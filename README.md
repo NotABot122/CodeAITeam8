@@ -50,7 +50,7 @@ python -m engine.demo
 
 Students can import results from an earlier lesson or choose a sample profile. Project suggestions use their interests; skill evidence determines where they start. The diagnostic also has an optional [AgentCore deployment](deploy/agentcore/README.md).
 
-The app also supports alternative project choices, a text/blocks editor, an optional AI tutor, and Bedrock Guardrails when configured. The configured Bedrock model is **not a verified Strands Decider 2B deployment**. The skill stages and pathway rules are a prototype rather than the full point-vector and prerequisite graph described in the specification.
+The app also supports alternative project choices, a text/blocks editor, an optional AI tutor, and Bedrock Guardrails when configured. The pathway decider runs on the team's Bedrock model, with the pathway rules as its fallback. The skill stages and pathway rules are a prototype rather than the full point-vector and prerequisite graph described in the specification.
 
 ## AWS and data
 

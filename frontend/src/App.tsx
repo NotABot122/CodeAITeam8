@@ -65,7 +65,7 @@ export default function App({client: injected}: {client?: ApiClient}) {
     window.addEventListener('hashchange', on);
     return () => window.removeEventListener('hashchange', on);
   }, []);
-  // landing -> quest (readiness check) -> pathway (Strands Decider 2B) -> lesson. 'resume' continues a started quest.
+  // landing -> quest (readiness check) -> pathway (the pathway decider) -> lesson. 'resume' continues a started quest.
   const [mode, setMode] = useState<'loading' | 'landing' | 'quest' | 'resume' | 'pathway' | 'choose' | 'lesson'>('loading');
   const [importOpen, setImportOpen] = useState(false);
   const [grade, setGradeState] = useState<number | null>(savedGrade);

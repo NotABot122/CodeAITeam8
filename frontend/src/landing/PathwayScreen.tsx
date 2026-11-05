@@ -14,7 +14,7 @@ import ProjectPicker from './ProjectPicker';
 
 const msg = (e: unknown) => (e instanceof Error ? e.message : 'Something went wrong. Try again.');
 
-/** After the readiness check: ask the Strands Decider 2B for a pathway, show it, then start it. */
+/** After the readiness check: ask the pathway decider for a pathway, show it, then start it. */
 export default function PathwayScreen({client, studentId, grade: initialGrade, existing, aiOn, aiReason, onGrade, onStart}: {
   client: ApiClient; studentId: string; grade: number | null; existing: PathwayView | null; aiOn: boolean; aiReason: string | null;
   onGrade: (g: number) => void; onStart: (state: StudentState | null) => void;

@@ -18,7 +18,7 @@ Routes (JSON):
     POST /api/students/<id>/submit          {"code": "..."} -> {outcome, state}
     GET  /api/students/<id>/projects        -> {choices: [{project, title, pitch, suggested, current}], locked, topic}
     POST /api/students/<id>/project         {"project": "monster-arena"} -> {state, choices, locked} (before it's started)
-    POST /api/students/<id>/pathway         {"grade": 9-12} -> {pathway, state} (Strands Decider 2B; once per student)
+    POST /api/students/<id>/pathway         {"grade": 9-12} -> {pathway, state} (the pathway decider; once per student)
     POST /api/students/<id>/hint            {"code": "..."} -> {outcome, state} (next hint; not a submission)
     POST /api/students/<id>/answer          {"answers": {"q1": 1, "q3": "text"}} -> {outcome, state}
     GET  /api/students/<id>/next            -> {nextStep}

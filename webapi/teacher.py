@@ -175,7 +175,7 @@ class Teacher:
             "nextStep": (profile.get("next_step") or {}).get("reason"),
             "seededFromQuest": diag.get("seeded") or {},
             "quest": report,
-            # The Strands Decider 2B's choice, with the teacher-only fields (stance, note, evidence, fallback).
+            # The pathway decider's choice, with the teacher-only fields (stance, note, evidence, fallback).
             "pathway": profile.get("pathway"),
             # Adaptive support: the likely mistakes seen, and how much help the current problem gets.
             "mistakes": self._mistakes(sid),

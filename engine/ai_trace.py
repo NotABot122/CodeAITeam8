@@ -24,7 +24,7 @@ current_student: contextvars.ContextVar[Optional[str]] = contextvars.ContextVar(
 
 # (text that identifies the system prompt, feature name, what it does in the app)
 FEATURES = [
-    ("Strands Decider 2B", "Pathway decider (Strands Decider 2B)",
+    ("routing step of an adaptive", "Pathway decider",
      "Picks the student's lesson pathway from the readiness check, their grade and the CSTA standards."),
     ("patient coding tutor", "AI tutor hint (Ducky)",
      "Writes one hint about the student's failing code. Level-aware; falls back to the teacher's hint."),

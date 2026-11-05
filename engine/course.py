@@ -587,7 +587,7 @@ class Course:
             self._switch(student_id, project, f"Starting {project.title}.")
         return self.state(student_id)
 
-    # Lesson pathway (Strands Decider 2B, engine/decider.py) -----------------------------------
+    # Lesson pathway (the pathway decider, engine/decider.py) ----------------------------------
     # After the readiness check, the decider picks a pathway: rules decide which ones the student can get,
     # Bedrock picks one using the evidence, grade and CSTA standards, and the rules' pick is the fallback.
     def _readiness(self, student_id: str) -> Dict[str, "Readiness"]:
@@ -621,7 +621,7 @@ class Course:
     def decide_pathway(self, student_id: str, grade: int) -> dict:
         """Pick and start the student's pathway. Safe to call again: the first decision is kept."""
         from .curriculum import CurriculumError, load_curriculum
-        from .decider import GRADES, StrandsDecider, load_pathways
+        from .decider import GRADES, PathwayDecider, load_pathways
         self._require(student_id)
         if grade not in GRADES:
             raise CourseError(f"Pick a grade from {GRADES[0]} to {GRADES[-1]}.")
@@ -652,7 +652,7 @@ class Course:
                                 "start": step.start})
             return out
 
-        decider = StrandsDecider(pathways, self.provider, curriculum)
+        decider = PathwayDecider(pathways, self.provider, curriculum)
         decision = decider.decide(readiness, grade, goal.label if goal else "",
                                   {p.id: [s["title"] for s in resolve(p)] for p in pathways})
         steps = resolve(decision.pathway)
@@ -665,7 +665,7 @@ class Course:
             "grade": grade, "decided_by": decision.decided_by, "model_id": decision.model_id,
             "latency_ms": decision.latency_ms, "fallback_reason": decision.fallback_reason,
             "eligible": decision.eligible, "rules_pick": decision.rules_pick, "notes": decision.notes,
-            "decider": "Strands Decider 2B",
+            "decider": "pathway decider",
             "at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
         }
         profile["grade"] = grade
@@ -673,10 +673,10 @@ class Course:
         self.store.save_profile(student_id, profile)
         self.events.write("pathway", student_id=student_id, selected=decision.pathway.id, reason=decision.stance,
                           source=decision.decided_by, model_id=decision.model_id or None,
-                          latency_ms=decision.latency_ms or None, category="strands_decider_2b")
+                          latency_ms=decision.latency_ms or None, category="pathway_decider")
         if decision.fallback_reason and self.provider is not None:
             self.events.write("fallback", student_id=student_id, selected=decision.pathway.id,
-                              reason=f"pathway decider: {decision.fallback_reason}"[:300], category="strands_decider_2b")
+                              reason=f"pathway decider: {decision.fallback_reason}"[:300], category="pathway_decider")
         if steps:
             self._start_step(student_id, steps[0])
         return record
