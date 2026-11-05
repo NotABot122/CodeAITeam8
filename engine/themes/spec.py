@@ -223,11 +223,12 @@ def parse_theme(data: dict) -> ThemeSpec:
     # Every piece of text a student will see goes through the content filter.
     texts = [spec.title, spec.story, spec.group_description, spec.metric_a.description, spec.metric_b.description,
              spec.metric_a.unit, spec.metric_b.unit] + groups + [n for items in names.values() for n in items]
-    for text in texts:
-        verdict = screen_text(text)
-        if verdict.blocked:
-            errors.append(f"content filter blocked text ({verdict.category}): {text[:40]!r}")
-            break
+    # One check for all of it (one guardrail call instead of one per name); the model wrote these, so OUTPUT.
+    verdict = screen_text("\n".join(texts), "OUTPUT")
+    if verdict.blocked:
+        culprit = next((t for t in texts if screen_text(t, local_only=True).blocked), None)
+        where = f": {culprit[:40]!r}" if culprit else ""
+        errors.append(f"content filter blocked text ({verdict.category}){where}")
 
     if errors:
         raise ThemeError(errors)

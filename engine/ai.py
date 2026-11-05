@@ -127,6 +127,25 @@ class ScriptedProvider(ModelProvider):
         return reply
 
 
+# "Make it yours" project generation (engine/themes/builder.py) uses its own model; everything else uses the
+# team model above. OpenAI GPT-5.6 Terra on Bedrock: reachable through both the us. and global. profiles here.
+DEFAULT_THEME_MODEL_ID = "us.openai.gpt-5.6-terra"
+
+
+class FallbackProvider(ModelProvider):
+    """Try `primary`; on a model error, ask `backup` (so a feature keeps working if one model is unavailable)."""
+
+    def __init__(self, primary: ModelProvider, backup: ModelProvider):
+        self.primary, self.backup = primary, backup
+        self.model_id = primary.model_id
+
+    def complete(self, system, prompt, max_tokens, tools=None, require_tool=False) -> ModelReply:
+        try:
+            return self.primary.complete(system, prompt, max_tokens, tools=tools, require_tool=require_tool)
+        except ModelError:
+            return self.backup.complete(system, prompt, max_tokens, tools=tools, require_tool=require_tool)
+
+
 def provider_from_env(mode: str = "bedrock") -> Optional[ModelProvider]:
     """Return a provider for mode 'bedrock', or None for 'off'."""
     if mode == "off":

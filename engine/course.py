@@ -246,13 +246,16 @@ class CourseError(Exception):
 
 class Course:
     def __init__(self, data_dir, projects_root: Path = PROJECTS_ROOT, provider: Optional[ModelProvider] = None,
-                 adaptive: bool = True, grader: Optional[Grader] = None, router=None):
+                 adaptive: bool = True, grader: Optional[Grader] = None, router=None,
+                 theme_provider: Optional[ModelProvider] = None):
         self.data_dir = Path(data_dir)
         self.projects_root = Path(projects_root)
         self.catalog = load_catalog(self.projects_root)
         self.store = JsonProgressStore(self.data_dir)
         self.events = EventLog(self.data_dir)
         self.provider = provider
+        # Designs "Make it yours" projects (its own model, $CODEAI_THEME_MODEL_ID); None: the team model.
+        self.theme_provider = theme_provider
         self.adaptive = adaptive
         self.grader = grader or Grader()
         self.router = router
@@ -388,10 +391,13 @@ class Course:
         self._require(student_id)
         if self.provider is None:
             raise CourseError("Themes need the AI features to be on.")
+        from .safety import ContentFilter
         from .themes.builder import BUILT, ThemeBuilder
-        result = ThemeBuilder(self.provider, self.data_dir / "themes").build(request)
+        designer = self.theme_provider or self.provider
+        # Moderation of the request stays on the team model; the design comes from the theme model.
+        result = ThemeBuilder(designer, self.data_dir / "themes", content_filter=ContentFilter(self.provider)).build(request)
         self.events.write("theme", student_id=student_id, source=result.status, category=result.category,
-                          model_id=self.provider.model_id)
+                          model_id=designer.model_id)
         if result.status != BUILT:
             return {"message": result.message, "project": None, "state": self.state(student_id), "built": False}
         project = self._project(result.project_path)

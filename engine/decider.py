@@ -204,7 +204,7 @@ def _clean(text: Any, limit: int) -> Optional[str]:
     if not isinstance(text, str):
         return None
     text = " ".join(text.split())
-    if not text or len(text) > limit or screen_text(text).blocked:
+    if not text or len(text) > limit or screen_text(text, "OUTPUT").blocked:
         return None
     return text
 
