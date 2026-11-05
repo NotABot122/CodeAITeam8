@@ -29,7 +29,7 @@ caller ──(2) POST /invocations, Authorization: Bearer <token>──▶ Agent
 | Cognito user pool, resource server, hosted domain | `codeai-team8-agentcore`, `codeai-diagnostic`, `codeai-team8-<account>` | The OAuth authorization server. The machine-to-machine client uses the `client_credentials` grant and gets one scope. |
 | Cognito app client | `codeai-team8-diagnostic-caller` | The caller. Its secret stays in Cognito; `demo` reads it when it needs a token and never writes it to disk. |
 | IAM role | `CodeAITeam8DiagnosticRuntime` | The execution role. It can write its own logs and read its package, nothing else. The trust policy is limited to this account's AgentCore resources (`aws:SourceAccount`, `aws:SourceArn`). |
-| S3 bucket | `codeai-team8-agentcore-code-<account>-<region>` | Holds the direct-code deployment zip. Public access is blocked. |
+| S3 bucket | `codeai-team8-agentcore-code-<account>-<region>` | Holds the direct-code deployment zip (code only, no student data). Public access is blocked, ACLs are off, and a bucket policy refuses non-TLS requests. |
 | AgentCore Runtime | `codeai_team8_diagnostic` | HTTP protocol, Python 3.12. The authorizer is the part that matters: |
 
 ```python

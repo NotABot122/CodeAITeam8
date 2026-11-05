@@ -12,10 +12,12 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from engine import s3_storage
 from engine.cli import DEFAULT_DATA, DEFAULT_PROJECT, start_workspace
 from engine.course import Course, CourseError
 from engine.progress import ProgressRecord
 from engine.project import Project
+from engine.safety import remove_contact_details
 from engine.session import SubmitOutcome, UnknownStudent
 from diagnostic.engine import NothingPending, NotFinished, UnknownQuest
 from diagnostic.importer import ImportRejected
@@ -28,6 +30,9 @@ from .blocks import python_to_blocks
 # Ids become folder names under the data directory, so only this shape is accepted.
 STUDENT_ID = re.compile(r"^([0-9a-f]{32}|STU-[0-9a-f]{16,32})$")  # lesson-only students, or ones made by the readiness quest
 MAX_CODE_CHARS = 20_000
+# Shown when an email address or phone number was taken out of the student's code before it was saved.
+PRIVACY_NOTICE = ("We took an email address or phone number out of your code to keep your details private. "
+                  "Your programs never need them.")
 MAX_THEME_CHARS = 300
 MAX_INTEREST_CHARS = 80         # the readiness check keeps at most max_goal_chars (diagnostic.yaml) of it
 
@@ -174,7 +179,8 @@ class Service:
         return {"ok": True, "project": self.course.default_project().title, "ai": self.provider is not None,
                 "aiReason": None if self.provider is not None else self.ai_reason,
                 "adaptive": self.adaptive, "dev": getattr(self, "trace", None) is not None,
-                "safety": self.guardrail.label if getattr(self, "guardrail", None) else "local rules"}
+                "safety": self.guardrail.label if getattr(self, "guardrail", None) else "local rules",
+                "storage": s3_storage.current().describe() if s3_storage.current() else "local disk"}
 
     # Dev-only AI inspector (webapi.server --dev) -----------------------------------
     def _trace(self):
@@ -225,12 +231,9 @@ class Service:
             if project.problem(self.course.engine(student_id).open(student_id)[0].current_problem).is_quiz:
                 raise ApiError(400, "bad_request", "This step is a quiz. Answer the questions instead.")
             path = start_workspace(self.data_dir, student_id, project)
-            try:
-                path.write_text(code, encoding="utf-8")
-            except UnicodeEncodeError:
-                raise ApiError(400, "bad_request", "The code has characters that can't be saved.") from None
+            removed = self._save_code(path, code)
             outcome = self._guard(lambda: self.course.submit(student_id, path))
-            return {"outcome": self._outcome(outcome, project), "state": self._state(student_id)}
+            return self._with_privacy_notice({"outcome": self._outcome(outcome, project), "state": self._state(student_id)}, removed)
 
     def hint(self, student_id: str, code: Any = None) -> Dict[str, Any]:
         """A hint on request. For a code problem the current editor text is saved first, so the AI tutor
@@ -246,12 +249,30 @@ class Service:
             path = None
             if not record.complete and not project.problem(record.current_problem).is_quiz and isinstance(code, str):
                 path = start_workspace(self.data_dir, student_id, project)
-                try:
-                    path.write_text(code, encoding="utf-8")
-                except UnicodeEncodeError:
-                    raise ApiError(400, "bad_request", "The code has characters that can't be saved.") from None
+                removed = self._save_code(path, code)
+            else:
+                removed = 0
             outcome = self._guard(lambda: self.course.request_hint(student_id, path))
-            return {"outcome": self._outcome(outcome, project), "state": self._state(student_id)}
+            return self._with_privacy_notice({"outcome": self._outcome(outcome, project), "state": self._state(student_id)}, removed)
+
+    @staticmethod
+    def _save_code(path: Path, code: str) -> int:
+        """Save the editor text as the student's workspace file, without email addresses or phone numbers.
+        Returns how many were taken out."""
+        code, removed = remove_contact_details(code)
+        try:
+            path.write_text(code, encoding="utf-8")
+        except UnicodeEncodeError:
+            raise ApiError(400, "bad_request", "The code has characters that can't be saved.") from None
+        s3_storage.changed(path)
+        return removed
+
+    @staticmethod
+    def _with_privacy_notice(result: Dict[str, Any], removed: int) -> Dict[str, Any]:
+        if removed:
+            result["outcome"]["notices"].insert(0, PRIVACY_NOTICE)
+            result["state"]["notices"].insert(0, PRIVACY_NOTICE)      # the lesson page shows state notices
+        return result
 
     @staticmethod
     def to_blocks(code: Any) -> Dict[str, Any]:

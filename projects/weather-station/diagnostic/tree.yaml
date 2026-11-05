@@ -7,7 +7,7 @@
 #
 # `csta` lists standard codes (DRAFT mapping by the evaluation team from the standards' text; a teacher
 # should confirm it). Codes come from
-# "curriculum database/CSTA_2026_PK12_Standards_by_Grade.xlsx" (grades 9-12).
+# "documentation/curriculum/CSTA_2026_PK12_Standards_by_Grade.xlsx" (grades 9-12).
 # HS-PRO-VD-16 data structures, counting, totals, extremes; HS-PRO-RD-17 reading code with parameters
 # and returns; HS-ALG-PS-02 reworking repetition into functions and loops; HS-ALG-PS-03 correctness with
 # test cases (edges, empty input); HS-PRO-PD-12 modular programs.

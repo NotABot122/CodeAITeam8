@@ -1,21 +1,24 @@
-"""The curriculum database: CSTA PK-12 standards from the team's workbook.
+"""Load CSTA standards from versioned JSON, with legacy workbook support.
 
-Source of truth: "curriculum database/CSTA_2026_PK12_Standards_by_Grade.xlsx", sheet "Standards by Grade"
-(one row per standard). Read with the standard library only (an .xlsx file is a zip of XML), so the server
-needs no spreadsheet package. Set $CODEAI_CURRICULUM to use another copy of the workbook.
+The local JSON is an offline default. Set CODEAI_CURRICULUM and
+CODEAI_CURRICULUM_VERSION_ID to read an immutable S3 object version.
 """
 from __future__ import annotations
 
 import os
 import re
 import zipfile
+import json
+from io import BytesIO
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional
+from typing import Dict, Iterable, List, Optional, Tuple, Union
+from urllib.parse import urlparse
 from xml.etree import ElementTree as ET
 
 ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_WORKBOOK = ROOT / "curriculum database" / "CSTA_2026_PK12_Standards_by_Grade.xlsx"
+DEFAULT_WORKBOOK = ROOT / "documentation" / "curriculum" / "CSTA_2026_PK12_Standards_by_Grade.xlsx"
+DEFAULT_CURRICULUM = ROOT / "documentation" / "curriculum" / "csta-standards.json"
 SHEET = "Standards by Grade"
 _NS = {"m": "http://schemas.openxmlformats.org/spreadsheetml/2006/main",
        "r": "http://schemas.openxmlformats.org/officeDocument/2006/relationships",
@@ -114,9 +117,40 @@ class Curriculum:
         self.standards: Dict[str, Standard] = {s.id: s for s in standards}
 
     @classmethod
-    def load(cls, path: Optional[Path] = None) -> "Curriculum":
-        path = Path(path or os.environ.get("CODEAI_CURRICULUM") or DEFAULT_WORKBOOK)
-        rows = _read_rows(path, SHEET)
+    def load(cls, path: Optional[Union[Path, str]] = None) -> "Curriculum":
+        source = str(path or os.environ.get("CODEAI_CURRICULUM") or DEFAULT_CURRICULUM)
+        if source.startswith("s3://"):
+            parsed = urlparse(source)
+            if not parsed.netloc or not parsed.path.lstrip("/") or parsed.query or parsed.fragment:
+                raise CurriculumError("curriculum S3 URI must be s3://bucket/key")
+            version = os.environ.get("CODEAI_CURRICULUM_VERSION_ID")
+            if not version:
+                raise CurriculumError("S3 curriculum requires CODEAI_CURRICULUM_VERSION_ID")
+            try:
+                from .s3_storage import app_client
+                client = app_client("s3")          # the app role (CODEAI_APP_ROLE_ARN) when set
+                response = client.get_object(Bucket=parsed.netloc, Key=parsed.path.lstrip("/"), VersionId=version)
+                body = response["Body"]
+                try:
+                    contents = body.read(10 * 1024 * 1024 + 1)
+                finally:
+                    body.close()
+                if len(contents) > 10 * 1024 * 1024:
+                    raise CurriculumError("curriculum workbook exceeds 10 MiB")
+                if parsed.path.lower().endswith(".json"):
+                    return cls.from_json(contents)
+                rows = _read_rows(BytesIO(contents), SHEET)
+            except CurriculumError:
+                raise
+            except Exception as exc:
+                raise CurriculumError(f"couldn't load S3 curriculum: {type(exc).__name__}") from None
+        else:
+            if source.lower().endswith(".json"):
+                try:
+                    return cls.from_json(Path(source).read_bytes())
+                except OSError as exc:
+                    raise CurriculumError(f"couldn't read curriculum: {type(exc).__name__}") from None
+            rows = _read_rows(Path(source), SHEET)
         if not rows:
             raise CurriculumError("the standards sheet is empty")
         header = {name: i for i, name in enumerate(rows[0]) if name in _COLUMNS}
@@ -128,6 +162,23 @@ class Curriculum:
             if get("Standard ID"):
                 out.append(Standard(**{_COLUMNS[col]: get(col) for col in _COLUMNS}))
         return cls(out)
+
+    @classmethod
+    def from_json(cls, contents: bytes) -> "Curriculum":
+        try:
+            data = json.loads(contents)
+            if not isinstance(data, dict) or data.get("schema_version") != 1 or not isinstance(data.get("standards"), list):
+                raise ValueError("invalid schema")
+            records = data["standards"]
+            required = set(_COLUMNS.values())
+            if not records or any(not isinstance(r, dict) or set(r) != required or
+                                  any(not isinstance(v, str) for v in r.values()) or not r["id"] for r in records):
+                raise ValueError("invalid standards")
+            if len({r["id"] for r in records}) != len(records):
+                raise ValueError("duplicate standard id")
+            return cls(Standard(**r) for r in records)
+        except (ValueError, TypeError, UnicodeDecodeError) as exc:
+            raise CurriculumError(f"invalid curriculum JSON: {type(exc).__name__}") from None
 
     def get(self, standard_id: str) -> Optional[Standard]:
         return self.standards.get(standard_id)
@@ -144,12 +195,14 @@ class Curriculum:
         return out
 
 
-_cache: Dict[str, Curriculum] = {}
+_cache: Dict[Tuple[str, str], Curriculum] = {}
 
 
-def load_curriculum(path: Optional[Path] = None) -> Curriculum:
+def load_curriculum(path: Optional[Union[Path, str]] = None) -> Curriculum:
     """Cached load. Raises CurriculumError if the workbook can't be read."""
-    key = str(path or os.environ.get("CODEAI_CURRICULUM") or DEFAULT_WORKBOOK)
-    if key not in _cache:
-        _cache[key] = Curriculum.load(Path(key))
-    return _cache[key]
+    key = str(path or os.environ.get("CODEAI_CURRICULUM") or DEFAULT_CURRICULUM)
+    version = os.environ.get("CODEAI_CURRICULUM_VERSION_ID", "") if key.startswith("s3://") else ""
+    cache_key = (key, version)
+    if cache_key not in _cache:
+        _cache[cache_key] = Curriculum.load(key)
+    return _cache[cache_key]

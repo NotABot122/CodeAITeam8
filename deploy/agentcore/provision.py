@@ -127,15 +127,20 @@ def _ensure_role(iam, state: State) -> str:
 def _ensure_bucket(s3, state: State) -> None:
     try:
         s3.head_bucket(Bucket=state.bucket, ExpectedBucketOwner=state.account_id)
-        return
     except ClientError as exc:
         if exc.response["Error"]["Code"] not in ("404", "NoSuchBucket"):
             raise
-    _say(f"creating bucket {state.bucket}")
-    location = {} if REGION == "us-east-1" else {"CreateBucketConfiguration": {"LocationConstraint": REGION}}
-    s3.create_bucket(Bucket=state.bucket, **location)
-    s3.put_public_access_block(Bucket=state.bucket, PublicAccessBlockConfiguration={
-        "BlockPublicAcls": True, "IgnorePublicAcls": True, "BlockPublicPolicy": True, "RestrictPublicBuckets": True})
+        _say(f"creating bucket {state.bucket}")
+        location = {} if REGION == "us-east-1" else {"CreateBucketConfiguration": {"LocationConstraint": REGION}}
+        s3.create_bucket(Bucket=state.bucket, ObjectOwnership="BucketOwnerEnforced", **location)
+        s3.put_public_access_block(Bucket=state.bucket, PublicAccessBlockConfiguration={
+            "BlockPublicAcls": True, "IgnorePublicAcls": True, "BlockPublicPolicy": True, "RestrictPublicBuckets": True})
+    # The package holds only code (no student data). Encrypted at rest by default (SSE-S3); TLS-only on the wire.
+    s3.put_bucket_policy(Bucket=state.bucket, ExpectedBucketOwner=state.account_id, Policy=json.dumps({
+        "Version": "2012-10-17",
+        "Statement": [{"Sid": "DenyInsecureTransport", "Effect": "Deny", "Principal": "*", "Action": "s3:*",
+                       "Resource": [f"arn:aws:s3:::{state.bucket}", f"arn:aws:s3:::{state.bucket}/*"],
+                       "Condition": {"Bool": {"aws:SecureTransport": "false"}}}]}))
 
 
 # AgentCore Runtime ------------------------------------------------------------------------

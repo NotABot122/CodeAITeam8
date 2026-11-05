@@ -304,7 +304,11 @@ class Engine:
         if problem.is_quiz:
             return SubmitOutcome("quiz", False, [f"{problem.label}: this step is a quiz. Answer its questions "
                                                  "instead of submitting code."], next_problem=problem, notices=notices)
-        result = self.grader.grade(self.project, problem, submission_path)
+        try:
+            result = self.grader.grade(self.project, problem, submission_path)
+        except Exception:
+            # A grader failure is not evidence of a student's performance.
+            result = g.GradeResult(g.UNGRADED, error_message="grading service unavailable")
         messages = messages_for(problem, result)
 
         if result.ungraded:
@@ -452,7 +456,12 @@ class Engine:
             code = Path(submission_path).read_text()
         except (OSError, UnicodeDecodeError):
             code = ""
-        result = self.hinter.hint(problem, messages, code, attempt=record.attempts.get(problem.id, 1), context=context)
+        try:
+            result = self.hinter.hint(problem, messages, code, attempt=record.attempts.get(problem.id, 1), context=context)
+        except Exception:
+            self.events.write("hint", student_id=record.student_id, project_id=self.project.id,
+                              problem_id=problem.id, source="authored", reason="hint service unavailable")
+            return authored, "authored"
         if result is None:
             self.events.write("hint", student_id=record.student_id, project_id=self.project.id,
                               problem_id=problem.id, source="authored", reason=self.hinter.last_rejection)

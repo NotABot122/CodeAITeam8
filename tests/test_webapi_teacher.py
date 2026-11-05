@@ -26,7 +26,7 @@ class TeacherTests(unittest.TestCase):
 
     def test_overview_flags_a_student_who_is_stuck_and_one_in_the_quest(self):
         # With in-lesson help on, a stuck student is moved to practice and the per-step count restarts;
-        # see docs/FRONTEND_GAPS.md item 2. This test checks the per-step flag on its own.
+        # see documentation/frontend-notes/FRONTEND_GAPS.md item 2. This test checks the per-step flag on its own.
         self.svc.course.catalog.intervention["struggle_after"] = None
         stuck = self.svc.new_student()["studentId"]
         for _ in range(4):

@@ -6,6 +6,8 @@ import json
 from pathlib import Path
 from typing import List
 
+from . import s3_storage
+
 ALLOWED_FIELDS = {"event", "student_id", "project_id", "problem_id", "reason", "selected", "stages", "timestamp",
                   "source", "model_id", "latency_ms", "category", "direction"}
 
@@ -24,6 +26,7 @@ class EventLog:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         with self.path.open("a") as handle:
             handle.write(json.dumps(entry) + "\n")
+        s3_storage.changed(self.path)
         return entry
 
     def read(self) -> List[dict]:

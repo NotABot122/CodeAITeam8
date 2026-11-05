@@ -13,6 +13,11 @@ class UngradedGrader:
         return GradeResult(UNGRADED, error_message="disk full")
 
 
+class CrashingGrader:
+    def grade(self, *args):
+        raise RuntimeError("unexpected grader error")
+
+
 class EngineFlowTests(TempDirMixin, unittest.TestCase):
     def run_all(self, engine, student_id, sources):
         outcomes = []
@@ -95,6 +100,31 @@ class EngineFlowTests(TempDirMixin, unittest.TestCase):
         record, _ = engine.open(sid)
         self.assertEqual((outcome.status, record.attempts, record.current_problem), ("ungraded", {}, "level-1"))
         self.assertIn("wasn't counted", outcome.messages[0])
+
+    def test_unexpected_grader_failure_is_ungraded_and_retry_works(self):
+        engine = self.engine(grader=CrashingGrader())
+        sid = engine.new_student()
+        path = self.write("crash.py", GET_GOOD)
+        result = engine.submit(sid, path)
+        record, _ = engine.open(sid)
+        self.assertEqual((result.status, record.attempts, record.current_problem), ("ungraded", {}, "level-1"))
+        self.assertEqual(set(record.stages().values()), {0})
+        from engine.grader import Grader
+        engine.grader = Grader()
+        self.assertTrue(engine.submit(sid, path).passed)
+
+    def test_unexpected_hint_failure_uses_authored_hint(self):
+        engine = self.engine()
+        sid = engine.new_student()
+        class BrokenHinter:
+            def hint(self, *args, **kwargs):
+                raise RuntimeError("provider failure")
+        engine.hinter = BrokenHinter()
+        result = engine.submit(sid, self.write("bad.py", GET_EXCLUSIVE))
+        self.assertFalse(result.passed)
+        self.assertTrue(result.hint)
+        self.assertEqual(result.hint_source, "authored")
+        self.assertTrue(any(e.get("reason") == "hint service unavailable" for e in EventLog(self.tmp).read()))
 
     def test_corrupt_progress_restarts_on_fallback(self):
         engine = self.engine()
