@@ -1,0 +1,11 @@
+{
+  "region": "us-west-2",
+  "stack": "codeai-storage-prod",
+  "student_data_bucket": "codeai-team8-student-data-prod-049796288127-us-west-2",
+  "app_role_arn": "arn:aws:iam::049796288127:role/CodeAITeam8App-prod-us-west-2",
+  "student_data_key_arn": "arn:aws:kms:us-west-2:049796288127:key/3addf47b-c89a-4913-bfe0-e1a7d919c3a5",
+  "curriculum_bucket": "codeai-team8-curriculum-prod-049796288127-us-west-2",
+  "curriculum_uri": "s3://codeai-team8-curriculum-prod-049796288127-us-west-2/standards/csta.json",
+  "curriculum_version_id": "q3V09WNjalt0uUHyEtS_4BWaYqrUAGdV",
+  "curriculum_published_at": "2026-11-05T10:48:15+00:00"
+}

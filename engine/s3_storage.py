@@ -17,6 +17,7 @@ bucket policy and the KMS key let read or write student data. Settings come from
     CODEAI_APP_ROLE_ARN          role to assume for S3 (the curriculum loader uses it too)
     CODEAI_AWS_REGION            region (default us-west-2)
     CODEAI_S3_STORAGE=off        turn S3 storage off even when the config file exists
+    CODEAI_STORAGE_CONFIG        another config file (production: config/aws_storage.prod.json)
 
 Commands:
     python -m engine.s3_storage configure [--stack codeai-storage]   write config/aws_storage.json from the stack
@@ -63,13 +64,18 @@ class StorageConfig:
     curriculum_version_id: Optional[str] = None
 
 
+def config_path() -> Path:
+    """config/aws_storage.json, or the file CODEAI_STORAGE_CONFIG names (production uses its own)."""
+    return Path(os.environ.get("CODEAI_STORAGE_CONFIG") or CONFIG)
+
+
 def load_config() -> Optional[StorageConfig]:
     """S3 storage settings from the environment, then config/aws_storage.json. None when S3 storage is off."""
     if os.environ.get("CODEAI_S3_STORAGE", "").lower() in ("off", "0", "false", "no"):
         return None
     data: Dict[str, Any] = {}
     try:
-        data = json.loads(CONFIG.read_text())
+        data = json.loads(config_path().read_text())
     except (OSError, ValueError):
         pass
     bucket = os.environ.get("CODEAI_STUDENT_DATA_BUCKET") or data.get("student_data_bucket")
@@ -420,13 +426,13 @@ def start(data_dir: Path, cfg: StorageConfig, client: Any = None) -> Tuple[S3Mir
 # Commands --------------------------------------------------------------------------------------------------------
 
 def _write_config(data: Dict[str, Any]) -> None:
-    CONFIG.parent.mkdir(parents=True, exist_ok=True)
-    CONFIG.write_text(json.dumps(data, indent=2) + "\n")
+    config_path().parent.mkdir(parents=True, exist_ok=True)
+    config_path().write_text(json.dumps(data, indent=2) + "\n")
 
 
 def _read_config() -> Dict[str, Any]:
     try:
-        return json.loads(CONFIG.read_text())
+        return json.loads(config_path().read_text())
     except (OSError, ValueError):
         return {}
 
@@ -446,7 +452,7 @@ def cmd_configure(stack: str, region: str) -> int:
         "curriculum_uri": f"s3://{out['CurriculumBucketName']}/{CURRICULUM_KEY}",
     })
     _write_config(data)
-    print(f"Wrote {CONFIG.relative_to(ROOT)}: bucket {data['student_data_bucket']}, role {data['app_role_arn']}")
+    print(f"Wrote {config_path()}: bucket {data['student_data_bucket']}, role {data['app_role_arn']}")
     return 0
 
 
@@ -467,7 +473,7 @@ def cmd_publish_curriculum() -> int:
     data["curriculum_published_at"] = dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
     _write_config(data)
     print(f"Published {count} standards to {data['curriculum_uri']} (version {version}); pinned in "
-          f"{CONFIG.relative_to(ROOT)}.")
+          f"{config_path()}.")
     return 0
 
 

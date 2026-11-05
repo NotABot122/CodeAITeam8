@@ -1,0 +1,19 @@
+#!/bin/bash
+# Runs one grading job as the sandbox user (codeai-sandbox). Installed root-owned at /opt/codeai/bin; the codeai
+# service may call only this, through sudo (see install.sh). The job folder is made by engine/grader.py and holds
+# copies of the submission, the checks, the reference solution and the database. Nothing else is readable to it.
+set -u
+job="${1:-}"
+case "$job" in
+  /tmp/codeai-grade-*/job.json) ;;
+  *) echo "run-student-code: unexpected job path" >&2; exit 2 ;;
+esac
+cd "$(dirname "$job")" || exit 2
+ulimit -t 15          # CPU seconds
+ulimit -v 1048576     # 1 GiB of memory
+ulimit -u 64          # processes for the sandbox user (no fork bombs)
+ulimit -f 10240       # 10 MiB per file
+ulimit -n 64          # open files
+exec timeout -s KILL 15 env -i PATH=/usr/bin:/bin LANG=C.UTF-8 HOME=/nonexistent \
+  PYTHONPATH=/opt/codeai/app PYTHONDONTWRITEBYTECODE=1 PYTHONIOENCODING=utf-8 \
+  /opt/codeai/venv/bin/python -m engine._runner "$job"

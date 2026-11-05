@@ -5,9 +5,18 @@ Description: >-
   See documentation/AWS_STORAGE_SETUP.md.
 
 Parameters:
+  Suffix:
+    Type: String
+    Default: ''
+    AllowedPattern: '^(-[a-z0-9]{1,12})?$'
+    Description: >-
+      Added to every name so a second copy can live in the same account ('' for the dev copy, '-prod' for
+      production). Changing it on an existing stack would replace the buckets, so pick it once.
   AppRunnerRoleArn:
     Type: String
-    Description: The IAM role the CodeAI server runs as. It is the only principal allowed to assume the app role.
+    Description: >-
+      The IAM role the CodeAI server runs as. It is the only principal allowed to assume the app role. It need not
+      exist yet (the trust policy matches it by ARN), so the production server's role can be made afterwards.
   KeyAdminRoleArn:
     Type: String
     Description: >-
@@ -26,7 +35,7 @@ Resources:
     DeletionPolicy: Retain
     UpdateReplacePolicy: Retain
     Properties:
-      BucketName: !Sub 'codeai-team8-curriculum-${AWS::AccountId}-${AWS::Region}'
+      BucketName: !Sub 'codeai-team8-curriculum${Suffix}-${AWS::AccountId}-${AWS::Region}'
       VersioningConfiguration:
         Status: Enabled
       OwnershipControls:
@@ -63,7 +72,7 @@ Resources:
   AppRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub 'CodeAITeam8App-${AWS::Region}'
+      RoleName: !Sub 'CodeAITeam8App${Suffix}-${AWS::Region}'
       Description: CodeAI server access to the student-data bucket and the curriculum. Nothing else.
       MaxSessionDuration: 3600
       AssumeRolePolicyDocument:
@@ -71,8 +80,11 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              AWS: !Ref AppRunnerRoleArn
+              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
             Action: 'sts:AssumeRole'
+            Condition:
+              ArnEquals:
+                'aws:PrincipalArn': !Ref AppRunnerRoleArn
       Policies:
         - PolicyName: storage
           PolicyDocument:
@@ -81,11 +93,11 @@ Resources:
               - Sid: StudentData
                 Effect: Allow
                 Action: ['s3:GetObject', 's3:PutObject', 's3:DeleteObject']
-                Resource: !Sub 'arn:aws:s3:::codeai-team8-student-data-${AWS::AccountId}-${AWS::Region}/*'
+                Resource: !Sub 'arn:aws:s3:::codeai-team8-student-data${Suffix}-${AWS::AccountId}-${AWS::Region}/*'
               - Sid: StudentDataList
                 Effect: Allow
                 Action: 's3:ListBucket'
-                Resource: !Sub 'arn:aws:s3:::codeai-team8-student-data-${AWS::AccountId}-${AWS::Region}'
+                Resource: !Sub 'arn:aws:s3:::codeai-team8-student-data${Suffix}-${AWS::AccountId}-${AWS::Region}'
               - Sid: CurriculumRead
                 Effect: Allow
                 Action: ['s3:GetObject', 's3:GetObjectVersion']
@@ -136,7 +148,7 @@ Resources:
   StudentDataKeyAlias:
     Type: AWS::KMS::Alias
     Properties:
-      AliasName: alias/codeai-team8-student-data
+      AliasName: !Sub 'alias/codeai-team8-student-data${Suffix}'
       TargetKeyId: !Ref StudentDataKey
 
   # Student data: progress, readiness-check answers, code workspaces, built themes, pseudonymous event logs.
@@ -145,7 +157,7 @@ Resources:
     DeletionPolicy: Retain
     UpdateReplacePolicy: Retain
     Properties:
-      BucketName: !Sub 'codeai-team8-student-data-${AWS::AccountId}-${AWS::Region}'
+      BucketName: !Sub 'codeai-team8-student-data${Suffix}-${AWS::AccountId}-${AWS::Region}'
       VersioningConfiguration:
         Status: Enabled
       OwnershipControls:

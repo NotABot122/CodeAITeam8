@@ -33,7 +33,7 @@ Every autonomous agent or developer **MUST read this file before writing code** 
 | `Agent-Bootstrap` | Gemini 3.8 Flash | `idle` | Integrated curriculum database references, added post-project AI reteach loop, created COURSE_FLOW_GRAPH.md, initialized git repository and committed all files | 2026-11-03 15:21 PST |
 | `Pratheek-Claude` | Claude Sonnet 5.5 | `idle` | Game-style readiness-quest inputs (tap the rows, sorting belt, word chips) via a `display` option on sort items | 2026-11-04 15:20 PST |
 | `Agent-3` | Unassigned | `idle` | None | - |
-| `zane-claude` | Claude Opus 5.5 (Kiro) | `idle` | S3 storage (Task 034) deployed and live; AgentCore readiness check deployed; committed on `feat/s3-storage`, PR into `main` | 2026-11-05 02:30 PST |
+| `zane-claude` | Claude Opus 5.5 (Kiro) | `working` | Production deploy (Task 035): private EC2 behind CloudFront VPC origin, prod S3 storage, student-code sandbox. Branch `feat/prod-deploy` | 2026-11-05 02:40 PST |
 | `Kiro-Demo` | Claude Opus 5.5 (Kiro) | `idle` | Merged `diagnosis` into `proto-branch` and connected the readiness quest to `Course` (confident stages seed the profile; placement sets the first problem) | 2026-11-04 12:05 PST |
 | `Agent-2` | Unassigned | `idle` | None | - |
 | `Kiro-AgentCore` | Claude Opus 5.5 (Kiro) | `idle` | Hosted the diagnostic on AgentCore Runtime behind inbound OAuth (`deploy/agentcore/`, branch `diagnosis`) | 2026-11-04 12:30 PST |

@@ -1,0 +1,351 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+  CodeAI production. One private EC2 instance (no public IP) reached only through a CloudFront VPC origin, a NAT
+  gateway for its outbound calls (Bedrock, STS, SSM), a bucket for code releases, and a generated teacher token.
+  Student data lives in the codeai-storage-prod stack. See documentation/PRODUCTION.md.
+
+Parameters:
+  AppRoleArn:
+    Type: String
+    Description: The app role from the codeai-storage-prod stack (its AppRoleArn output). The server assumes it for S3.
+  AvailabilityZone:
+    Type: AWS::EC2::AvailabilityZone::Name
+    Default: us-west-2a
+  InstanceType:
+    Type: String
+    Default: t3.small
+    AllowedValues: [t3.small, t3.medium]
+  LatestAmi:
+    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
+  ReleaseParameter:
+    Type: String
+    Default: /codeai-team8/prod/release
+    Description: SSM parameter holding the S3 key of the release to run. Written by `python -m deploy.production release`.
+
+Mappings:
+  Managed:
+    CloudFront:
+      CachingDisabled: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad
+      CachingOptimized: 658327ea-f89d-4fab-a63d-7e88639e58f6
+      AllViewerExceptHostHeader: b689b0a8-53d0-40ab-baf2-68738e2966ac
+      SecurityHeaders: 67f7725c-6f97-4210-82d7-5512b31e9d03
+
+Resources:
+  # Network: a public subnet holds only the NAT gateway; the instance sits in the private subnet.
+  Vpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.42.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags: [{Key: Name, Value: codeai-prod}]
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags: [{Key: Name, Value: codeai-prod}]
+  GatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref Vpc
+      InternetGatewayId: !Ref InternetGateway
+  PublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      AvailabilityZone: !Ref AvailabilityZone
+      CidrBlock: 10.42.0.0/24
+      MapPublicIpOnLaunch: false
+      Tags: [{Key: Name, Value: codeai-prod-public}]
+  PrivateSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      AvailabilityZone: !Ref AvailabilityZone
+      CidrBlock: 10.42.1.0/24
+      MapPublicIpOnLaunch: false
+      Tags: [{Key: Name, Value: codeai-prod-private}]
+  PublicRoutes:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Vpc
+      Tags: [{Key: Name, Value: codeai-prod-public}]
+  PublicDefaultRoute:
+    Type: AWS::EC2::Route
+    DependsOn: GatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRoutes
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+  PublicSubnetRoutes:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet
+      RouteTableId: !Ref PublicRoutes
+  NatAddress:
+    Type: AWS::EC2::EIP
+    DependsOn: GatewayAttachment
+    Properties:
+      Domain: vpc
+      Tags: [{Key: Name, Value: codeai-prod-nat}]
+  NatGateway:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatAddress.AllocationId
+      SubnetId: !Ref PublicSubnet
+      Tags: [{Key: Name, Value: codeai-prod}]
+  PrivateRoutes:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Vpc
+      Tags: [{Key: Name, Value: codeai-prod-private}]
+  PrivateDefaultRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRoutes
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway
+  PrivateSubnetRoutes:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet
+      RouteTableId: !Ref PrivateRoutes
+  S3Endpoint:                                   # S3 traffic (student data, releases) stays on the AWS network
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref Vpc
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.s3'
+      VpcEndpointType: Gateway
+      RouteTableIds: [!Ref PrivateRoutes]
+  ServerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: CodeAI server. HTTP 8080 from inside the VPC only (CloudFront VPC origin). No SSH.
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          CidrIp: 10.42.0.0/16
+      Tags: [{Key: Name, Value: codeai-prod-server}]
+
+  # Releases: code only (no student data). The deploy tool uploads; the instance reads.
+  ReleaseBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'codeai-team8-releases-prod-${AWS::AccountId}-${AWS::Region}'
+      VersioningConfiguration:
+        Status: Enabled
+      OwnershipControls:
+        Rules: [{ObjectOwnership: BucketOwnerEnforced}]
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      LifecycleConfiguration:
+        Rules:
+          - Id: OldReleases
+            Status: Enabled
+            Prefix: releases/
+            ExpirationInDays: 90
+            NoncurrentVersionExpiration:
+              NoncurrentDays: 7
+  ReleaseBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref ReleaseBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: DenyInsecureTransport
+            Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource: [!GetAtt ReleaseBucket.Arn, !Sub '${ReleaseBucket.Arn}/*']
+            Condition:
+              Bool:
+                'aws:SecureTransport': false
+
+  TeacherToken:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: codeai-team8/prod/teacher-token
+      Description: The token the teacher pages ask for (header X-Teacher-Token). Read by the production server.
+      GenerateSecretString:
+        PasswordLength: 40
+        ExcludePunctuation: true
+
+  # The server's identity. It can assume the app role (student data, curriculum), call Bedrock, read its token and
+  # releases, and be managed through Systems Manager. Student code never runs with it (see engine/grader.py).
+  ServerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'CodeAITeam8ProdServer-${AWS::Region}'
+      Description: CodeAI production server (EC2 instance profile).
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: {Service: ec2.amazonaws.com}
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+      Policies:
+        - PolicyName: server
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Sid: StudentDataThroughTheAppRole
+                Effect: Allow
+                Action: 'sts:AssumeRole'
+                Resource: !Ref AppRoleArn
+              - Sid: Models
+                Effect: Allow
+                Action: ['bedrock:InvokeModel', 'bedrock:InvokeModelWithResponseStream']
+                Resource: '*'
+              - Sid: Guardrail
+                Effect: Allow
+                Action: 'bedrock:ApplyGuardrail'
+                Resource: !Sub 'arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:guardrail/*'
+              - Sid: TeacherToken
+                Effect: Allow
+                Action: 'secretsmanager:GetSecretValue'
+                Resource: !Ref TeacherToken
+              - Sid: Releases
+                Effect: Allow
+                Action: 's3:GetObject'
+                Resource: !Sub '${ReleaseBucket.Arn}/releases/*'
+              - Sid: ReleasePointer
+                Effect: Allow
+                Action: 'ssm:GetParameter'
+                Resource: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${ReleaseParameter}'
+  ServerProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles: [!Ref ServerRole]
+
+  Server:
+    Type: AWS::EC2::Instance
+    DependsOn: PrivateDefaultRoute
+    Properties:
+      ImageId: !Ref LatestAmi
+      InstanceType: !Ref InstanceType
+      SubnetId: !Ref PrivateSubnet
+      SecurityGroupIds: [!Ref ServerSecurityGroup]
+      IamInstanceProfile: !Ref ServerProfile
+      MetadataOptions:
+        HttpEndpoint: enabled
+        HttpTokens: required
+        HttpPutResponseHopLimit: 1
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeType: gp3
+            VolumeSize: 20
+            Encrypted: true
+            DeleteOnTermination: true
+      Tags: [{Key: Name, Value: codeai-prod-server}]
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          # First boot: install the current release if one has been published (the deploy tool pushes it otherwise).
+          set -uo pipefail
+          for i in $(seq 1 30); do
+            KEY=$(aws ssm get-parameter --region ${AWS::Region} --name ${ReleaseParameter} --query Parameter.Value --output text 2>/dev/null) && break
+            sleep 10
+          done
+          [ -n "${!KEY:-}" ] || exit 0
+          aws s3 cp --region ${AWS::Region} "s3://${ReleaseBucket}/${!KEY}" /root/codeai-release.tar.gz
+          rm -rf /root/codeai-release && mkdir /root/codeai-release && tar -xzf /root/codeai-release.tar.gz -C /root/codeai-release
+          bash /root/codeai-release/deploy/production/install.sh /root/codeai-release.tar.gz "$(basename "${!KEY}" .tar.gz)"
+
+  # One instance: if the host fails, recover it onto new hardware (same instance, same disk); if the OS hangs, reboot.
+  RecoverAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: CodeAI production server host failure; recover the instance.
+      Namespace: AWS/EC2
+      MetricName: StatusCheckFailed_System
+      Dimensions: [{Name: InstanceId, Value: !Ref Server}]
+      Statistic: Maximum
+      Period: 60
+      EvaluationPeriods: 2
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      AlarmActions: [!Sub 'arn:aws:automate:${AWS::Region}:ec2:recover']
+  RebootAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: CodeAI production server OS not responding; reboot it.
+      Namespace: AWS/EC2
+      MetricName: StatusCheckFailed_Instance
+      Dimensions: [{Name: InstanceId, Value: !Ref Server}]
+      Statistic: Maximum
+      Period: 60
+      EvaluationPeriods: 3
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      AlarmActions: [!Sub 'arn:aws:automate:${AWS::Region}:ec2:reboot']
+
+  # CloudFront reaches the private instance through a VPC origin; nothing on the internet can reach it directly.
+  ServerOrigin:
+    Type: AWS::CloudFront::VpcOrigin
+    Properties:
+      VpcOriginEndpointConfig:
+        Name: codeai-prod-server
+        Arn: !Sub 'arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:instance/${Server}'
+        HTTPPort: 8080
+        HTTPSPort: 443
+        OriginProtocolPolicy: http-only
+  Distribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Comment: CodeAI production
+        Enabled: true
+        HttpVersion: http2and3
+        IPV6Enabled: true
+        PriceClass: PriceClass_100
+        Origins:
+          - Id: server
+            DomainName: !GetAtt Server.PrivateDnsName
+            VpcOriginConfig:
+              VpcOriginId: !GetAtt ServerOrigin.Id
+              OriginReadTimeout: 60
+        DefaultCacheBehavior:
+          TargetOriginId: server
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods: [GET, HEAD, OPTIONS, PUT, POST, PATCH, DELETE]
+          CachedMethods: [GET, HEAD]
+          Compress: true
+          CachePolicyId: !FindInMap [Managed, CloudFront, CachingDisabled]
+          OriginRequestPolicyId: !FindInMap [Managed, CloudFront, AllViewerExceptHostHeader]
+          ResponseHeadersPolicyId: !FindInMap [Managed, CloudFront, SecurityHeaders]
+        CacheBehaviors:
+          - PathPattern: /assets/*
+            TargetOriginId: server
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods: [GET, HEAD]
+            CachedMethods: [GET, HEAD]
+            Compress: true
+            CachePolicyId: !FindInMap [Managed, CloudFront, CachingOptimized]
+            ResponseHeadersPolicyId: !FindInMap [Managed, CloudFront, SecurityHeaders]
+
+Outputs:
+  Url:
+    Value: !Sub 'https://${Distribution.DomainName}'
+  InstanceId:
+    Value: !Ref Server
+  ReleaseBucketName:
+    Value: !Ref ReleaseBucket
+  ReleaseParameter:
+    Value: !Ref ReleaseParameter
+  TeacherTokenSecret:
+    Value: !Ref TeacherToken
+  ServerRoleArn:
+    Value: !GetAtt ServerRole.Arn

@@ -1,0 +1,25 @@
+[Unit]
+Description=CodeAI adaptive lesson server
+After=network-online.target nftables.service
+Wants=network-online.target
+Requires=nftables.service
+
+[Service]
+User=codeai
+Group=codeai
+EnvironmentFile=/etc/codeai/env
+WorkingDirectory=/opt/codeai/app
+ExecStart=/opt/codeai/venv/bin/python -m webapi.server --host 0.0.0.0 --port 8080 --ai bedrock --data-dir /var/lib/codeai
+Restart=always
+RestartSec=3
+# SIGTERM makes the server send pending student data to S3 before it exits (webapi/server.py).
+KillSignal=SIGTERM
+TimeoutStopSec=30
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/var/lib/codeai
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target
