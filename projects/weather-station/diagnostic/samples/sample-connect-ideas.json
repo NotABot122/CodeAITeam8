@@ -1,0 +1,13 @@
+{
+  "format": "codeai-lesson-export",
+  "version": 1,
+  "source": "Sample data for demos",
+  "goal": "find_facts",
+  "interests": "birds and ocean animals",
+  "concepts": {
+    "database_retrieval": {"stage": 2, "correct": 4, "answered": 5},
+    "conditionals": {"stage": 2, "correct": 4, "answered": 5},
+    "loops": {"stage": 1, "correct": 3, "answered": 5},
+    "functions": {"stage": 1, "correct": 2, "answered": 4}
+  }
+}

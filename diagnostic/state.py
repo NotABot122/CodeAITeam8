@@ -85,7 +85,22 @@ class DiagnosticState:
     started_at: str = field(default_factory=now_iso)
     finished_at: Optional[str] = None
     elapsed_ms_total: int = 0
+    # Set when the result came from an earlier lesson instead of this quest (diagnostic/importer.py):
+    # {"source", "at", "concepts": {concept: {"stage", "correct", "answered"}}}. Results is then empty.
+    imported: Optional[Dict[str, Any]] = None
     schema_version: int = SCHEMA_VERSION
+
+    def answer_counts(self) -> Dict[str, Dict[str, int]]:
+        """{concept: {"correct", "answered"}} from this quest's answers, or from the imported lesson."""
+        if self.imported:
+            return {c: {"correct": int(v.get("correct", 0)), "answered": int(v.get("answered", 0))}
+                    for c, v in (self.imported.get("concepts") or {}).items()}
+        counts: Dict[str, Dict[str, int]] = {}
+        for r in self.results:
+            entry = counts.setdefault(r.concept, {"correct": 0, "answered": 0})
+            entry["answered"] += 1
+            entry["correct"] += int(r.passed)
+        return counts
 
     def to_dict(self) -> dict:
         data = dict(self.__dict__)

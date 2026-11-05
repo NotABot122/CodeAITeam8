@@ -9,7 +9,7 @@ about what they're into, matched against each project's `interests` keywords.
 Privacy: this module only sees text that already passed the readiness check's screen
 (diagnostic.safety.clean_goal_text drops personal details, profanity and injection attempts). It
 matches that text locally and never logs it or sends it anywhere. Reasons shown to the student
-quote catalog keywords, not the student's own words.
+repeat only the words that matched a catalog keyword, never anything else the student typed.
 """
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ from typing import Dict, Iterable, List, Mapping, Optional, Sequence
 
 GOAL_POINTS = 3          # the goal the student picked names this project
 WORD_POINTS = 2          # each of the student's words that matches one of the project's interests
-MAX_WORDS_SHOWN = 2
+MAX_WORDS_SHOWN = 3
 NOT_SURE_GOAL = "not_sure"
 
 _WORD = re.compile(r"[a-z]+")
@@ -34,24 +34,26 @@ def _stem(word: str) -> str:
     return word
 
 
-def interest_words(text: Optional[str]) -> List[str]:
-    """The student's words, lowercased and roughly singular, in order, without repeats."""
-    out: List[str] = []
-    for word in _WORD.findall((text or "").lower()):
-        stem = _stem(word)
-        if stem not in out:
-            out.append(stem)
-    return out
-
-
-def _keyword_hits(keywords: Iterable[str], words: Sequence[str]) -> List[str]:
-    """Catalog keywords (one or more words each) found in the student's words."""
-    hits = []
-    joined = " " + " ".join(words) + " "
+def _keyword_hits(keywords: Iterable[str], text: Optional[str]) -> List[str]:
+    """The parts of the student's text that match a catalog keyword (one or more words), as they wrote them
+    and in their order. Only catalog keywords can match, so nothing else the student typed is ever repeated."""
+    tokens = _WORD.findall((text or "").lower())
+    stems = [_stem(t) for t in tokens]
+    found: List[tuple] = []
     for keyword in keywords:
-        stems = " ".join(_stem(w) for w in _WORD.findall(str(keyword).lower()))
-        if stems and f" {stems} " in joined and keyword not in hits:
-            hits.append(str(keyword))
+        want = [_stem(w) for w in _WORD.findall(str(keyword).lower())]
+        for start in range(len(stems) - len(want) + 1) if want else ():
+            if stems[start:start + len(want)] == want:
+                found.append((start, len(want), " ".join(tokens[start:start + len(want)])))
+                break
+    # Keep the longest match where two overlap ("video games" over "games"), then the student's order.
+    found.sort(key=lambda f: (f[0], -f[1]))
+    hits: List[str] = []
+    covered = -1
+    for start, length, surface in found:
+        if start > covered and surface not in hits:
+            hits.append(surface)
+            covered = start + length - 1
     return hits
 
 
@@ -60,7 +62,7 @@ class StoryFit:
     project: str
     points: int
     goal_match: bool
-    words: List[str]           # catalog keywords the student's words matched
+    words: List[str]           # the student's words that matched a catalog keyword, as written
 
 
 @dataclass
@@ -75,11 +77,10 @@ def match_story(choices: Sequence[Mapping], goal_id: Optional[str], goal_label: 
                 interest_text: Optional[str], default: str) -> StoryMatch:
     """Rank the ready-made stories by the student's interests. Ties keep catalog order, so with no signal
     the first choice (the original project) wins."""
-    words = interest_words(interest_text)
     fits = []
     for choice in choices:
         goal_match = bool(goal_id) and goal_id in (choice.get("goals") or [])
-        hits = _keyword_hits(choice.get("interests") or [], words)
+        hits = _keyword_hits(choice.get("interests") or [], interest_text)
         points = (GOAL_POINTS if goal_match and goal_id != NOT_SURE_GOAL else 0) + WORD_POINTS * len(hits)
         fits.append(StoryFit(choice["project"], points, goal_match, hits))
     ranked = sorted(fits, key=lambda f: -f.points)      # stable: catalog order breaks ties
@@ -88,8 +89,8 @@ def match_story(choices: Sequence[Mapping], goal_id: Optional[str], goal_label: 
 
     reasons: List[str] = []
     if best and best.words:
-        shown = " and ".join(best.words[:MAX_WORDS_SHOWN])
-        reasons.append(f"You said you're into {shown}, and this story is about that.")
+        reasons.append(f"You said you're into {_join(best.words[:MAX_WORDS_SHOWN], lower=False)}, "
+                       "and this story is about that.")
     if best and best.goal_match and goal_id != NOT_SURE_GOAL and goal_label:
         reasons.append(f"You picked \"{goal_label}\" as your goal.")
     if not reasons:
@@ -131,8 +132,8 @@ def skill_fit(decisions: Mapping[str, Mapping], names: Mapping[str, str], planne
     return SkillFit(strengths, warm_ups, new_ideas, reasons)
 
 
-def _join(items: List[str]) -> str:
-    items = [i.lower() for i in items]
+def _join(items: List[str], lower: bool = True) -> str:
+    items = [i.lower() for i in items] if lower else list(items)
     return items[0] if len(items) == 1 else ", ".join(items[:-1]) + " and " + items[-1]
 
 

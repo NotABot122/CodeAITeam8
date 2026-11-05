@@ -107,6 +107,14 @@ export interface ProjectMatch {
   themeIdea: string | null;
 }
 export interface ProjectChoices {choices: ProjectChoice[]; locked: boolean; topic: string; match?: ProjectMatch | null}
+
+/** A synthetic sample student for demos (no real data). */
+export interface ImportSample {id: string; label: string; about: string}
+/** POST /api/import: the readiness check's closing screen for the imported results, and the new student's state. */
+export interface ImportResult {
+  result: {student_id: string; notices: string[]; match?: ProjectMatch | null; next_stop?: {activity: {id: string; title: string} | null; project?: string}};
+  state: StudentState;
+}
 export interface ChooseResult extends ProjectChoices {state: StudentState}
 
 export interface StudentState {

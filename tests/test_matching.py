@@ -4,7 +4,7 @@ import unittest
 from diagnostic.simulation import profile_student, respond
 from engine.course import Course
 from engine.grader import Grader
-from engine.matching import interest_words, match_story, skill_fit
+from engine.matching import match_story, skill_fit
 from tests.helpers import TempDirMixin
 
 CHOICES = [
@@ -23,10 +23,12 @@ class StoryMatchTests(unittest.TestCase):
         self.assertIsNone(m.theme_idea)
 
     def test_typed_interests_match_keywords_with_plurals_and_phrases(self):
-        self.assertEqual(interest_words("I love Animals, BIRDS and stories!"), ["i", "love", "animal", "bird", "and", "story"])
-        m = match_story(CHOICES, "not_sure", "I'm not sure yet", "I like video games", "weather-station")
+        self.assertEqual(match_story(CHOICES, None, None, "I love Animals and BIRDS!", "weather-station").fits[0].words,
+                         ["animals", "birds"])
+        m = match_story(CHOICES, "not_sure", "I'm not sure yet", "I like video games and monsters", "weather-station")
         self.assertEqual(m.project, "monster-arena")
-        self.assertEqual(m.fits[0].words, ["game", "video game"])
+        self.assertEqual(m.fits[0].words, ["video games", "monsters"])      # longest match, as written, in order
+        self.assertEqual(m.reasons[0], "You said you're into video games and monsters, and this story is about that.")
 
     def test_two_matching_words_outweigh_a_tapped_goal(self):
         m = match_story(CHOICES, "build_game", "Make a game", "animals and birds", "weather-station")
@@ -42,10 +44,11 @@ class StoryMatchTests(unittest.TestCase):
         m = match_story(CHOICES, "not_sure", None, "soccer", "weather-station")
         self.assertEqual((m.project, m.theme_idea), ("weather-station", "soccer"))
 
-    def test_reasons_quote_catalog_keywords_not_the_students_words(self):
-        m = match_story(CHOICES, None, None, "my cat Whiskers is the best animal", "weather-station")
+    def test_reasons_repeat_only_the_words_that_matched(self):
+        m = match_story(CHOICES, None, None, "my dog Whiskers is the best animal", "weather-station")
         self.assertEqual(m.project, "wildlife-watch")
-        self.assertNotIn("Whiskers", " ".join(m.reasons))
+        self.assertEqual(m.reasons, ["You said you're into animal, and this story is about that."])
+        self.assertNotIn("whiskers", " ".join(m.reasons).lower())
 
 
 class SkillFitTests(unittest.TestCase):

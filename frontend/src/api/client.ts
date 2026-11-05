@@ -1,5 +1,5 @@
 import type {AnswerResult, QuestNext, QuestOptions, QuestStart} from '@/quest/types';
-import type {BlocksResult, ChooseResult, CourseView, Health, PathwayResult, ProjectChoices, StartResult, StudentState, SubmitResult, ThemeResult} from './types';
+import type {BlocksResult, ChooseResult, CourseView, Health, ImportResult, ImportSample, PathwayResult, ProjectChoices, StartResult, StudentState, SubmitResult, ThemeResult} from './types';
 
 export class ApiError extends Error {
   constructor(message: string, readonly code: string, readonly status: number) {
@@ -16,6 +16,10 @@ export interface ApiClient {
   questNext(id: string): Promise<QuestNext>;
   questAnswer(id: string, response: unknown, elapsedMs: number | null): Promise<AnswerResult>;
   questFinish(id: string): Promise<unknown>;
+  /** Sample students for skipping the readiness check in a demo. */
+  importSamples(): Promise<{samples: ImportSample[]}>;
+  /** Skip the readiness check with an earlier lesson's results: a sample's id, or a results file's JSON. */
+  importPrevious(from: {sample: string} | {data: unknown}): Promise<ImportResult>;
   getState(id: string): Promise<StudentState>;
   getCourse(id: string): Promise<CourseView>;
   submit(id: string, code: string): Promise<SubmitResult>;
@@ -68,6 +72,8 @@ export function createHttpClient(base = ''): ApiClient {
     questNext: id => call('GET', `/api/quest/${encodeURIComponent(id)}/next`),
     questAnswer: (id, response, elapsedMs) => call('POST', `/api/quest/${encodeURIComponent(id)}/answer`, {response, elapsedMs}),
     questFinish: id => call('POST', `/api/quest/${encodeURIComponent(id)}/finish`, {}),
+    importSamples: () => call('GET', '/api/import/samples'),
+    importPrevious: from => call('POST', '/api/import', from),
     getState: id => call('GET', s(id)),
     getCourse: id => call('GET', `${s(id)}/course`),
     submit: (id, code) => call('POST', `${s(id)}/submit`, {code}),

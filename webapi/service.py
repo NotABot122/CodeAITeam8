@@ -17,6 +17,7 @@ from engine.progress import ProgressRecord
 from engine.project import Project
 from engine.session import SubmitOutcome, UnknownStudent
 from diagnostic.engine import NothingPending, NotFinished, UnknownQuest
+from diagnostic.importer import ImportRejected
 from diagnostic.models import InvalidResponse
 from diagnostic.store import InvalidStudentId
 from engine.stages import MAX_STAGE, STAGE_NAMES
@@ -375,6 +376,24 @@ class Service:
         self._check_id(student_id)
         with self._lock(student_id):
             return self._guard(lambda: self.course.diagnostic_finish(student_id))
+
+    # Starting from an earlier lesson's results (diagnostic/importer.py) ------------------------
+    def import_samples(self) -> Dict[str, Any]:
+        return {"samples": self.course.import_samples()}
+
+    def import_previous(self, sample: Any = None, data: Any = None) -> Dict[str, Any]:
+        """Exactly one of: a sample student's id, or the JSON of a results file. Returns {result, state}."""
+        if (sample is None) == (data is None):
+            raise ApiError(400, "bad_request", "Pick a sample student or choose a results file.")
+        if sample is not None and not isinstance(sample, str):
+            raise ApiError(400, "bad_request", "Pick one of the sample students in the list.")
+        if data is not None and not isinstance(data, dict):
+            raise ApiError(400, "import_rejected", "The file must be one JSON object, like the sample files.")
+        try:
+            result = self.course.import_previous(data=data, sample=sample)
+        except ImportRejected as err:
+            raise ApiError(400, "import_rejected", " ".join(err.problems)) from None
+        return {"result": result, "state": self._state(result["student_id"])}
 
     @staticmethod
     def _guard(fn):

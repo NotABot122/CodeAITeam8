@@ -1,0 +1,13 @@
+{
+  "format": "codeai-lesson-export",
+  "version": 1,
+  "source": "Sample data for demos",
+  "goal": "weather_report",
+  "interests": "soccer",
+  "concepts": {
+    "database_retrieval": {"stage": 1, "correct": 3, "answered": 4},
+    "conditionals": {"stage": 1, "correct": 2, "answered": 4},
+    "loops": {"stage": 2, "correct": 4, "answered": 5},
+    "functions": {"stage": 0, "correct": 1, "answered": 4}
+  }
+}

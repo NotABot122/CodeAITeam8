@@ -155,6 +155,11 @@ def main(argv=None) -> int:
     theme.add_argument("--reset", action="store_true", help="go back to the standard project")
     placement = sub.add_parser("placement", help="use a finished readiness quest (python -m diagnostic.cli play)")
     placement.add_argument("--student", required=True)
+    imp = sub.add_parser("import", help="skip the readiness quest with an earlier lesson's results")
+    source = imp.add_mutually_exclusive_group(required=True)
+    source.add_argument("--file", help="a codeai-lesson-export JSON file (see diagnostic/importer.py)")
+    source.add_argument("--sample", help="a sample student id; --list shows them")
+    source.add_argument("--list", action="store_true", help="list the sample students")
     sub.add_parser("check-content")
     sub.add_parser("generate-data")
     sub.add_parser("generate-expected")
@@ -190,6 +195,9 @@ def main(argv=None) -> int:
             print('Want a different theme? Run: python -m engine.cli theme --student ID "your idea"\n')
             print_problem(course.state(student_id)["problem"])
             return 0
+
+        if args.command == "import":
+            return import_previous(course, data_dir, args)
 
         student = args.student
 
@@ -277,6 +285,33 @@ def main(argv=None) -> int:
         print(str(exc), file=sys.stderr)
         return 1
     return 1
+
+
+def import_previous(course: Course, data_dir: Path, args: argparse.Namespace) -> int:
+    """`import`: start a student from an earlier lesson's results instead of the readiness quest."""
+    from diagnostic.importer import ImportRejected
+    if args.list:
+        for sample in course.import_samples():
+            print(f"  {sample['id']:<22} {sample['label']}. {sample['about']}")
+        return 0
+    try:
+        data = json.loads(Path(args.file).read_text(encoding="utf-8")) if args.file else None
+        result = course.import_previous(data=data, sample=args.sample)
+    except ImportRejected as exc:
+        print("That file can't be used:\n  - " + "\n  - ".join(exc.problems), file=sys.stderr)
+        return 1
+    except (OSError, ValueError) as exc:
+        print(f"Couldn't read that file as JSON: {exc}", file=sys.stderr)
+        return 1
+    for notice in result["notices"]:
+        print(f"[note] {notice}")
+    print(f"Your student id: {result['student_id']}")
+    match = result.get("match")
+    if match:
+        print(f"Your project: {match['title']}")
+        for line in match["because"] + match["fit"]:
+            print(f"  - {line}")
+    return show_start(course, data_dir, result["student_id"])
 
 
 def show_start(course: Course, data_dir: Path, student: str) -> int:

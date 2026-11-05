@@ -1,0 +1,15 @@
+# Synthetic sample students for demos: "Import results from an earlier lesson" on the landing page.
+# Each file uses the codeai-lesson-export format (diagnostic/importer.py). No real student data and no
+# names or other personal details, ever. Each one lands on a different pathway (projects/catalog.yaml).
+- id: sample-full-project
+  label: "Sample A: ready for the full project"
+  about: "Solid on all four ideas. Into strategy games."
+- id: sample-connect-ideas
+  label: "Sample B: strong on data and decisions"
+  about: "Reads data and writes if statements well, newer to loops and functions. Into birds and ocean animals."
+- id: sample-step-by-step
+  label: "Sample C: mixed results"
+  about: "Some ideas started, functions are new. Into soccer, which has no ready-made story yet."
+- id: sample-review-first
+  label: "Sample D: new to most ideas"
+  about: "Has started on loops; reading data, if statements and functions are new. Into books."

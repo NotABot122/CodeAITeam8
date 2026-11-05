@@ -597,9 +597,11 @@ class Course:
         decisions = (self.store.profile(student_id).get("diagnostic") or {}).get("decisions") or {}
         tree = self.diagnostic().content.tree
         out: Dict[str, Readiness] = {}
+        counts = state.answer_counts()
         for concept, est in state.placement.get("concepts", {}).items():
             answers = [r for r in state.results if r.concept == concept]
             times = sorted(r.elapsed_ms / 1000 for r in answers if r.elapsed_ms)
+            count = counts.get(concept) or {"correct": 0, "answered": 0}
             d = decisions.get(concept) or {}
             codes: List[str] = []
             for node in tree.nodes.values():
@@ -609,7 +611,7 @@ class Course:
                 concept=concept, name=self.catalog.name(concept), stage=int(est.get("stage", 0)),
                 confident_stage=int(d["stage"]) if d.get("used") else None,
                 confidence=float(est.get("confidence", 0.0)), borderline=bool(est.get("borderline")),
-                correct=sum(1 for r in answers if r.passed), answered=len(answers),
+                correct=count["correct"], answered=count["answered"],
                 misconceptions=list(est.get("misconceptions") or []),
                 median_seconds=round(times[len(times) // 2], 1) if times else None, standards=codes)
         return out
@@ -769,6 +771,22 @@ class Course:
                 result["goal_connection"] = f"Your project: {project.title}. {pitch}".strip()
         result["match"] = self.project_match(student_id)
 
+    def import_previous(self, data: Optional[dict] = None, sample: Optional[str] = None) -> dict:
+        """Skip the readiness check with an earlier lesson's results (a file's JSON, or a sample student's id).
+        Creates the student, applies the result like a finished check, and returns the closing screen
+        (with "student_id", "notices" and the project match). Raises diagnostic.importer.ImportRejected."""
+        diagnostic = self.diagnostic()
+        result = diagnostic.import_previous(diagnostic.load_sample(sample) if sample is not None else data)
+        student_id = result["student_id"]
+        profile = self.store.profile(student_id)
+        profile.update(active_project=str(self.default_project().root), concepts={}, completed=[], next_step=None)
+        self.store.save_profile(student_id, profile)
+        self._name_first_stop(result, self.apply_diagnostic(student_id), student_id)
+        return result
+
+    def import_samples(self) -> List[dict]:
+        return self.diagnostic().import_samples()
+
     def diagnostic_answer(self, student_id: str, response, elapsed_ms: Optional[int] = None) -> dict:
         return self.diagnostic().answer(student_id, response, elapsed_ms)
 
@@ -793,10 +811,7 @@ class Course:
         if profile.get("diagnostic", {}).get("applied"):
             return profile["diagnostic"]
 
-        correct: Dict[str, int] = {}
-        for r in state.results:
-            if r.passed:
-                correct[r.concept] = correct.get(r.concept, 0) + 1
+        correct = {c: n["correct"] for c, n in state.answer_counts().items()}
         decisions = seed_from_placement(state.placement, self.catalog.diagnostic, correct)
         concepts = dict(profile.get("concepts") or {})
         for concept, d in decisions.items():
